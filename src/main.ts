@@ -47,7 +47,7 @@ try {
             // limit the number of search results to the maxResults
             searchUrls = searchUrls.slice(0, processedInput.input.maxResults);
 
-            log.info(`Extracted URLs: ${searchUrls.join('\n')}, \nlength: ${searchUrls.length}`);
+            log.info(`Extracted URLs: \n${searchUrls.join('\n')}, \nlength: ${searchUrls.length}`);
         },
     });
 

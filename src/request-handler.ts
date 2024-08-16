@@ -1,5 +1,5 @@
 import { htmlToText, log, PlaywrightCrawlingContext, sleep } from 'crawlee';
-import { load } from 'cheerio';
+import * as cheerio from 'cheerio';
 
 import { processHtml } from './html-processing';
 import { htmlToMarkdown } from './markdown';
@@ -60,15 +60,10 @@ export async function genericHandler(context: PlaywrightCrawlingContext<UserData
     const processedHtml = await processHtml(html, request.url, settings, $);
 
     const isTooLarge = processedHtml.length > settings.maxHtmlCharsToProcess;
-
-    const text = isTooLarge ? load(processedHtml).text() : htmlToText(processedHtml);
+    const text = isTooLarge ? cheerio.load(processedHtml).text() : htmlToText(cheerio.load(processedHtml));
 
     const markdown = htmlToMarkdown(processedHtml);
 
-    // log.info(`Text: ${text}`);
-    // log.info(`Markdown: ${markdown}`);
-
-    // push the data to the Apify platform
-    log.info('Pushing data to the Apify platform...');
+    log.info(`Pushing data from: ${request.url} to the Apify dataset`);
     await context.pushData({ url: request.url, text, markdown });
 }
