@@ -1,8 +1,8 @@
 import type { CheerioAPI } from 'cheerio';
 import { log } from 'crawlee';
 
-import type { ScraperSettings } from './types.js';
 import { readableText } from './extractors.js';
+import type { ScraperSettings } from './types.js';
 
 /**
  * Process HTML with the selected HTML transformer (source: Website Content Crawler).

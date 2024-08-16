@@ -10,8 +10,8 @@ import {
 } from 'crawlee';
 
 import { scrapeOrganicResults } from './google-extractors-urls.js';
-import { genericHandler } from './request-handler';
 import { processInput } from './input.js';
+import { genericHandler } from './request-handler.js';
 import { UserData } from './types.js';
 
 await Actor.init();
