@@ -1,6 +1,6 @@
+import { log } from 'apify';
 import plugin from 'joplin-turndown-plugin-gfm';
 import TurndownService from 'turndown';
-import { log } from 'apify';
 
 const turndownSettings = {
     headingStyle: 'atx',

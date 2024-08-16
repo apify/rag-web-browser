@@ -8,10 +8,11 @@ import {
     PlaywrightCrawlingContext,
     PlaywrightCrawlerOptions,
 } from 'crawlee';
+
 import { scrapeOrganicResults } from './google-extractors-urls.js';
 import { genericHandler } from './request-handler';
-import { UserData } from './types.js';
 import { processInput } from './input.js';
+import { UserData } from './types.js';
 
 await Actor.init();
 
@@ -43,6 +44,9 @@ try {
             const organicResults = scrapeOrganicResults($);
 
             searchUrls = organicResults.map((result) => result.url).filter((url): url is string => url !== undefined);
+            // limit the number of search results to the maxResults
+            searchUrls = searchUrls.slice(0, processedInput.input.maxResults);
+
             log.info(`Extracted URLs: ${searchUrls.join('\n')}, \nlength: ${searchUrls.length}`);
         },
     });

@@ -1,8 +1,9 @@
 import { htmlToText, log, PlaywrightCrawlingContext, sleep } from 'crawlee';
 import { load } from 'cheerio';
-import { ScraperSettings, UserData } from './types';
+
 import { processHtml } from './html-processing';
 import { htmlToMarkdown } from './markdown';
+import { ScraperSettings, UserData } from './types';
 
 /**
  * Waits for the `time` to pass, but breaks early if the page is loaded (source: Website Content Crawler).

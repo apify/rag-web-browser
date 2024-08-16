@@ -1,5 +1,6 @@
 import type { CheerioAPI } from 'cheerio';
 import type { Element } from 'domhandler';
+
 import type { OrganicResult } from './types.js';
 
 /**

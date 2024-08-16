@@ -1,5 +1,6 @@
 import { JSDOM } from 'jsdom';
 import { Readability, isProbablyReaderable } from '@mozilla/readability';
+
 import type { ScraperSettings } from './types.js';
 
 /**

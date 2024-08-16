@@ -12,7 +12,6 @@ export type Input = {
     dynamicContentWaitSecs: number;
     initialConcurrency: number;
     maxConcurrency: number;
-    maxRequestRetries: number;
     minConcurrency: number;
     proxyConfiguration: ProxyConfigurationOptions;
     readableTextCharThreshold: number;
