@@ -1,0 +1,63 @@
+{
+	"actorSpecification": 1,
+	"name": "serp-content-crawler",
+	"title": "SERP Content Crawler",
+	"description": "Retrieve website content from the top Google Search Results Pages (SERPs)",
+	"version": "0.0",
+	"meta": {
+		"templateId": "ts-crawlee-cheerio"
+	},
+	"input": "./input_schema.json",
+	"dockerfile": "./Dockerfile",
+    "storage": {
+        "dataset": {
+            "actorSpecification": 1,
+            "title": "SERP Content Crawler Dataset",
+            "description": "",
+            "views": {
+                "default": {
+                    "title": "Text",
+                    "description": "View of URLs of web pages and their content as simple plain text.",
+                    "transformation": {
+                        "fields": [
+                            "url",
+                            "text"
+                        ]
+                    },
+                    "display": {
+                        "component": "table",
+                        "properties": {
+                            "url": {
+                                "label": "Webpage URL"
+                            },
+                            "text": {
+                                "label": "Extracted text"
+                            }
+                        }
+                    }
+                },
+                "markdown": {
+                    "title": "Markdown",
+                    "description": "View of URLs of web pages and their content as Markdown with formatting.",
+                    "transformation": {
+                        "fields": [
+                            "url",
+                            "markdown"
+                        ]
+                    },
+                    "display": {
+                        "component": "table",
+                        "properties": {
+                            "url": {
+                                "label": "Webpage URL"
+                            },
+                            "markdown": {
+                                "label": "Extracted Markdown"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

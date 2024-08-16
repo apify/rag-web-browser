@@ -1,0 +1,43 @@
+{
+	"name": "store-fast-google-search",
+	"version": "0.0.1",
+	"type": "module",
+	"description": "This is a boilerplate of an Apify actor.",
+	"engines": {
+		"node": ">=18.0.0"
+	},
+	"dependencies": {
+		"@apify/google-extractors": "^1.2.7",
+		"@mozilla/readability": "^0.5.0",
+		"apify": "^3.2.4",
+		"apify-cli": "^0.20.2",
+		"cheerio": "^1.0.0",
+		"crawlee": "^3.5.4",
+		"joplin-turndown-plugin-gfm": "^1.0.12",
+		"jsdom": "^24.1.1",
+		"playwright": "^1.46.0",
+		"turndown": "^7.2.0"
+	},
+	"devDependencies": {
+		"@apify/eslint-config-ts": "^0.3.0",
+		"@apify/tsconfig": "^0.1.0",
+		"@types/turndown": "^5.0.5",
+		"@typescript-eslint/eslint-plugin": "^6.7.2",
+		"@typescript-eslint/parser": "^6.7.2",
+		"eslint": "^8.50.0",
+		"eslint-config-prettier": "^9.1.0",
+		"tsx": "^4.6.2",
+		"typescript": "^5.3.3"
+	},
+	"scripts": {
+		"start": "npm run start:dev",
+		"start:prod": "node dist/main.js",
+		"start:dev": "tsx src/main.ts",
+		"build": "tsc",
+		"lint": "eslint ./src --ext .ts",
+		"lint:fix": "eslint ./src --ext .ts --fix",
+		"test": "echo \"Error: oops, the actor has no tests yet, sad!\" && exit 1"
+	},
+	"author": "It's not you it's me",
+	"license": "ISC"
+}

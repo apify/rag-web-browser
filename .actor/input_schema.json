@@ -1,0 +1,19 @@
+{
+    "title": "SERP Content Crawler",
+    "description": "TODO",
+    "type": "object",
+    "schemaVersion": 1,
+    "properties": {
+        "startUrls": {
+            "title": "TODO",
+            "type": "array",
+            "description": "TODO",
+            "editor": "requestListSources",
+            "prefill": [
+                {
+                    "url": "https://crawlee.dev"
+                }
+            ]
+        }
+    }
+}

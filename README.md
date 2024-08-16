@@ -1,28 +1,17 @@
-# Solution template
-This repository serves as a template for creating repositories for new solutions. Using a template makes it easier to create new repos with pre-defined contents and ensures consistency between the repositories.
+## Fast Google Search Result Content Crawler
 
-## How to use this template
+This Actor retrieves website content from the top Google Search Results Pages (SERPs).
+Given a search query, it fetches the first page of Google search results, then crawls the top sites to extract text content.
+It is capable of extracting content from JavaScript-enabled websites and can bypass anti-scraping protections.
+The extracted web content is saved as plain text or markdown.
+This Actor is ideal for adding up-to-date Google search knowledge to your LLM applications.
 
-1. Click the Use this template button in the top right corner.
-2. Choose a name for the repository. It should be in the format `vendor`-`customer`-`solution`-`...`. 
-   - **Examples:**
-   - apify-thorn-facebook-scraper
-   - topmonks-microsoft-google-scraper
-   - topmonks-microsoft-google-data-processor
-   - devbros-apple-some-codename-scraper
-3. Make sure the repo is **private**.
-4. Create the repo.
+This Actor is a combination of a two more powerful Apify actors:
+- [Google Search Results Scraper](https://apify.com/apify/google-search-scraper)
+- [Website Content Crawler](https://apify.com/apify/website-content-crawler)
 
-**Once you have the repo created:**
+#### Looking to scrape Google Search Results?
+- Check out the [Google Search Results Scraper](https://apify.com/apify/google-search-scraper) actor.
 
-1. Go to Settings -> Manage Access -> Invite teams or people.
-2. Add the **Apify Team** as **admin**. If the solution will be delivered by a partner, add their team as **admin** too.
-4. Edit this README and fill in the details in the template below. If a field cannot be filled, write **N/A**.
-5. Finally, delete this guide from the Readme, so that only the newly added details will remain.
-6. You're done! Thanks for using the template!
-
-# vendor-customer-solution
-
-**Kanban link:** Add link to the Apify Kanban card.
-
-**Issue link:** Add link to the issue created in Delivery Issue Tracker or some other tracking issue.
+#### Need to extract content from a list of URLs?
+- Explore the the [Website Content Crawler](https://apify.com/apify/website-content-crawler) actor.
