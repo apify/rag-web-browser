@@ -1,19 +1,16 @@
 {
     "title": "SERP Content Crawler",
-    "description": "TODO",
+    "description": "Retrieve website content from the top Google Search Results Pages (SERPs)",
     "type": "object",
     "schemaVersion": 1,
     "properties": {
-        "startUrls": {
-            "title": "TODO",
-            "type": "array",
-            "description": "TODO",
-            "editor": "requestListSources",
-            "prefill": [
-                {
-                    "url": "https://crawlee.dev"
-                }
-            ]
+        "queries": {
+            "title": "Search term(s)",
+            "type": "string",
+            "description": "Use regular search words or enter Google Search URLs. You can also apply [advanced Google search techniques](https://blog.apify.com/how-to-scrape-google-like-a-pro/), such as <code>AI site:twitter.com</code> or <code>javascript OR python</code>.",
+            "prefill": "apify\nllm",
+            "editor": "textarea",
+            "pattern": "[^\\s]+"
         }
     }
 }
