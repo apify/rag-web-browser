@@ -1,6 +1,7 @@
 import { Actor } from 'apify';
 import type { CheerioAPI } from 'cheerio';
 import {
+    BrowserName,
     CheerioCrawler,
     CheerioCrawlingContext,
     PlaywrightCrawler,
@@ -8,6 +9,7 @@ import {
     PlaywrightCrawlingContext,
     PlaywrightCrawlerOptions,
 } from 'crawlee';
+import { firefox } from 'playwright';
 
 import { scrapeOrganicResults } from './google-extractors-urls.js';
 import { processInput } from './input.js';
@@ -47,7 +49,7 @@ try {
             // limit the number of search results to the maxResults
             searchUrls = searchUrls.slice(0, processedInput.input.maxResults);
 
-            log.info(`Extracted URLs: \n${searchUrls.join('\n')}, \nlength: ${searchUrls.length}`);
+            log.info(`Extracted ${searchUrls.length} URLs: \n${searchUrls.join('\n')}`);
         },
     });
 
@@ -62,12 +64,24 @@ try {
         headless: true,
         minConcurrency: Math.min(searchUrls.length, processedInput.input.minConcurrency),
         maxConcurrency: Math.min(searchUrls.length, processedInput.input.maxConcurrency),
+        launchContext: {
+            launcher: firefox,
+        },
+        browserPoolOptions: {
+            fingerprintOptions: {
+                fingerprintGeneratorOptions: {
+                    browsers: [BrowserName.firefox],
+                },
+            },
+            retireInactiveBrowserAfterSecs: 20,
+        },
     };
 
     const crawlerContent = new PlaywrightCrawler({
         requestHandler: (context: PlaywrightCrawlingContext) => genericHandler(context, processedInput.scraperSettings),
         ...crawlerOptions,
     });
+    log.info(`Crawl ${searchUrls.length} URLs: \n${searchUrls}`);
     await crawlerContent.run(searchUrls);
 } catch (e) {
     await Actor.fail((e as Error).message);

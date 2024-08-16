@@ -36,6 +36,7 @@ function isValidContentType(contentType: string | undefined) {
 export async function genericHandler(context: PlaywrightCrawlingContext<UserData>, settings: ScraperSettings) {
     const { request, contentType, page, response, closeCookieModals } = context;
 
+    log.info(`Processing URL: ${request.url}`);
     if (settings.dynamicContentWaitSecs > 0) {
         await waitForDynamicContent(context, settings.dynamicContentWaitSecs * 1000);
     }
@@ -53,8 +54,6 @@ export async function genericHandler(context: PlaywrightCrawlingContext<UserData
         log.info(`Skipping URL ${request.loadedUrl} as it could not be parsed.`, contentType as object);
         return;
     }
-
-    log.info(`Processing URL: ${request.url}`);
 
     const html = $('html').html()!;
     const processedHtml = await processHtml(html, request.url, settings, $);
