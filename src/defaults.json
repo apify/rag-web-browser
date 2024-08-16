@@ -11,7 +11,7 @@
 	"removeCookieWarnings": true,
 	"requestTimeoutSecs": 10,
     "dynamicContentWaitSecs": 10,
-    "minConcurrency": 3,
+    "minConcurrency": 5,
     "maxConcurrency": 20,
     "saveHtml": false,
     "saveMarkdown": true

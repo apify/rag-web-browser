@@ -28,7 +28,7 @@ try {
     }
 
     const proxyConfiguration = await Actor.createProxyConfiguration({
-        // groups: ['GOOGLE_SERP'],
+        groups: ['GOOGLE_SERP'],
     });
 
     const processedInput = await processInput((await Actor.getInput<Partial<Input>>()) ?? ({} as Input));
@@ -56,14 +56,15 @@ try {
     // increase the number of search results to be sure we get enough results as there are some duplicates
     const maxSearchResults = processedInput.input.maxResults + 5;
 
-    const url = `https://www.google.com/search?q=${processedInput.input.queries}&num=${maxSearchResults}`;
+    const url = `http://www.google.com/search?q=${processedInput.input.queries}&num=${maxSearchResults}`;
     await crawler.run([url]);
 
     const crawlerOptions: PlaywrightCrawlerOptions = {
         ...(processedInput.crawlerOptions as PlaywrightCrawlerOptions),
         headless: true,
         minConcurrency: Math.min(searchUrls.length, processedInput.input.minConcurrency),
-        maxConcurrency: Math.min(searchUrls.length, processedInput.input.maxConcurrency),
+        // +1 is required only when length of searchUrls is 0
+        maxConcurrency: Math.min(searchUrls.length + 1, processedInput.input.maxConcurrency),
         launchContext: {
             launcher: firefox,
         },
@@ -77,10 +78,17 @@ try {
         },
     };
 
+    log.info(`Crawl options: ${JSON.stringify(crawlerOptions)}`);
+
     const crawlerContent = new PlaywrightCrawler({
         requestHandler: (context: PlaywrightCrawlingContext) => genericHandler(context, processedInput.scraperSettings),
         ...crawlerOptions,
     });
+
+    if (searchUrls.length === 0) {
+        await Actor.fail('No search results found');
+    }
+
     log.info(`Crawl ${searchUrls.length} URLs: \n${searchUrls}`);
     await crawlerContent.run(searchUrls);
 } catch (e) {
