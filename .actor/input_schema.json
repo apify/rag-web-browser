@@ -11,6 +11,25 @@
             "prefill": "apify\nllm",
             "editor": "textarea",
             "pattern": "[^\\s]+"
+        },
+        "maxResults": {
+            "title": "Max results to return",
+            "type": "integer",
+            "description": "",
+            "prefill": 3.0,
+            "minimum": 1.0
+        },
+        "proxyConfiguration": {
+            "title": "Crawler: Proxy configuration",
+            "type": "object",
+            "description": "Enables loading the websites from IP addresses in specific geographies and to circumvent blocking.",
+            "default": {
+                "useApifyProxy": true
+            },
+            "prefill": {
+                "useApifyProxy": true
+            },
+            "editor": "proxy"
         }
     }
 }

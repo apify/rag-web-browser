@@ -1,7 +1,6 @@
 import { Actor } from 'apify';
 import type { CheerioAPI } from 'cheerio';
 import {
-    BrowserName,
     CheerioCrawler,
     CheerioCrawlingContext,
     PlaywrightCrawler,
@@ -9,7 +8,6 @@ import {
     PlaywrightCrawlingContext,
     PlaywrightCrawlerOptions,
 } from 'crawlee';
-import { firefox } from 'playwright';
 
 import { scrapeOrganicResults } from './google-extractors-urls.js';
 import { processInput } from './input.js';
@@ -61,21 +59,9 @@ try {
 
     const crawlerOptions: PlaywrightCrawlerOptions = {
         ...(processedInput.crawlerOptions as PlaywrightCrawlerOptions),
-        headless: true,
         minConcurrency: Math.min(searchUrls.length, processedInput.input.minConcurrency),
         // +1 is required only when length of searchUrls is 0
         maxConcurrency: Math.min(searchUrls.length + 1, processedInput.input.maxConcurrency),
-        launchContext: {
-            launcher: firefox,
-        },
-        browserPoolOptions: {
-            fingerprintOptions: {
-                fingerprintGeneratorOptions: {
-                    browsers: [BrowserName.firefox],
-                },
-            },
-            retireInactiveBrowserAfterSecs: 20,
-        },
     };
 
     log.info(`Crawl options: ${JSON.stringify(crawlerOptions)}`);

@@ -1,5 +1,7 @@
 import { Actor } from 'apify';
-import { PlaywrightCrawlerOptions, PlaywrightCrawlingContext } from 'crawlee';
+import { BrowserName, PlaywrightCrawlerOptions, PlaywrightCrawlingContext } from 'crawlee';
+import { firefox } from 'playwright';
+
 import defaults from './defaults.json' assert { type: 'json' };
 import { genericHandler } from './request-handler.js';
 import type { Input, ScraperSettings } from './types.js';
@@ -18,6 +20,7 @@ export async function processInput(originalInput: Partial<Input>) {
     const {
         dynamicContentWaitSecs,
         proxyConfiguration,
+        maxRequestRetries,
         readableTextCharThreshold,
         removeCookieWarnings,
         requestTimeoutSecs,
@@ -37,8 +40,21 @@ export async function processInput(originalInput: Partial<Input>) {
     };
 
     const crawlerOptions: PlaywrightCrawlerOptions = {
+        headless: true,
+        maxRequestRetries,
         proxyConfiguration: proxy,
         requestHandlerTimeoutSecs: requestTimeoutSecs,
+        launchContext: {
+            launcher: firefox,
+        },
+        browserPoolOptions: {
+            fingerprintOptions: {
+                fingerprintGeneratorOptions: {
+                    browsers: [BrowserName.firefox],
+                },
+            },
+            retireInactiveBrowserAfterSecs: 20,
+        },
         requestHandler: (context: PlaywrightCrawlingContext) => genericHandler(context, scraperSettings),
     };
 

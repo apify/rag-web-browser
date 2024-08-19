@@ -1,7 +1,7 @@
 {
     "countryCode": "US",
     "languageCode": "en",
-    "maxResults": 5,
+    "maxResults": 3,
     "queries": "site:apify.com actor",
 	"initialConcurrency": 3,
 	"initialCookies": [],
@@ -9,10 +9,10 @@
 	"proxyConfiguration": { "useApifyProxy": true },
 	"readableTextCharThreshold": 100,
 	"removeCookieWarnings": true,
-	"requestTimeoutSecs": 10,
+	"requestTimeoutSecs": 30,
     "dynamicContentWaitSecs": 10,
     "minConcurrency": 5,
     "maxConcurrency": 20,
     "saveHtml": false,
-    "saveMarkdown": true
+    "saveMarkdown": false
 }

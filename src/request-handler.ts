@@ -46,6 +46,7 @@ export async function genericHandler(context: PlaywrightCrawlingContext<UserData
     }
 
     // Parsing the page after the dynamic content has been loaded / cookie warnings removed
+    log.info(`Parse HTML with Cheerio: ${request.url}`);
     const $ = await context.parseWithCheerio();
 
     const headers = response?.headers instanceof Function ? response.headers() : response?.headers;
