@@ -11,19 +11,14 @@ import {
 
 import { scrapeOrganicResults } from './google-extractors-urls.js';
 import { processInput } from './input.js';
-import { genericHandler } from './request-handler.js';
-import { UserData } from './types.js';
+import { genericHandler } from './request-handlers';
+import { Input, UserData } from './types.js';
 
 await Actor.init();
 
 try {
     let searchUrls: string[] = [];
     log.setLevel(log.LEVELS.INFO);
-
-    interface Input {
-        queries: string;
-        resultsPerPage: number;
-    }
 
     const proxyConfiguration = await Actor.createProxyConfiguration({
         groups: ['GOOGLE_SERP'],
