@@ -3,7 +3,7 @@ import { BrowserName, PlaywrightCrawlerOptions, PlaywrightCrawlingContext } from
 import { firefox } from 'playwright';
 
 import defaults from './defaults.json' assert { type: 'json' };
-import { genericHandler } from './request-handler.js';
+import { genericHandler } from './request-handlers';
 import type { Input, ScraperSettings } from './types.js';
 
 /**
