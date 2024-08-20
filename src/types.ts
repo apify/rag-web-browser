@@ -34,6 +34,7 @@ export type OrganicResult = {
 export type UserData = {
     startedAt?: Date;
     finishedAt?: Date;
+    responseId?: string;
 };
 
 export type SearchQuery = {

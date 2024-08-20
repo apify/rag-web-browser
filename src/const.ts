@@ -5,8 +5,8 @@ export enum Label {
 }
 
 export enum Crawlers {
-    GOOGLE_SEARCH = 'google-search',
-    CONTENT_CRAWLER = 'content-crawler',
+    CHEERIO_SEARCH_CRAWLER = 'cheerio-search-crawler',
+    PLAYWRIGHT_CONTENT_CRAWLER = 'playwright-content-crawler',
 }
 
 export const VALID_RESOURCES = [

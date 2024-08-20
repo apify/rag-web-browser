@@ -4,6 +4,7 @@ import { load } from 'cheerio';
 import { processHtml } from './html-processing.js';
 import { htmlToMarkdown } from './markdown.js';
 import { ScraperSettings, UserData } from './types.js';
+import {addResultToResponse, addSearchResultCount} from "./responses";
 
 /**
  * Waits for the `time` to pass, but breaks early if the page is loaded (source: Website Content Crawler).
@@ -66,4 +67,11 @@ export async function genericHandler(context: PlaywrightCrawlingContext<UserData
 
     log.info(`Pushing data from: ${request.url} to the Apify dataset`);
     await context.pushData({ url: request.url, text, markdown });
+
+    // const responseId = request.uniqueKey;
+    log.info(`Adding result to response: ${request.userData.responseId}, request.uniqueKey: ${request.uniqueKey}`);
+    const { responseId } = request.userData;
+    if (responseId) {
+        addResultToResponse(responseId, { url: request.url, text, markdown });
+    }
 }

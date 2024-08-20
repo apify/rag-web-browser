@@ -70,18 +70,28 @@ function generateHeaders(device: 'mobile' | 'desktop') {
 }
 
 export function createRequestForCrawler(params: ParsedUrlQuery): RequestOptions<UserData> {
-    const generatedHeaders = generateHeaders('desktop');
+    // const generatedHeaders = generateHeaders('desktop');
     const urlSearch = `http://www.google.com/search?q=${params[QueryParams.q]}&num=5`;
     return {
         url: urlSearch,
         uniqueKey: uuidv4(),
-        headers: {
-            ...generatedHeaders,
-        },
+        // headers: {
+        //     ...generatedHeaders,
+        // },
     };
     // const renderJs = true;
     // finalRequest.label = renderJs ? Label.BROWSER : Label.HTTP;
     // return finalRequest;
+}
+
+export function createRequest(url: string, responseId: string): RequestOptions<UserData> {
+    return {
+        url,
+        uniqueKey: uuidv4(),
+        userData: {
+            responseId,
+        },
+    };
 }
 
 export function createProxyOptions(params: ParsedUrlQuery) {
