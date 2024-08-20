@@ -2,7 +2,6 @@
     "countryCode": "US",
     "languageCode": "en",
     "maxResults": 3,
-    "queries": "site:apify.com actor",
 	"initialConcurrency": 3,
 	"initialCookies": [],
 	"maxRequestRetries": 3,

@@ -1,5 +1,9 @@
 import type { ProxyConfigurationOptions } from 'apify';
 
+export interface CrawlerOptions {
+    proxyConfigurationOptions: ProxyConfigurationOptions;
+}
+
 export type Input = {
 
     // google search parameters
