@@ -4,7 +4,7 @@ import {CheerioCrawler, CheerioCrawlingContext, PlaywrightCrawler, RequestOption
 import type { CheerioAPI } from 'cheerio';
 import { CrawlerOptions, Input, UserData } from './types.js';
 // import { addRequest, createAndStartCrawler, DEFAULT_CRAWLER_OPTIONS } from './crawlers.js';
-import {addResponse, addTimeoutToAllResponses} from './responses.js';
+import {addResponse, addTimeoutToAllResponses, sendSuccResponseById} from './responses.js';
 // import { ScrapingBee } from './params.js';
 import { UserInputError } from './errors.js';
 import { scrapeOrganicResults } from './google-extractors-urls';
@@ -30,7 +30,7 @@ const proxyConfiguration = await Actor.createProxyConfiguration({
 const processedInput = await processInput((await Actor.getInput<Partial<Input>>()) ?? ({} as Input));
 const crawlers = new Map<string, CheerioCrawler | PlaywrightCrawler>();
 
-async function createCrawler() {
+async function createCrawlerGoogleSearch() {
     const queue = await RequestQueue.open(undefined);
     const crawler = new CheerioCrawler({
         proxyConfiguration,
@@ -48,6 +48,10 @@ async function createCrawler() {
             searchUrls = searchUrls.slice(0, processedInput.input.maxResults);
 
             log.info(`Extracted ${searchUrls.length} URLs: \n${searchUrls.join('\n')}`);
+            log.info(`Sending response for request ${request.uniqueKey}`);
+
+            const responseId = request.uniqueKey;
+            sendSuccResponseById(responseId, searchUrls.join('\n'), 'application/json');
         },
     });
     crawler.run().then(() => log.warning(`Google-search-crawler has finished`), () => { });
@@ -57,7 +61,7 @@ async function createCrawler() {
 }
 
 export const addRequest = async (request: RequestOptions<UserData>, res: ServerResponse, key: Crawlers) => {
-    const crawler = crawlers.get(key) ?? await createCrawler();
+    const crawler = crawlers.get(key) ?? await createCrawlerGoogleSearch();
     addResponse(request.uniqueKey!, res);
     await crawler.requestQueue!.addRequest(request);
 };
@@ -97,6 +101,6 @@ server.listen(port, async () => {
 
     // Pre-create common crawlers because crawler init can take about 1 sec
     await Promise.all([
-        createCrawler(),
+        createCrawlerGoogleSearch(),
     ]);
 });
