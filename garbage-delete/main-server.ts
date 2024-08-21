@@ -10,10 +10,10 @@ import { log,
 import express from 'express';
 import type { CheerioAPI } from 'cheerio';
 
-import { scrapeOrganicResults } from './google-extractors-urls.js';
-import { processInput } from './input.js';
-import { genericHandler } from './request-handlers';
-import { Input, UserData } from './types.js';
+import { scrapeOrganicResults } from '../src/google-extractors-urls';
+import { processInput } from '../src/input';
+import { genericHandler } from '../src/request-handlers';
+import { Input, UserData } from '../src/types';
 
 const STANDBY_MODE = process.env.APIFY_META_ORIGIN === 'STANDBY' || true;
 

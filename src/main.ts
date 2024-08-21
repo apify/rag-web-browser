@@ -69,6 +69,6 @@ if ((Actor.isAtHome() && Actor.getEnv().metaOrigin === 'STANDBY') || RUN_STANDBY
     const contentCrawler = await createAndStartCrawlerPlaywright(crawlerOptions, {} as ScraperSettings, false);
 
     await searchCrawler.run([crawlerRequest.url]);
-    // await contentCrawler.run();
+    await contentCrawler.run();
     await Actor.exit();
 }

@@ -9,10 +9,10 @@ import {
     PlaywrightCrawlerOptions,
 } from 'crawlee';
 
-import { scrapeOrganicResults } from './google-extractors-urls.js';
-import { processInput } from './input.js';
-import { genericHandler } from './request-handlers';
-import { Input, UserData } from './types.js';
+import { scrapeOrganicResults } from '../src/google-extractors-urls';
+import { processInput } from '../src/input';
+import { genericHandler } from '../src/request-handlers';
+import { Input, UserData } from '../src/types';
 
 await Actor.init();
 
