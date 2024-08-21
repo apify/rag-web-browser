@@ -11,16 +11,18 @@ import { ServerResponse } from 'http';
 // }
 
 class ResponseData {
+    createdAt: Date;
     response: ServerResponse;
     resultCount: number;
-    searchResultCount: number;
     results: unknown[];
+    maxResults: number;
 
-    constructor(response: ServerResponse) {
+    constructor(response: ServerResponse, maxResults: number) {
+        this.createdAt = new Date();
         this.response = response;
         this.resultCount = 0;
-        this.searchResultCount = 0;
         this.results = [];
+        this.maxResults = maxResults;
     }
 }
 
@@ -35,11 +37,11 @@ const getResponseDataById = (responseId: string): ResponseData | null => {
     return res;
 };
 
-export const addSearchResultCount = (responseId: string, countRequired: number) => {
+export const addSearchResultCount = (responseId: string, maxResults: number) => {
     const res = getResponseDataById(responseId);
     if (!res) return;
-    res.searchResultCount = countRequired;
-    log.info(`Response for request ${responseId} requires ${countRequired} results`);
+    res.maxResults = maxResults;
+    log.info(`Response for request ${responseId} requires ${maxResults} results`);
 };
 
 export const sendSuccResponseById = (responseId: string, result: unknown, contentType: string) => {
@@ -64,8 +66,8 @@ export const sendErrorResponseById = (responseId: string, result: string, status
     responseData.delete(responseId);
 };
 
-export const addResponse = (responseId: string, response: ServerResponse) => {
-    responseData.set(responseId, new ResponseData(response));
+export const createResponse = (responseId: string, response: ServerResponse, maxResults: number) => {
+    responseData.set(responseId, new ResponseData(response, maxResults));
 };
 
 export const addResultToResponse = (responseId: string, result: unknown) => {
@@ -75,21 +77,23 @@ export const addResultToResponse = (responseId: string, result: unknown) => {
         return;
     }
 
-    if (res.searchResultCount === null) {
+    if (res.maxResults === null) {
         log.info(`Response for request ${responseId} does not require any results`);
         return;
     }
 
     res.results.push(result);
     res.resultCount += 1;
-    log.info(`Response for request ${responseId} has ${res.resultCount} results, ${res.searchResultCount} required`);
+    log.info(`Response for request ${responseId} has ${res.resultCount} results, ${res.maxResults} required`);
 
-    if (res.resultCount >= res.searchResultCount) {
+    if (res.resultCount >= res.maxResults) {
         sendSuccResponseById(responseId, JSON.stringify(res.results), 'application/json');
         responseData.delete(responseId);
     }
 };
-
+/**
+ * Add timeout to all responses when actor is migrating (source: SuperScraper).
+ */
 export const addTimeoutToAllResponses = (timeoutInSeconds: number = 60) => {
     const migrationErrorMessage = {
         errorMessage: `Actor had to migrate to another server. Please, retry your request.`,

@@ -5,7 +5,7 @@ import { RequestOptions } from 'crawlee';
 import { v4 as uuidv4 } from 'uuid';
 import { HeaderGenerator } from 'header-generator';
 import { Actor, ProxyConfigurationOptions, log } from 'apify';
-import { TimeMeasure, JsScenario, RequestDetails, ScreenshotSettings, UserData } from './types.js';
+import {TimeMeasure, JsScenario, RequestDetails, ScreenshotSettings, UserData, Input} from './types.js';
 import {EquivalentParameters, ScrapingBee, ScraperApi, ScrapingAnt, QueryParams} from './params.js';
 import { UserInputError } from './errors.js';
 // import { validateAndTransformExtractRules } from './extract_rules_utils.js';
@@ -69,19 +69,9 @@ function generateHeaders(device: 'mobile' | 'desktop') {
     return rest;
 }
 
-export function createRequestForCrawler(params: ParsedUrlQuery): RequestOptions<UserData> {
-    // const generatedHeaders = generateHeaders('desktop');
-    const urlSearch = `http://www.google.com/search?q=${params[QueryParams.q]}&num=5`;
-    return {
-        url: urlSearch,
-        uniqueKey: uuidv4(),
-        // headers: {
-        //     ...generatedHeaders,
-        // },
-    };
-    // const renderJs = true;
-    // finalRequest.label = renderJs ? Label.BROWSER : Label.HTTP;
-    // return finalRequest;
+export function createRequestForCrawler(queries: string, maxResults: number): RequestOptions<UserData> {
+    const urlSearch = `http://www.google.com/search?q=${queries}&num=${maxResults}`;
+    return { url: urlSearch, uniqueKey: uuidv4()};
 }
 
 export function createRequest(url: string, responseId: string): RequestOptions<UserData> {
@@ -92,45 +82,4 @@ export function createRequest(url: string, responseId: string): RequestOptions<U
             responseId,
         },
     };
-}
-
-export function createProxyOptions(params: ParsedUrlQuery) {
-    const proxyOptions: ProxyConfigurationOptions = {};
-
-    const proxyType = params[ScrapingAnt.proxyType] as string || 'datacenter';
-    if (proxyType !== 'datacenter' && proxyType !== 'residential') {
-        throw new UserInputError('Parameter proxy_type can be either residential or datacenter');
-    }
-
-    const useGoogleProxy = params[ScrapingBee.customGoogle] === 'true';
-    const url = new URL(params[ScrapingBee.url] as string);
-    if (url.host.includes('google') && !useGoogleProxy) {
-        throw new UserInputError('Set param custom_google to true to scrape Google urls');
-    }
-    if (useGoogleProxy) {
-        proxyOptions.groups = ['GOOGLE_SERP'];
-        return proxyOptions;
-    }
-
-    if (params[ScrapingBee.ownProxy]) {
-        proxyOptions.proxyUrls = [params[ScrapingBee.ownProxy] as string];
-        return proxyOptions;
-    }
-
-    const usePremium = params[ScrapingBee.premiumProxy] === 'true' || proxyType === 'residential';
-    if (usePremium) {
-        proxyOptions.groups = ['RESIDENTIAL'];
-    }
-
-    if (params[ScrapingBee.countryCode]) {
-        const countryCode = (params[ScrapingBee.countryCode] as string).toUpperCase();
-        if (countryCode.length !== 2) {
-            throw new UserInputError('Parameter for country code must be a string of length 2');
-        }
-        if (!usePremium && countryCode !== 'US') {
-            throw new UserInputError('Parameter for country code must be used with premium proxies when using non-US country');
-        }
-        proxyOptions.countryCode = countryCode;
-    }
-    return proxyOptions;
 }

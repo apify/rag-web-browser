@@ -1,9 +1,8 @@
 import { Actor } from 'apify';
-import { BrowserName, PlaywrightCrawlerOptions, PlaywrightCrawlingContext } from 'crawlee';
+import { BrowserName, PlaywrightCrawlerOptions } from 'crawlee';
 import { firefox } from 'playwright';
 
 import defaults from './defaults.json' assert { type: 'json' };
-import { genericHandler } from './request-handlers';
 import type { Input, ScraperSettings } from './types.js';
 
 /**
@@ -55,7 +54,6 @@ export async function processInput(originalInput: Partial<Input>) {
             },
             retireInactiveBrowserAfterSecs: 20,
         },
-        requestHandler: (context: PlaywrightCrawlingContext) => genericHandler(context, scraperSettings),
     };
 
     return { input, crawlerOptions, scraperSettings };

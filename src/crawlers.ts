@@ -1,198 +1,202 @@
-import { Actor, RequestQueue, log } from 'apify';
-import { PlaywrightCrawler } from 'crawlee';
-import type { PlaywrightCrawlingContext, RequestOptions, AutoscaledPoolOptions } from 'crawlee';
-import { MemoryStorage } from '@crawlee/memory-storage';
+import { Actor, RequestQueue } from 'apify';
+import { CheerioAPI, load } from 'cheerio';
+import type { RequestOptions } from 'crawlee';
+import {
+    CheerioCrawlingContext,
+    htmlToText,
+    log,
+    PlaywrightCrawlingContext,
+    sleep,
+    CheerioCrawler,
+    PlaywrightCrawler,
+    PlaywrightCrawlerOptions,
+} from 'crawlee';
 import { ServerResponse } from 'http';
-import { TimeMeasure, UserData, VerboseResult, CrawlerOptions } from './types.js';
-import { addResponse, sendErrorResponseById } from './responses.js';
-import { router } from './router.js';
-import { pushLogData } from './utils.js';
-import { Label } from './const.js';
+import { Page } from 'playwright';
 
-const crawlers = new Map<string, PlaywrightCrawler>();
+import { Crawlers } from './const.js';
+import { scrapeOrganicResults } from './google-extractors-urls';
+import { processHtml } from './html-processing';
+import { htmlToMarkdown } from './markdown';
+import { createResponse, addResultToResponse } from './responses.js';
+import { ScraperSettings, UserData, CrawlerOptions } from './types.js';
+import { createRequest } from './utils.js';
 
-export const DEFAULT_CRAWLER_OPTIONS: CrawlerOptions = {
-    proxyConfigurationOptions: {},
-};
+// const crawlers = new Map<string, PlaywrightCrawler>();
+const crawlers = new Map<string, CheerioCrawler | PlaywrightCrawler>();
 
-export const createAndStartCrawler = async (crawlerOptions: CrawlerOptions = DEFAULT_CRAWLER_OPTIONS) => {
-    const client = new MemoryStorage();
-    const queue = await RequestQueue.open(undefined, { storageClient: client });
+const queueSearchCrawler = await RequestQueue.open('cheerio-google-search-queue');
 
+// export const DEFAULT_CRAWLER_OPTIONS: CrawlerOptions = {
+//     proxyConfigurationOptions: {},
+// };
+//
+// export const DEFAULT_SCRAPER_SETTINGS: ScraperSettings = {
+//     dynamicContentWaitSecs: 0,
+//     maxHtmlCharsToProcess: 1.5e6,
+//     readableTextCharThreshold: 100,
+//     removeCookieWarnings: true,
+//     saveHtml: true,
+//     saveMarkdown: false,
+// };
+
+// Use crawlOptions to create a new CheerioCrawler (proxyConfiguration)
+// Proxy configuration for a PlaywrightCrawler
+// Two request queues: one for Google search and one for content crawling
+// How to handle the case when all the requests are not finished?
+
+export async function createAndStartSearchCrawler(
+    crawlerOptions: CrawlerOptions = {} as CrawlerOptions,
+    scraperSettings: ScraperSettings = {} as ScraperSettings,
+    startCrawler: boolean = true,
+) {
     const proxyConfig = await Actor.createProxyConfiguration(crawlerOptions.proxyConfigurationOptions);
 
-    const crawler = new PlaywrightCrawler({
+    const crawler = new CheerioCrawler({
         keepAlive: true,
         proxyConfiguration: proxyConfig,
         maxRequestRetries: 4,
-        requestQueue: queue,
-        launchContext: {
-            browserPerProxy: false,
-        },
-        statisticsOptions: {
-            persistenceOptions: {
-                enable: false,
-            },
-        },
-        requestHandlerTimeoutSecs: 3600,
-        sessionPoolOptions: {
-            persistenceOptions: {
-                enable: false,
-            },
-        },
-        errorHandler: async ({ request }, err) => {
-            const { requestDetails, timeMeasures, transparentStatusCode } = request.userData as UserData;
-            timeMeasures.push({
-                event: 'error',
-                time: Date.now(),
-            });
+        requestQueue: queueSearchCrawler,
+        requestHandler: async ({ request, $: _$ }: CheerioCrawlingContext<UserData>) => {
+            // NOTE: we need to cast this to fix `cheerio` type errors
+            const $ = _$ as CheerioAPI;
 
-            requestDetails.requestErrors.push({
-                attempt: request.retryCount + 1,
-                errorMessage: err.message,
-            });
+            log.info(`${Crawlers.CHEERIO_GOOGLE_SEARCH_CRAWLER} requestHandler: Processing URL: ${request.url}`);
+            const organicResults = scrapeOrganicResults($);
 
-            if (transparentStatusCode) {
-                request.noRetry = true;
+            let searchUrls = organicResults.map((result) => result.url).filter((url): url is string => url !== undefined);
+            // limit the number of search results to the maxResults
+            searchUrls = searchUrls.slice(0, request.userData?.maxResults ?? searchUrls.length);
+            log.info(`Extracted ${searchUrls.length} URLs: \n${searchUrls.join('\n')}`);
+
+            const responseId = request.uniqueKey;
+            for (const url of searchUrls) {
+                const r = createRequest(url, responseId);
+                await addContentCrawlRequest(r, crawlerOptions, scraperSettings);
             }
         },
-        failedRequestHandler: async ({ request, response, page }, err) => {
-            const {
-                requestDetails,
-                jsonResponse,
-                inputtedUrl,
-                parsedInputtedParams,
-                timeMeasures,
-                transparentStatusCode,
-                nonbrowserRequestStatus,
-            } = request.userData as UserData;
-
-            requestDetails.requestErrors.push({
-                attempt: request.retryCount + 1,
-                errorMessage: err.message,
-            });
-
-            const errorResponse = {
-                errorMessage: err.message,
-            };
-
-            const responseStatusCode = request.skipNavigation ? nonbrowserRequestStatus! : (response?.status() || null);
-            let statusCode = 500;
-            if (transparentStatusCode && responseStatusCode) {
-                statusCode = responseStatusCode;
-            }
-            if (jsonResponse) {
-                const verboseResponse: VerboseResult = {
-                    body: errorResponse,
-                    cookies: await page.context().cookies(request.url) || [],
-                    evaluateResults: [],
-                    jsScenarioReport: {},
-                    headers: requestDetails.responseHeaders || {},
-                    type: 'json',
-                    iframes: [],
-                    xhr: [],
-                    initialStatusCode: responseStatusCode,
-                    resolvedUrl: '',
-                    screenshot: null,
-                };
-                await pushLogData(timeMeasures, { inputtedUrl, parsedInputtedParams, result: verboseResponse, errors: requestDetails.requestErrors }, true);
-                sendErrorResponseById(request.uniqueKey, JSON.stringify(verboseResponse), statusCode);
-            } else {
-                await pushLogData(timeMeasures, { inputtedUrl, parsedInputtedParams, result: errorResponse, errors: requestDetails.requestErrors }, true);
-                sendErrorResponseById(request.uniqueKey, JSON.stringify(errorResponse), statusCode);
-            }
-        },
-        preNavigationHooks: [
-            async ({ request, page, blockRequests }) => {
-                const { timeMeasures, blockResources, width, height, blockResourceTypes, jsonResponse, requestDetails } = request.userData as UserData;
-                timeMeasures.push({
-                    event: 'pre-navigation hook',
-                    time: Date.now(),
-                });
-
-                await page.setViewportSize({ width, height });
-
-                if (request.label === Label.BROWSER && blockResources) {
-                    await blockRequests({
-                        extraUrlPatterns: ['*.svg'],
-                    });
-                }
-
-                if (request.label === Label.BROWSER && blockResourceTypes.length) {
-                    await page.route('**', async (route) => {
-                        if (blockResourceTypes.includes(route.request().resourceType())) {
-                            await route.abort();
-                        }
-                    });
-                }
-
-                if (request.label === Label.BROWSER && jsonResponse) {
-                    page.on('response', async (resp) => {
-                        try {
-                            const req = resp.request();
-                            if (req.resourceType() !== 'xhr') {
-                                return;
-                            }
-
-                            requestDetails.xhr.push({
-                                url: req.url(),
-                                statusCode: resp.status(),
-                                method: req.method(),
-                                requestHeaders: req.headers(),
-                                headers: resp.headers(),
-                                body: (await resp.body()).toString(),
-                            });
-                        } catch (e) {
-                            log.warning((e as Error).message);
-                        }
-                    });
-                }
-            },
-        ],
-        requestHandler: router,
     });
-
-    // TODO: This is just for Crawlee perf measurement, remove it once we properly understand the bottlenecks
-    // @ts-expect-error Overriding internal method
-    const origRunTaskFunction = crawler.autoscaledPoolOptions.runTaskFunction.bind(crawler);
-    // @ts-expect-error Overriding internal method
-    crawler.autoscaledPoolOptions.runTaskFunction = async function () {
-        // This code runs before we pull request from queue so we have to approximate that by having mutable global
-        // It will ofc be wrong if someone bombs requests with interval shorter than 1 sec
-        (global as unknown as { latestRequestTaskTimeMeasure: TimeMeasure }).latestRequestTaskTimeMeasure = {
-            event: 'crawlee internal run task',
-            time: Date.now(),
-        };
-        await (origRunTaskFunction as AutoscaledPoolOptions['runTaskFunction'])!();
-    };
-
-    // @ts-expect-error Overriding internal method
-    const origRunRequestHandler = crawler._runRequestHandler.bind(crawler);
-    // @ts-expect-error Overriding internal method
-    crawler._runRequestHandler = async function (context: PlaywrightCrawlingContext<UserData>) {
-        context.request.userData.timeMeasures.push({
-            event: 'crawlee internal request handler',
-            time: Date.now(),
-        });
-        await origRunRequestHandler(context);
-    };
-
-    await crawler.stats.stopCapturing();
-    crawler.run().then(() => log.warning(`Crawler ended`, crawlerOptions), () => { });
-    crawlers.set(JSON.stringify(crawlerOptions), crawler);
-    log.info('Crawler ready 🫡', crawlerOptions);
+    if (startCrawler) {
+        crawler.run().then(() => log.warning(`Google-search-crawler has finished`), () => {});
+        log.info('Google-search-crawler has started 🫡');
+    }
+    const key = Crawlers.CHEERIO_GOOGLE_SEARCH_CRAWLER;
+    crawlers.set(key, crawler);
     return crawler;
+}
+
+export async function createAndStartCrawlerPlaywright(
+    crawlerOptions: CrawlerOptions = {} as CrawlerOptions,
+    settings: ScraperSettings = {} as ScraperSettings,
+    startCrawler: boolean = true,
+) {
+    const options: PlaywrightCrawlerOptions = {
+        ...(crawlerOptions as PlaywrightCrawlerOptions),
+    };
+
+    const crawler = new PlaywrightCrawler({
+        keepAlive: true,
+        requestQueue: await RequestQueue.open(),
+        requestHandler: async (context) => {
+            const { request, contentType, page, response, closeCookieModals } = context;
+
+            log.info(`${Crawlers.PLAYWRIGHT_CONTENT_CRAWLER} requestHandler: Processing URL: ${request.url}`);
+            if (settings.dynamicContentWaitSecs > 0) {
+                await waitForDynamicContent(context, settings.dynamicContentWaitSecs * 1000);
+            }
+            if (page && settings.removeCookieWarnings) {
+                await closeCookieModals();
+            }
+            // Parsing the page after the dynamic content has been loaded / cookie warnings removed
+            log.info(`Parse HTML with Cheerio: ${request.url}`);
+            const $ = await context.parseWithCheerio();
+
+            const headers = response?.headers instanceof Function ? response.headers() : response?.headers;
+            // @ts-expect-error false-positive?
+            if (!$ || !isValidContentType(headers['content-type'])) {
+                log.info(`Skipping URL ${request.loadedUrl} as it could not be parsed.`, contentType as object);
+                return;
+            }
+
+            const html = $('html').html()!;
+            const processedHtml = await processHtml(html, request.url, settings, $);
+
+            const isTooLarge = processedHtml.length > settings.maxHtmlCharsToProcess;
+            const text = isTooLarge ? load(processedHtml).text() : htmlToText(load(processedHtml));
+
+            const markdown = htmlToMarkdown(processedHtml);
+
+            log.info(`Pushing data from: ${request.url} to the Apify dataset`);
+            await context.pushData({ url: request.url, text, markdown });
+
+            // const responseId = request.uniqueKey;
+            log.info(`Adding result to response: ${request.userData.responseId}, request.uniqueKey: ${request.uniqueKey}`);
+            const { responseId } = request.userData;
+            if (responseId) {
+                addResultToResponse(responseId, { url: request.url, text, markdown });
+            }
+        },
+    });
+    if (startCrawler) {
+        crawler.run().then(() => log.warning(`Crawler playwright has finished`), () => {});
+        log.info('Crawler playwright has started 💪🏼');
+    }
+    const key = Crawlers.PLAYWRIGHT_CONTENT_CRAWLER;
+    crawlers.set(key, crawler);
+    return crawler;
+}
+
+/**
+ * Waits for the `time` to pass, but breaks early if the page is loaded (source: Website Content Crawler).
+ */
+async function waitForPlaywright(page: Page, time: number) {
+    // Early break is possible only after 1/3 of the time has passed (max 3 seconds) to avoid breaking too early.
+    const hardDelay = Math.min(1000, Math.floor(0.3 * time));
+    await sleep(hardDelay);
+
+    return Promise.race([page.waitForLoadState('networkidle', { timeout: 0 }), sleep(time - hardDelay)]);
+}
+
+/**
+ * Waits for the `time`, but checks the content length every half second and breaks early if it hasn't changed
+ * in last 2 seconds (source: Website Content Crawler).
+ */
+export async function waitForDynamicContent(context: PlaywrightCrawlingContext, time: number) {
+    if (context.page) {
+        await waitForPlaywright(context.page, time);
+    }
+}
+
+function isValidContentType(contentType: string | undefined) {
+    return ['text', 'html', 'xml'].some((type) => contentType?.includes(type));
+}
+
+/**
+ * Adds a search request to the Google search crawler.
+ * Create a response for the request and set the desired number of results (maxResults).
+ */
+export const addSearchRequest = async (
+    request: RequestOptions<UserData>, response: ServerResponse | null,
+    crawlerOptions: CrawlerOptions, maxResults: number,
+) => {
+    const key = Crawlers.CHEERIO_GOOGLE_SEARCH_CRAWLER;
+    const crawler = crawlers.has(key) ? crawlers.get(key)! : await createAndStartSearchCrawler(crawlerOptions);
+
+    if (response) {
+        createResponse(request.uniqueKey!, response, maxResults);
+        log.info(`Created response for request ${request.uniqueKey}, request.url: ${request.url}`);
+    }
+    await crawler.requestQueue!.addRequest(request);
+    log.info(`Added request to cheerio-google-search-crawler: ${request.url}`);
 };
 
-export const addRequest = async (request: RequestOptions<UserData>, res: ServerResponse, crawlerOptions: CrawlerOptions) => {
-    const key = JSON.stringify(crawlerOptions);
-    const crawler = crawlers.has(key) ? crawlers.get(key)! : await createAndStartCrawler(crawlerOptions);
-
-    addResponse(request.uniqueKey!, res);
-
-    request.userData?.timeMeasures.push({
-        event: 'before queue add',
-        time: Date.now(),
-    });
+/**
+ * Adds a content crawl request to the Playwright content crawler.
+ * Get existing crawler based on crawlerOptions and scraperSettings, if not present -> create new
+ */
+export const addContentCrawlRequest = async (request: RequestOptions<UserData>, crawlerOptions: CrawlerOptions, scraperSettings: ScraperSettings) => {
+    const key = Crawlers.PLAYWRIGHT_CONTENT_CRAWLER;
+    const crawler = crawlers.get(key) ?? await createAndStartCrawlerPlaywright(crawlerOptions, scraperSettings);
     await crawler.requestQueue!.addRequest(request);
+    log.info(`Added request to the playwright-content-crawler: ${request.url}`);
 };

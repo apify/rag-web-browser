@@ -6,6 +6,8 @@
 	"initialCookies": [],
 	"maxRequestRetries": 3,
 	"proxyConfiguration": { "useApifyProxy": true },
+    "proxyTypeDataCrawler": "RESIDENTIAL",
+    "proxyTypeSearchCrawler": "GOOGLE_SERP",
 	"readableTextCharThreshold": 100,
 	"removeCookieWarnings": true,
 	"requestTimeoutSecs": 30,

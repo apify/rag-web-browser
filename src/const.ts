@@ -5,7 +5,7 @@ export enum Label {
 }
 
 export enum Crawlers {
-    CHEERIO_SEARCH_CRAWLER = 'cheerio-search-crawler',
+    CHEERIO_GOOGLE_SEARCH_CRAWLER = 'cheerio-google-search-crawler',
     PLAYWRIGHT_CONTENT_CRAWLER = 'playwright-content-crawler',
 }
 

@@ -11,6 +11,8 @@ export type Input = {
     languageCode: string;
     maxResults: number;
     queries: string;
+    proxyTypeSearchCrawler: 'GOOGLE_SERP' | 'RESIDENTIAL' | 'SHADER';
+    proxyTypeDataCrawler: 'DATACENTER' | 'RESIDENTIAL';
 
     // content crawler parameters
     dynamicContentWaitSecs: number;
@@ -35,6 +37,7 @@ export type UserData = {
     startedAt?: Date;
     finishedAt?: Date;
     responseId?: string;
+    maxResults?: number;
 };
 
 export type SearchQuery = {
