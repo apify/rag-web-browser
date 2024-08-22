@@ -1,8 +1,9 @@
-import { htmlToText, log, PlaywrightCrawlingContext, sleep } from 'crawlee';
 import { load } from 'cheerio';
+import { htmlToText, log, PlaywrightCrawlingContext, sleep } from 'crawlee';
 
 import { processHtml } from './html-processing.js';
 import { htmlToMarkdown } from './markdown.js';
+import { handleResponse } from './responses.js';
 import { ScraperSettings, UserData } from './types.js';
 
 /**
@@ -46,7 +47,6 @@ export async function genericHandler(context: PlaywrightCrawlingContext<UserData
     }
 
     // Parsing the page after the dynamic content has been loaded / cookie warnings removed
-    log.info(`Parse HTML with Cheerio: ${request.url}`);
     const $ = await context.parseWithCheerio();
 
     const headers = response?.headers instanceof Function ? response.headers() : response?.headers;
@@ -57,6 +57,7 @@ export async function genericHandler(context: PlaywrightCrawlingContext<UserData
     }
 
     const html = $('html').html()!;
+    const title = $('title').first().text();
     const processedHtml = await processHtml(html, request.url, settings, $);
 
     const isTooLarge = processedHtml.length > settings.maxHtmlCharsToProcess;
@@ -64,6 +65,13 @@ export async function genericHandler(context: PlaywrightCrawlingContext<UserData
 
     const markdown = htmlToMarkdown(processedHtml);
 
-    log.info(`Pushing data from: ${request.url} to the Apify dataset`);
+    log.info(`Adding result to the Apify dataset: ${request.url}`);
     await context.pushData({ url: request.url, text, markdown });
+
+    log.info(`Adding result to response: ${request.userData.responseId}, request.uniqueKey: ${request.uniqueKey}`);
+    // Get responseId from the request.userData, which corresponds to the original search request
+    const { responseId } = request.userData;
+    if (responseId) {
+        handleResponse(responseId, { title, url: request.url, text, markdown });
+    }
 }

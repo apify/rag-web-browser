@@ -1,9 +1,8 @@
 import { Actor } from 'apify';
-import { BrowserName, PlaywrightCrawlerOptions, PlaywrightCrawlingContext } from 'crawlee';
+import { BrowserName, PlaywrightCrawlerOptions } from 'crawlee';
 import { firefox } from 'playwright';
 
 import defaults from './defaults.json' assert { type: 'json' };
-import { genericHandler } from './request-handler.js';
 import type { Input, ScraperSettings } from './types.js';
 
 /**
@@ -12,6 +11,13 @@ import type { Input, ScraperSettings } from './types.js';
 
 export async function processInput(originalInput: Partial<Input>) {
     const input: Input = { ...(defaults as unknown as Input), ...originalInput };
+
+    if (!input.queries) {
+        throw new Error('The "queries" parameter must be provided and non-empty');
+    }
+    if (input.maxResults <= 0) {
+        throw new Error('The "maxResults" parameter must be greater than 0');
+    }
 
     if (input.dynamicContentWaitSecs >= input.requestTimeoutSecs) {
         input.dynamicContentWaitSecs = Math.round(input.requestTimeoutSecs / 2);
@@ -55,7 +61,6 @@ export async function processInput(originalInput: Partial<Input>) {
             },
             retireInactiveBrowserAfterSecs: 20,
         },
-        requestHandler: (context: PlaywrightCrawlingContext) => genericHandler(context, scraperSettings),
     };
 
     return { input, crawlerOptions, scraperSettings };

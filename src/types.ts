@@ -1,5 +1,9 @@
 import type { ProxyConfigurationOptions } from 'apify';
 
+export interface CrawlerOptions {
+    proxyConfigurationOptions: ProxyConfigurationOptions;
+}
+
 export type Input = {
 
     // google search parameters
@@ -7,6 +11,8 @@ export type Input = {
     languageCode: string;
     maxResults: number;
     queries: string;
+    proxyTypeSearchCrawler: 'GOOGLE_SERP' | 'RESIDENTIAL' | 'SHADER';
+    proxyTypeDataCrawler: 'DATACENTER' | 'RESIDENTIAL';
 
     // content crawler parameters
     dynamicContentWaitSecs: number;
@@ -30,6 +36,8 @@ export type OrganicResult = {
 export type UserData = {
     startedAt?: Date;
     finishedAt?: Date;
+    responseId?: string;
+    maxResults?: number;
 };
 
 export type SearchQuery = {
