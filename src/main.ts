@@ -5,14 +5,15 @@ import { createServer } from 'http';
 import { addSearchRequest, createAndStartCrawlerPlaywright, createAndStartSearchCrawler } from './crawlers';
 import { UserInputError } from './errors.js';
 import { processInput } from './input';
-import { addTimeoutToAllResponses } from './responses.js';
+import {addTimeoutToAllResponses, sendResponseError} from './responses.js';
 import {CrawlerOptions, Input, ScraperSettings} from './types.js';
-import { parseParameters, createRequestForCrawler } from './utils';
+import { parseParameters, checkForExtraParams, createRequestSearch } from './utils';
 
 await Actor.init();
 
 // Allow to run standby mode only when the actor is not running in the Apify platform (e.g. in local development)
 const RUN_STANDBY_MODE_AT_LOCAL = !Actor.isAtHome() && true;
+const TIMEOUT_MS = 60000;
 
 Actor.on('migrating', () => {
     addTimeoutToAllResponses(60);
@@ -24,13 +25,22 @@ const server = createServer(async (req, res) => {
     }
     try {
         const params = parseParameters(req.url!);
+        checkForExtraParams(params);
         log.info(`Received input parameters: ${JSON.stringify(params)}`);
         const { input } = await processInput(params as Partial<Input>);
 
-        const crawlerRequest = createRequestForCrawler(input.queries, input.maxResults);
+        const crawlerRequest = createRequestSearch(input.queries, input.maxResults);
         const crawlerOptions: CrawlerOptions = {
             proxyConfigurationOptions: { groups: [input.proxyTypeSearchCrawler] },
         };
+
+        setTimeout(() => {
+            const timeoutErrorMessage = {
+                errorMessage: `Response timed out.`,
+            };
+            sendResponseError(crawlerRequest.uniqueKey!, JSON.stringify(timeoutErrorMessage));
+        }, TIMEOUT_MS);
+
         await addSearchRequest(crawlerRequest, res, crawlerOptions, input.maxResults);
     } catch (e) {
         const error = e as Error;
@@ -61,7 +71,7 @@ if ((Actor.isAtHome() && Actor.getEnv().metaOrigin === 'STANDBY') || RUN_STANDBY
     const { input } = processedInput;
     log.info(`Received input: ${JSON.stringify(input)}`);
 
-    const crawlerRequest = createRequestForCrawler(input.queries, input.maxResults);
+    const crawlerRequest = createRequestSearch(input.queries, input.maxResults);
     const crawlerOptions: CrawlerOptions = {
         proxyConfigurationOptions: { groups: [input.proxyTypeSearchCrawler] },
     };

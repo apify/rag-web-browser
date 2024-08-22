@@ -21,6 +21,7 @@
 		"@apify/eslint-config-ts": "^0.3.0",
 		"@apify/tsconfig": "^0.1.0",
 		"@types/turndown": "^5.0.5",
+		"@types/uuid": "^10.0.0",
 		"@typescript-eslint/eslint-plugin": "^6.7.2",
 		"@typescript-eslint/parser": "^6.7.2",
 		"eslint": "^8.50.0",

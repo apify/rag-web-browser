@@ -15,3 +15,6 @@ This Actor is a combination of a two more powerful Apify actors:
 
 #### Need to extract content from a list of URLs?
 - Explore the the [Website Content Crawler](https://apify.com/apify/website-content-crawler) actor.
+
+Browsing Tool
+- https://community.openai.com/t/new-assistants-browse-with-bing-ability/479383/27
