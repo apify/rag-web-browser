@@ -15,7 +15,7 @@ export function parseParameters(url: string): ParsedUrlQuery {
 export function checkForExtraParams(params: ParsedUrlQuery) {
     for (const key of Object.keys(params)) {
         if (!defaults.hasOwnProperty(key)) {
-            log.error(`Unknown parameter: ${key}. Supported parameters: ${Object.keys(defaults).join(', ')}`);
+            log.warning(`Unknown parameter: ${key}. Supported parameters: ${Object.keys(defaults).join(', ')}`);
         }
     }
 }
