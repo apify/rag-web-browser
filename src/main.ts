@@ -2,18 +2,18 @@ import { Actor } from 'apify';
 import { log } from 'crawlee';
 import { createServer } from 'http';
 
-import { addSearchRequest, createAndStartCrawlerPlaywright, createAndStartSearchCrawler } from './crawlers';
+import { addSearchRequest, createAndStartCrawlerPlaywright, createAndStartSearchCrawler } from './crawlers.js';
 import { UserInputError } from './errors.js';
-import { processInput } from './input';
-import { addTimeoutToAllResponses, sendResponseError } from './responses.js';
-import { CrawlerOptions, Input, ScraperSettings } from './types.js';
-import { parseParameters, checkForExtraParams, createRequestSearch } from './utils';
+import { processInput } from './input.js';
+import { addTimeoutToAllResponses } from './responses.js';
+import { Input } from './types.js';
+import { parseParameters, checkForExtraParams, createRequestSearch } from './utils.js';
 
 await Actor.init();
 
 // Allow to run standby mode only when the actor is not running in the Apify platform (e.g. in local development)
 const RUN_STANDBY_MODE_AT_LOCAL = !Actor.isAtHome() && true;
-const TIMEOUT_MS = 60000;
+// const TIMEOUT_MS = 60000;
 
 Actor.on('migrating', () => {
     addTimeoutToAllResponses(60);
@@ -27,21 +27,18 @@ const server = createServer(async (req, res) => {
         const params = parseParameters(req.url!);
         checkForExtraParams(params);
         log.info(`Received input parameters: ${JSON.stringify(params)}`);
-        const { input } = await processInput(params as Partial<Input>);
+        const { input, crawlerOptions, scraperSettings } = await processInput(params as Partial<Input>);
 
         const crawlerRequest = createRequestSearch(input.queries, input.maxResults);
-        const crawlerOptions: CrawlerOptions = {
-            proxyConfigurationOptions: { groups: [input.proxyTypeSearchCrawler] },
-        };
 
-        setTimeout(() => {
-            const timeoutErrorMessage = {
-                errorMessage: `Response timed out.`,
-            };
-            sendResponseError(crawlerRequest.uniqueKey!, JSON.stringify(timeoutErrorMessage));
-        }, TIMEOUT_MS);
+        // setTimeout(() => {
+        //     const timeoutErrorMessage = {
+        //         errorMessage: `Response timed out.`,
+        //     };
+        //     sendResponseError(crawlerRequest.uniqueKey!, JSON.stringify(timeoutErrorMessage));
+        // }, TIMEOUT_MS);
 
-        await addSearchRequest(crawlerRequest, res, crawlerOptions, input.maxResults);
+        await addSearchRequest(crawlerRequest, res, input.maxResults, crawlerOptions, scraperSettings);
     } catch (e) {
         const error = e as Error;
         const errorMessage = { errorMessage: error.message };
@@ -55,28 +52,29 @@ if ((Actor.isAtHome() && Actor.getEnv().metaOrigin === 'STANDBY') || RUN_STANDBY
     log.info('Actor is running in Standby mode');
 
     const port = Actor.isAtHome() ? process.env.ACTOR_STANDBY_PORT : 3000;
-    const host = Actor.isAtHome() ? process.env.ACTOR_WEB_SERVER_URL : 'http://localhost';
-
     server.listen(port, async () => {
-        log.info(`Google-Search-Data-Extractor is listening for user requests at ${host}:${port}`);
+        log.info(`Google-Search-Data-Extractor is listening for user requests`);
+
+        const { input, crawlerOptions, scraperSettings } = await processInput((await Actor.getInput<Partial<Input>>()) ?? ({} as Input));
+        log.info(`Loaded input: ${JSON.stringify(input)},
+            crawlerOptions: ${JSON.stringify(crawlerOptions)},
+            scraperSettings: ${JSON.stringify(scraperSettings)}
+        `);
         // Pre-create common crawlers because crawler init can take about 1 sec
         await Promise.all([
-            createAndStartSearchCrawler(),
-            createAndStartCrawlerPlaywright(),
+            createAndStartSearchCrawler(crawlerOptions, scraperSettings),
+            createAndStartCrawlerPlaywright(crawlerOptions, scraperSettings),
         ]);
     });
 } else {
     log.info('Actor is running in the normal mode');
     const processedInput = await processInput((await Actor.getInput<Partial<Input>>()) ?? ({} as Input));
-    const { input } = processedInput;
+    const { input, crawlerOptions, scraperSettings } = processedInput;
     log.info(`Received input: ${JSON.stringify(input)}`);
 
     const crawlerRequest = createRequestSearch(input.queries, input.maxResults);
-    const crawlerOptions: CrawlerOptions = {
-        proxyConfigurationOptions: { groups: [input.proxyTypeSearchCrawler] },
-    };
-    const searchCrawler = await createAndStartSearchCrawler(crawlerOptions, {} as ScraperSettings, false);
-    const contentCrawler = await createAndStartCrawlerPlaywright(crawlerOptions, {} as ScraperSettings, false);
+    const searchCrawler = await createAndStartSearchCrawler(crawlerOptions, scraperSettings, false);
+    const contentCrawler = await createAndStartCrawlerPlaywright(crawlerOptions, scraperSettings, false);
 
     await searchCrawler.run([crawlerRequest.url]);
     await contentCrawler.run();

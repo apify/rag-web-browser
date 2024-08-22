@@ -1,4 +1,4 @@
-## Fast Google Search Result Content Crawler
+## Google Search Data Extractor
 
 This Actor retrieves website content from the top Google Search Results Pages (SERPs).
 Given a search query, it fetches the first page of Google search results, then crawls the top sites to extract text content.

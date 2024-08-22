@@ -3,6 +3,7 @@ import { BrowserName, PlaywrightCrawlerOptions } from 'crawlee';
 import { firefox } from 'playwright';
 
 import defaults from './defaults.json' assert { type: 'json' };
+import { UserInputError } from './errors.js';
 import type { Input, ScraperSettings } from './types.js';
 
 /**
@@ -13,10 +14,10 @@ export async function processInput(originalInput: Partial<Input>) {
     const input: Input = { ...(defaults as unknown as Input), ...originalInput };
 
     if (!input.queries) {
-        throw new Error('The "queries" parameter must be provided and non-empty');
+        throw new UserInputError('The "queries" parameter must be provided and non-empty');
     }
     if (input.maxResults <= 0) {
-        throw new Error('The "maxResults" parameter must be greater than 0');
+        throw new UserInputError('The "maxResults" parameter must be greater than 0');
     }
 
     if (input.dynamicContentWaitSecs >= input.requestTimeoutSecs) {

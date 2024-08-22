@@ -21,8 +21,10 @@ export function checkForExtraParams(params: ParsedUrlQuery) {
 }
 
 export function createRequestSearch(queries: string, maxResults: number): RequestOptions<UserData> {
-    const urlSearch = `http://www.google.com/search?q=${queries}&num=${maxResults}`;
-    return { url: urlSearch, uniqueKey: uuidv4() };
+    // add some overhead for the maxResults to account for the fact that some results are not Organic
+    const n = maxResults + 5;
+    const urlSearch = `http://www.google.com/search?q=${queries}&num=${n}`;
+    return { url: urlSearch, uniqueKey: uuidv4(), userData: { maxResults } };
 }
 
 export function createRequest(url: string, responseId: string): RequestOptions<UserData> {

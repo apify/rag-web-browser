@@ -1,6 +1,6 @@
 import { Actor, RequestQueue } from 'apify';
 import { CheerioAPI } from 'cheerio';
-import type { RequestOptions } from 'crawlee';
+import type { CheerioCrawlerOptions, RequestOptions } from 'crawlee';
 import {
     CheerioCrawlingContext,
     log,
@@ -11,10 +11,10 @@ import {
 } from 'crawlee';
 import { ServerResponse } from 'http';
 
-import { scrapeOrganicResults } from './google-extractors-urls';
+import { scrapeOrganicResults } from './google-extractors-urls.js';
 import { genericHandler } from './playwright-req-handler.js';
 import { createResponse } from './responses.js';
-import { ScraperSettings, UserData, CrawlerOptions } from './types.js';
+import { ScraperSettings, UserData } from './types.js';
 import { createRequest } from './utils.js';
 
 enum CrawlerType {
@@ -24,6 +24,8 @@ enum CrawlerType {
 
 const crawlers = new Map<string, CheerioCrawler | PlaywrightCrawler>();
 const queueSearchCrawler = await RequestQueue.open('cheerio-google-search-queue');
+
+log.setLevel(log.LEVELS.DEBUG);
 
 // export const DEFAULT_CRAWLER_OPTIONS: CrawlerOptions = {
 //     proxyConfigurationOptions: {},
@@ -43,11 +45,14 @@ const queueSearchCrawler = await RequestQueue.open('cheerio-google-search-queue'
 // How to handle the case when all the requests are not finished?
 
 export async function createAndStartSearchCrawler(
-    crawlerOptions: CrawlerOptions = {} as CrawlerOptions,
-    scraperSettings: ScraperSettings = {} as ScraperSettings,
+    crawlerOptions: CheerioCrawlerOptions | PlaywrightCrawlerOptions,
+    scraperSettings: ScraperSettings,
     startCrawler: boolean = true,
 ) {
-    const proxyConfig = await Actor.createProxyConfiguration(crawlerOptions.proxyConfigurationOptions);
+    // const proxyConfig = await Actor.createProxyConfiguration(crawlerOptions.proxyConfigurationOptions);
+    const proxyConfig = await Actor.createProxyConfiguration(
+        { groups: ['GOOGLE_SERP'] },
+    );
 
     const crawler = new CheerioCrawler({
         keepAlive: true,
@@ -69,7 +74,7 @@ export async function createAndStartSearchCrawler(
             const responseId = request.uniqueKey;
             for (const url of searchUrls) {
                 const r = createRequest(url, responseId);
-                await addContentCrawlRequest(r, crawlerOptions, scraperSettings);
+                await addContentCrawlRequest(r, crawlerOptions as PlaywrightCrawlerOptions, scraperSettings);
             }
         },
     });
@@ -83,19 +88,20 @@ export async function createAndStartSearchCrawler(
 }
 
 export async function createAndStartCrawlerPlaywright(
-    crawlerOptions: CrawlerOptions = {} as CrawlerOptions,
-    settings: ScraperSettings = {} as ScraperSettings,
+    crawlerOptions: PlaywrightCrawlerOptions,
+    settings: ScraperSettings,
     startCrawler: boolean = true,
 ) {
-    const options: PlaywrightCrawlerOptions = {
-        ...(crawlerOptions as PlaywrightCrawlerOptions),
-        keepAlive: true,
-        requestQueue: await RequestQueue.open(),
-    };
+    log.info('Creating Playwright crawler with Options: ', crawlerOptions);
+    // const proxyConfig = await Actor.createProxyConfiguration(
+    //     { groups: ['RESIDENTIAL'] },
+    // );
 
     const crawler = new PlaywrightCrawler({
+        ...(crawlerOptions as PlaywrightCrawlerOptions),
         requestHandler: (context: PlaywrightCrawlingContext) => genericHandler(context, settings),
-        ...options,
+        keepAlive: true,
+        requestQueue: await RequestQueue.open(),
     });
 
     if (startCrawler) {
@@ -112,11 +118,14 @@ export async function createAndStartCrawlerPlaywright(
  * Create a response for the request and set the desired number of results (maxResults).
  */
 export const addSearchRequest = async (
-    request: RequestOptions<UserData>, response: ServerResponse | null,
-    crawlerOptions: CrawlerOptions, maxResults: number,
+    request: RequestOptions<UserData>,
+    response: ServerResponse | null,
+    maxResults: number,
+    crawlerOptions: PlaywrightCrawlerOptions,
+    scraperSettings: ScraperSettings,
 ) => {
     const key = CrawlerType.CHEERIO_GOOGLE_SEARCH_CRAWLER;
-    const crawler = crawlers.has(key) ? crawlers.get(key)! : await createAndStartSearchCrawler(crawlerOptions);
+    const crawler = crawlers.has(key) ? crawlers.get(key)! : await createAndStartSearchCrawler(crawlerOptions, scraperSettings);
 
     if (response) {
         createResponse(request.uniqueKey!, response, maxResults);
@@ -130,7 +139,7 @@ export const addSearchRequest = async (
  * Adds a content crawl request to the Playwright content crawler.
  * Get existing crawler based on crawlerOptions and scraperSettings, if not present -> create new
  */
-export const addContentCrawlRequest = async (request: RequestOptions<UserData>, crawlerOptions: CrawlerOptions, scraperSettings: ScraperSettings) => {
+export const addContentCrawlRequest = async (request: RequestOptions<UserData>, crawlerOptions: PlaywrightCrawlerOptions, scraperSettings: ScraperSettings) => {
     const key = CrawlerType.PLAYWRIGHT_CONTENT_CRAWLER;
     const crawler = crawlers.get(key) ?? await createAndStartCrawlerPlaywright(crawlerOptions, scraperSettings);
     await crawler.requestQueue!.addRequest(request);

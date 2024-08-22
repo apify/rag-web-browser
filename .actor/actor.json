@@ -1,7 +1,7 @@
 {
 	"actorSpecification": 1,
-	"name": "serp-content-crawler",
-	"title": "SERP Content Crawler",
+	"name": "google-search-data-extractor",
+	"title": "Google Search Data Extractor",
 	"description": "Retrieve website content from the top Google Search Results Pages (SERPs)",
 	"version": "0.0",
 	"meta": {
@@ -12,26 +12,34 @@
     "storage": {
         "dataset": {
             "actorSpecification": 1,
-            "title": "SERP Content Crawler Dataset",
+            "title": "Google Search Data Extractor",
             "description": "",
             "views": {
                 "default": {
                     "title": "Text",
-                    "description": "View of URLs of web pages and their content as simple plain text.",
+                    "description": "View of page titles, URLs, extracted text and markdown.",
                     "transformation": {
                         "fields": [
+                            "title",
                             "url",
-                            "text"
+                            "text",
+                            "markdown"
                         ]
                     },
                     "display": {
                         "component": "table",
                         "properties": {
+                            "title": {
+                                "label": "Page title"
+                            },
                             "url": {
                                 "label": "Webpage URL"
                             },
                             "text": {
                                 "label": "Extracted text"
+                            },
+                            "markdown": {
+                                "label": "Extracted Markdown"
                             }
                         }
                     }

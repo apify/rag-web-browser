@@ -1,8 +1,8 @@
 import type { ProxyConfigurationOptions } from 'apify';
 
-export interface CrawlerOptions {
-    proxyConfigurationOptions: ProxyConfigurationOptions;
-}
+// export interface CrawlerOptions {
+//     proxyConfigurationOptions: ProxyConfigurationOptions;
+// }
 
 export type Input = {
 
