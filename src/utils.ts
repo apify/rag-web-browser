@@ -1,5 +1,5 @@
 import { RequestOptions, log } from 'crawlee';
-import {parse, ParsedUrlQuery} from 'querystring';
+import { parse, ParsedUrlQuery } from 'querystring';
 import { v4 as uuidv4 } from 'uuid';
 
 import defaults from './defaults.json' assert { type: 'json' };

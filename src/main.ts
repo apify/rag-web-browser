@@ -5,8 +5,8 @@ import { createServer } from 'http';
 import { addSearchRequest, createAndStartCrawlerPlaywright, createAndStartSearchCrawler } from './crawlers';
 import { UserInputError } from './errors.js';
 import { processInput } from './input';
-import {addTimeoutToAllResponses, sendResponseError} from './responses.js';
-import {CrawlerOptions, Input, ScraperSettings} from './types.js';
+import { addTimeoutToAllResponses, sendResponseError } from './responses.js';
+import { CrawlerOptions, Input, ScraperSettings } from './types.js';
 import { parseParameters, checkForExtraParams, createRequestSearch } from './utils';
 
 await Actor.init();
