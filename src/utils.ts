@@ -6,7 +6,7 @@ import defaults from './defaults.json' assert { type: 'json' };
 import { UserData } from './types.js';
 
 export function parseParameters(url: string): ParsedUrlQuery {
-    return parse(url.slice(2));
+    return parse(url.slice(1));
 }
 
 /**

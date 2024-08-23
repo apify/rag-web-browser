@@ -13,21 +13,15 @@ import type { Input, ScraperSettings } from './types.js';
 export async function processInput(originalInput: Partial<Input>) {
     const input: Input = { ...(defaults as unknown as Input), ...originalInput };
 
-    if (!input.queries) {
-        throw new UserInputError('The "queries" parameter must be provided and non-empty');
-    }
-    if (input.maxResults <= 0) {
-        throw new UserInputError('The "maxResults" parameter must be greater than 0');
-    }
-
     if (input.dynamicContentWaitSecs >= input.requestTimeoutSecs) {
         input.dynamicContentWaitSecs = Math.round(input.requestTimeoutSecs / 2);
     }
 
     const {
         dynamicContentWaitSecs,
-        proxyConfiguration,
+        keepAlive,
         maxRequestRetries,
+        proxyConfiguration,
         readableTextCharThreshold,
         removeCookieWarnings,
         requestTimeoutSecs,
@@ -48,6 +42,7 @@ export async function processInput(originalInput: Partial<Input>) {
 
     const crawlerOptions: PlaywrightCrawlerOptions = {
         headless: true,
+        keepAlive,
         maxRequestRetries,
         proxyConfiguration: proxy,
         requestHandlerTimeoutSecs: requestTimeoutSecs,
@@ -65,4 +60,13 @@ export async function processInput(originalInput: Partial<Input>) {
     };
 
     return { input, crawlerOptions, scraperSettings };
+}
+
+export async function checkInputsAreValid(input: Partial<Input>) {
+    if (!input.query) {
+        throw new UserInputError('The "query" parameter must be provided and non-empty');
+    }
+    if (input.maxResults !== undefined && input.maxResults <= 0) {
+        throw new UserInputError('The "maxResults" parameter must be greater than 0');
+    }
 }

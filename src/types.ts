@@ -6,11 +6,14 @@ import type { ProxyConfigurationOptions } from 'apify';
 
 export type Input = {
 
+    // both
+    keepAlive: boolean;
+
     // google search parameters
     countryCode: string;
     languageCode: string;
     maxResults: number;
-    queries: string;
+    query: string;
     proxyTypeSearchCrawler: 'GOOGLE_SERP' | 'RESIDENTIAL' | 'SHADER';
     proxyTypeDataCrawler: 'DATACENTER' | 'RESIDENTIAL';
 

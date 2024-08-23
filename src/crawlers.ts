@@ -1,7 +1,6 @@
 import { Actor, RequestQueue } from 'apify';
 import { CheerioAPI } from 'cheerio';
-import type { CheerioCrawlerOptions, RequestOptions } from 'crawlee';
-import {
+import { CheerioCrawlerOptions, RequestOptions,
     CheerioCrawlingContext,
     log,
     PlaywrightCrawlingContext,
@@ -55,10 +54,11 @@ export async function createAndStartSearchCrawler(
     );
 
     const crawler = new CheerioCrawler({
-        keepAlive: true,
+        keepAlive: crawlerOptions.keepAlive,
         proxyConfiguration: proxyConfig,
         maxRequestRetries: 4,
         requestQueue: queueSearchCrawler,
+        autoscaledPoolOptions: { desiredConcurrency: 1 },
         requestHandler: async ({ request, $: _$ }: CheerioCrawlingContext<UserData>) => {
             // NOTE: we need to cast this to fix `cheerio` type errors
             const $ = _$ as CheerioAPI;
@@ -100,8 +100,9 @@ export async function createAndStartCrawlerPlaywright(
     const crawler = new PlaywrightCrawler({
         ...(crawlerOptions as PlaywrightCrawlerOptions),
         requestHandler: (context: PlaywrightCrawlingContext) => genericHandler(context, settings),
-        keepAlive: true,
+        keepAlive: crawlerOptions.keepAlive,
         requestQueue: await RequestQueue.open(),
+        autoscaledPoolOptions: { desiredConcurrency: 3 },
     });
 
     if (startCrawler) {
