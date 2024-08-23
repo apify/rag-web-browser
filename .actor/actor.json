@@ -1,8 +1,8 @@
 {
 	"actorSpecification": 1,
-	"name": "google-search-data-extractor",
-	"title": "Google Search Data Extractor",
-	"description": "Retrieve website content from the top Google Search Results Pages (SERPs)",
+	"name": "rag-web-browser",
+	"title": "RAG Web browser",
+    "description": "Web browser for a retrieval augmented generation workflows. Retrieve and return website content from the top Google Search Results Pages",
 	"version": "0.0",
 	"meta": {
 		"templateId": "ts-crawlee-cheerio"
