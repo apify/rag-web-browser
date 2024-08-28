@@ -1,10 +1,10 @@
 import { Actor } from 'apify';
-import { BrowserName, PlaywrightCrawlerOptions } from 'crawlee';
+import { BrowserName, CheerioCrawlerOptions, PlaywrightCrawlerOptions } from 'crawlee';
 import { firefox } from 'playwright';
 
 import defaults from './defaults.json' assert { type: 'json' };
 import { UserInputError } from './errors.js';
-import type { Input, ScraperSettings } from './types.js';
+import type { Input, PlaywrightScraperSettings } from './types.js';
 
 /**
  * Processes the input and returns the settings for the crawler (adapted from: Website Content Crawler).
@@ -21,26 +21,23 @@ export async function processInput(originalInput: Partial<Input>) {
         dynamicContentWaitSecs,
         keepAlive,
         maxRequestRetries,
+        maxRequestRetriesSearch,
+        outputFormats,
+        proxyGroupSearch,
         proxyConfiguration,
         readableTextCharThreshold,
         removeCookieWarnings,
         requestTimeoutSecs,
-        saveHtml,
-        saveMarkdown,
     } = input;
 
-    const proxy = await Actor.createProxyConfiguration(proxyConfiguration);
-
-    const scraperSettings: ScraperSettings = {
-        dynamicContentWaitSecs,
-        maxHtmlCharsToProcess: 1.5e6,
-        readableTextCharThreshold,
-        removeCookieWarnings,
-        saveHtml,
-        saveMarkdown,
+    const proxySearch = await Actor.createProxyConfiguration({ groups: [proxyGroupSearch] });
+    const cheerioCrawlerOptions: CheerioCrawlerOptions = {
+        keepAlive,
+        maxRequestRetries: maxRequestRetriesSearch,
+        proxyConfiguration: proxySearch,
     };
-
-    const crawlerOptions: PlaywrightCrawlerOptions = {
+    const proxy = await Actor.createProxyConfiguration(proxyConfiguration);
+    const playwrightCrawlerOptions: PlaywrightCrawlerOptions = {
         headless: true,
         keepAlive,
         maxRequestRetries,
@@ -55,11 +52,19 @@ export async function processInput(originalInput: Partial<Input>) {
                     browsers: [BrowserName.firefox],
                 },
             },
-            retireInactiveBrowserAfterSecs: 20,
+            retireInactiveBrowserAfterSecs: 60,
         },
     };
 
-    return { input, crawlerOptions, scraperSettings };
+    const playwrightScraperSettings: PlaywrightScraperSettings = {
+        dynamicContentWaitSecs,
+        maxHtmlCharsToProcess: 1.5e6,
+        outputFormats,
+        readableTextCharThreshold,
+        removeCookieWarnings,
+    };
+
+    return { input, cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings };
 }
 
 export async function checkInputsAreValid(input: Partial<Input>) {

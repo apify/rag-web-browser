@@ -13,11 +13,32 @@
             "pattern": "[^\\s]+"
         },
         "maxResults": {
-            "title": "Max results to return",
+            "title": "Number of top search results to return from Google. Only organic results are returned and counted.",
             "type": "integer",
             "description": "",
-            "prefill": 3.0,
-            "minimum": 1.0
+            "prefill": 3,
+            "minimum": 1,
+            "maximum": 50
+        },
+        "outputFormats": {
+            "title": "Output formats",
+            "type": "array",
+            "description": "Select the output formats you want to receive.",
+            "editor": "select",
+            "default": ["text"],
+            "items": {
+                "type": "string",
+                "enum": ["text", "markdown", "html"],
+                "enumTitles": ["Plain text", "Markdown", "HTML"]
+            }
+        },
+        "proxyGroupSearch": {
+            "title": "Search Proxy Group",
+            "type": "string",
+            "description": "Enables loading the search results using different proxies.",
+            "editor": "select",
+            "default": "GOOGLE_SERP",
+            "enum": ["GOOGLE_SERP", "SHADER"]
         },
         "proxyConfiguration": {
             "title": "Crawler: Proxy configuration",
@@ -29,7 +50,24 @@
             "prefill": {
                 "useApifyProxy": true
             },
-            "editor": "proxy"
+            "editor": "proxy",
+            "sectionCaption": "Crawler Settings"
+        },
+        "maxRequestRetries": {
+            "title": "Maximum number of retries on network / server errors",
+            "type": "integer",
+            "description": "The maximum number of times the crawler will retry the request on network, proxy or server errors. If the (n+1)-th request still fails, the crawler will mark this request as failed.",
+            "minimum": 0,
+            "maximum": 3,
+            "default": 1
+        },
+        "requestTimeoutSecs": {
+            "title": "Request timeout",
+            "type": "integer",
+            "description": "Timeout (in seconds) for making the request and processing its response.",
+            "minimum": 1,
+            "maximum": 600,
+            "default": 20
         }
     }
 }
