@@ -1,4 +1,4 @@
-import { RequestOptions, log } from 'crawlee';
+import { RequestOptions, log, ProxyConfiguration } from 'crawlee';
 import { parse, ParsedUrlQuery } from 'querystring';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -20,10 +20,14 @@ export function checkForExtraParams(params: ParsedUrlQuery) {
     }
 }
 
-export function createRequestSearch(queries: string, maxResults: number): RequestOptions<UserData> {
+export function createRequestSearch(queries: string, maxResults: number, proxyConfiguration: ProxyConfiguration | undefined): RequestOptions<UserData> {
     // add some overhead for the maxResults to account for the fact that some results are not Organic
     const n = maxResults + 5;
-    const urlSearch = `http://www.google.com/search?q=${queries}&num=${n}`;
+
+    // @ts-expect-error is there a better way to get group information? (e.g. to  create extended CheerioCrawlOptions and pass it there?)
+    const groups = proxyConfiguration?.groups || [];
+    const protocol = groups.includes('GOOGLE_SERP') ? 'http' : 'https';
+    const urlSearch = `${protocol}://www.google.com/search?q=${queries}&num=${n}`;
     return { url: urlSearch, uniqueKey: uuidv4(), userData: { maxResults } };
 }
 

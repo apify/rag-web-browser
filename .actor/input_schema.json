@@ -13,26 +13,27 @@
             "pattern": "[^\\s]+"
         },
         "maxResults": {
-            "title": "Max results to return",
+            "title": "Number of top search results to return from Google. Only organic results are returned and counted.",
             "type": "integer",
             "description": "",
-            "prefill": 3.0,
-            "minimum": 1.0
+            "prefill": 3,
+            "minimum": 1,
+            "maximum": 50
         },
         "outputFormats": {
             "title": "Output formats",
             "type": "array",
-            "description": "Select the output formats you want to retrieve from the search results.",
+            "description": "Select the output formats you want to receive.",
             "editor": "select",
             "default": ["text"],
             "items": {
                 "type": "string",
                 "enum": ["text", "markdown", "html"],
-                "enumTitles": ["Text", "Markdown", "HTML"]
+                "enumTitles": ["Plain text", "Markdown", "HTML"]
             }
         },
-        "proxyConfigurationSearch": {
-            "title": "Search: Proxy configuration",
+        "proxyGroupSearch": {
+            "title": "Search Proxy Group",
             "type": "string",
             "description": "Enables loading the search results using different proxies.",
             "editor": "select",

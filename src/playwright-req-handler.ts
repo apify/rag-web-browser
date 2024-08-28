@@ -4,7 +4,7 @@ import { htmlToText, log, PlaywrightCrawlingContext, sleep } from 'crawlee';
 import { processHtml } from './html-processing.js';
 import { htmlToMarkdown } from './markdown.js';
 import { handleResponse } from './responses.js';
-import { Output, ScraperSettings, UserData } from './types.js';
+import { Output, PlaywrightScraperSettings, UserData } from './types.js';
 
 /**
  * Waits for the `time` to pass, but breaks early if the page is loaded (source: Website Content Crawler).
@@ -34,7 +34,7 @@ function isValidContentType(contentType: string | undefined) {
 /**
  * Generic handler for processing the page content (adapted from: Website Content Crawler).
  */
-export async function genericHandler(context: PlaywrightCrawlingContext<UserData>, settings: ScraperSettings) {
+export async function genericHandler(context: PlaywrightCrawlingContext<UserData>, settings: PlaywrightScraperSettings) {
     const { request, contentType, page, response, closeCookieModals } = context;
 
     log.info(`Processing URL: ${request.url}`);
@@ -67,6 +67,7 @@ export async function genericHandler(context: PlaywrightCrawlingContext<UserData
         crawl: {
             httpStatusCode: page ? response?.status() : null,
             loadedTime: new Date(),
+            status: 'success',
         },
         metadata: {
             author: $('meta[name=author]').first().attr('content') ?? null,

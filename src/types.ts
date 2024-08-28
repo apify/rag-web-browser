@@ -1,6 +1,6 @@
 import type { ProxyConfigurationOptions } from 'apify';
 
-type OutputFormat = 'text' | 'markdown' | 'html';
+type OutputFormats = 'text' | 'markdown' | 'html';
 
 export type Input = {
 
@@ -11,12 +11,13 @@ export type Input = {
     countryCode: string;
     languageCode: string;
     maxResults: number;
-    proxyConfigurationSearch: 'GOOGLE_SERP' | 'SHADER';
+    proxyGroupSearch: 'GOOGLE_SERP' | 'SHADER';
+    maxRequestRetriesSearch: number;
     query: string;
 
     // content crawler parameters
     dynamicContentWaitSecs: number;
-    outputFormats: OutputFormat[]
+    outputFormats: OutputFormats[]
     initialConcurrency: number;
     maxConcurrency: number;
     maxRequestRetries: number;
@@ -39,12 +40,12 @@ export type UserData = {
     maxResults?: number;
 };
 
-export interface ScraperSettings {
+export interface PlaywrightScraperSettings {
     dynamicContentWaitSecs: number;
     maxHtmlCharsToProcess: number;
+    outputFormats: OutputFormats[];
     readableTextCharThreshold: number;
     removeCookieWarnings?: boolean;
-    outputFormats: OutputFormat[];
 }
 
 export type Output = {
@@ -54,6 +55,7 @@ export type Output = {
     crawl: {
         httpStatusCode?: number | null;
         loadedTime: Date;
+        status: string;
     }
     metadata: {
         author?: string | null;
