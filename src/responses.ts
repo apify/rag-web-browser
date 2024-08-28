@@ -1,6 +1,8 @@
 import { log } from 'apify';
 import { ServerResponse } from 'http';
 
+import { Output } from './types.js';
+
 class ResponseData {
     createdAt: Date;
     response: ServerResponse;
@@ -49,7 +51,7 @@ export const sendResponseError = (responseId: string, result: string, statusCode
     responseData.delete(responseId);
 };
 
-export const handleResponse = (responseId: string, result: unknown) => {
+export const handleResponse = (responseId: string, result: Output) => {
     const res = getResponse(responseId);
     if (!res) return;
 
@@ -61,7 +63,7 @@ export const handleResponse = (responseId: string, result: unknown) => {
     }
 };
 
-const addResultToResponse = (responseId: string, result: unknown) => {
+const addResultToResponse = (responseId: string, result: Output) => {
     const res = getResponse(responseId);
     if (!res) return;
 

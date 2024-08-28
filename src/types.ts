@@ -1,21 +1,23 @@
 import type { ProxyConfigurationOptions } from 'apify';
 
-export interface CrawlerOptions {
-    proxyConfigurationOptions: ProxyConfigurationOptions;
-}
+type OutputFormats = 'text' | 'markdown' | 'html';
 
 export type Input = {
+
+    // both
+    keepAlive: boolean;
 
     // google search parameters
     countryCode: string;
     languageCode: string;
     maxResults: number;
-    queries: string;
-    proxyTypeSearchCrawler: 'GOOGLE_SERP' | 'RESIDENTIAL' | 'SHADER';
-    proxyTypeDataCrawler: 'DATACENTER' | 'RESIDENTIAL';
+    proxyGroupSearch: 'GOOGLE_SERP' | 'SHADER';
+    maxRequestRetriesSearch: number;
+    query: string;
 
     // content crawler parameters
     dynamicContentWaitSecs: number;
+    outputFormats: OutputFormats[]
     initialConcurrency: number;
     maxConcurrency: number;
     maxRequestRetries: number;
@@ -24,8 +26,6 @@ export type Input = {
     readableTextCharThreshold: number;
     removeCookieWarnings: boolean;
     requestTimeoutSecs: number;
-    saveHtml: boolean;
-    saveMarkdown: boolean;
 };
 
 export type OrganicResult = {
@@ -40,23 +40,29 @@ export type UserData = {
     maxResults?: number;
 };
 
-export type SearchQuery = {
-    term: string;
-    url: string;
-    device: string;
-    page: number;
-    type: string;
-    domain: string;
-    countryCode: string;
-    languageCode: string | null;
-    resultsPerPage: number;
-};
-
-export interface ScraperSettings {
+export interface PlaywrightScraperSettings {
     dynamicContentWaitSecs: number;
     maxHtmlCharsToProcess: number;
+    outputFormats: OutputFormats[];
     readableTextCharThreshold: number;
     removeCookieWarnings?: boolean;
-    saveHtml?: boolean;
-    saveMarkdown?: boolean;
+}
+
+export type Output = {
+    text: string;
+    html?: string | null;
+    markdown?: string | null;
+    crawl: {
+        httpStatusCode?: number | null;
+        loadedTime: Date;
+        status: string;
+    }
+    metadata: {
+        author?: string | null;
+        description?: string | null;
+        keywords?: string | null;
+        languageCode?: string | null
+        title?: string | null;
+        url: string;
+    };
 }

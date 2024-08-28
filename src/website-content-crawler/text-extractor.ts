@@ -1,7 +1,7 @@
 import { Readability, isProbablyReaderable } from '@mozilla/readability';
 import { JSDOM } from 'jsdom';
 
-import type { ScraperSettings } from './types.js';
+import type { PlaywrightScraperSettings } from '../types.js';
 
 /**
  * Extracts readable text from the HTML using Mozilla's Readability (source: Website Content Crawler).
@@ -14,7 +14,7 @@ export async function readableText({
 }: {
     html: string;
     url: string;
-    settings: ScraperSettings;
+    settings: PlaywrightScraperSettings;
     options?: {
         fallbackToNone?: boolean;
     };

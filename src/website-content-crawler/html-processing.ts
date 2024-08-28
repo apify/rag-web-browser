@@ -1,8 +1,8 @@
 import type { CheerioAPI } from 'cheerio';
 import { log } from 'crawlee';
 
-import { readableText } from './extractors.js';
-import type { ScraperSettings } from './types.js';
+import { readableText } from './text-extractor.js';
+import type { PlaywrightScraperSettings } from '../types.js';
 
 /**
  * Process HTML with the selected HTML transformer (source: Website Content Crawler).
@@ -10,7 +10,7 @@ import type { ScraperSettings } from './types.js';
 export async function processHtml(
     html: string | null,
     url: string,
-    settings: ScraperSettings,
+    settings: PlaywrightScraperSettings,
     $: CheerioAPI,
 ): Promise<string> {
     const $body = $('body').clone();

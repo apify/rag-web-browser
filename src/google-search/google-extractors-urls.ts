@@ -1,7 +1,7 @@
 import type { CheerioAPI } from 'cheerio';
 import type { Element } from 'domhandler';
 
-import type { OrganicResult } from './types.js';
+import type { OrganicResult } from '../types.js';
 
 /**
  * Deduplicates search results based on their title and URL (source @apify/google-search).

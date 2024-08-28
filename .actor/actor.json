@@ -1,58 +1,42 @@
 {
-	"actorSpecification": 1,
-	"name": "serp-content-crawler",
-	"title": "SERP Content Crawler",
-	"description": "Retrieve website content from the top Google Search Results Pages (SERPs)",
-	"version": "0.0",
-	"meta": {
-		"templateId": "ts-crawlee-cheerio"
-	},
-	"input": "./input_schema.json",
-	"dockerfile": "./Dockerfile",
-    "storage": {
+    "actorSpecification": 1,
+    "name": "rag-web-browser",
+    "title": "RAG Web browser",
+    "description": "Web browser for a retrieval augmented generation workflows. Retrieve and return website content from the top Google Search Results Pages",
+    "version": "0.0",
+    "input": "./input_schema.json",
+    "dockerfile": "./Dockerfile",
+    "storages": {
         "dataset": {
             "actorSpecification": 1,
-            "title": "SERP Content Crawler Dataset",
-            "description": "",
+            "title": "RAG Web browser",
+            "description": "Too see all scraped properties, export the whole dataset or select All fields instead of Overview",
             "views": {
-                "default": {
-                    "title": "Text",
-                    "description": "View of URLs of web pages and their content as simple plain text.",
+                "overview": {
+                    "title": "Overview",
+                    "description": "Selected fields from the dataset",
                     "transformation": {
                         "fields": [
-                            "url",
+                            "metadata.url",
+                            "metadata.title",
                             "text"
-                        ]
+                        ],
+                        "flatten": ["metadata"]
                     },
                     "display": {
                         "component": "table",
                         "properties": {
-                            "url": {
-                                "label": "Webpage URL"
+                            "metadata.url": {
+                                "label": "Page URL",
+                                "format": "text"
+                            },
+                            "metadata.title": {
+                                "label": "Page Title",
+                                "format": "text"
                             },
                             "text": {
-                                "label": "Extracted text"
-                            }
-                        }
-                    }
-                },
-                "markdown": {
-                    "title": "Markdown",
-                    "description": "View of URLs of web pages and their content as Markdown with formatting.",
-                    "transformation": {
-                        "fields": [
-                            "url",
-                            "markdown"
-                        ]
-                    },
-                    "display": {
-                        "component": "table",
-                        "properties": {
-                            "url": {
-                                "label": "Webpage URL"
-                            },
-                            "markdown": {
-                                "label": "Extracted Markdown"
+                                "label": "Extracted text",
+                                "format": "text"
                             }
                         }
                     }
