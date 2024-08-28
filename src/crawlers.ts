@@ -1,48 +1,29 @@
 import { MemoryStorage } from '@crawlee/memory-storage';
 import { RequestQueue } from 'apify';
 import { CheerioAPI } from 'cheerio';
-import { CheerioCrawlerOptions, RequestOptions,
+import {
+    CheerioCrawler,
+    CheerioCrawlerOptions,
     CheerioCrawlingContext,
     log,
-    PlaywrightCrawlingContext,
-    CheerioCrawler,
     PlaywrightCrawler,
     PlaywrightCrawlerOptions,
+    PlaywrightCrawlingContext,
+    RequestOptions,
 } from 'crawlee';
 import { ServerResponse } from 'http';
 
+import { CrawlerQueueName, CrawlerType } from './const.js';
 import { scrapeOrganicResults } from './google-extractors-urls.js';
 import { genericHandler } from './playwright-req-handler.js';
 import { createResponse } from './responses.js';
 import { PlaywrightScraperSettings, UserData } from './types.js';
 import { createRequest } from './utils.js';
 
-enum CrawlerType {
-    CHEERIO_GOOGLE_SEARCH_CRAWLER = 'cheerio-google-search-crawler',
-    PLAYWRIGHT_CONTENT_CRAWLER = 'playwright-content-crawler',
-}
-
 const crawlers = new Map<string, CheerioCrawler | PlaywrightCrawler>();
-// const queueSearchCrawler = await RequestQueue.open('cheerio-google-search-queue');
+const client = new MemoryStorage({ persistStorage: false });
 
 log.setLevel(log.LEVELS.DEBUG);
-
-// export const DEFAULT_CRAWLER_OPTIONS: CrawlerOptions = {
-//     proxyConfigurationOptions: {},
-// };
-//
-// export const DEFAULT_SCRAPER_SETTINGS: ScraperSettings = {
-//     dynamicContentWaitSecs: 0,
-//     maxHtmlCharsToProcess: 1.5e6,
-//     readableTextCharThreshold: 100,
-//     removeCookieWarnings: true,
-//     saveHtml: true,
-//     saveMarkdown: false,
-// };
-
-// Use crawlOptions to create a new CheerioCrawler (proxyConfiguration)
-// Proxy configuration for a PlaywrightCrawler
-// How to handle the case when all the requests are not finished?
 
 /**
  * Creates and starts a Google search crawler with the provided configuration.
@@ -57,12 +38,9 @@ export async function createAndStartSearchCrawler(
     playwrightScraperSettings: PlaywrightScraperSettings,
     startCrawler: boolean = true,
 ) {
-    const client = new MemoryStorage();
-    const queue = await RequestQueue.open(undefined, { storageClient: client });
-
     const crawler = new CheerioCrawler({
         ...(cheerioCrawlerOptions as CheerioCrawlerOptions),
-        requestQueue: queue,
+        requestQueue: await RequestQueue.open(CrawlerQueueName.CHEERIO_SEARCH_QUEUE, { storageClient: client }),
         requestHandler: async ({ request, $: _$ }: CheerioCrawlingContext<UserData>) => {
             // NOTE: we need to cast this to fix `cheerio` type errors
             const $ = _$ as CheerioAPI;
@@ -101,7 +79,7 @@ export async function createAndStartCrawlerPlaywright(
         ...(crawlerOptions as PlaywrightCrawlerOptions),
         requestHandler: (context: PlaywrightCrawlingContext) => genericHandler(context, settings),
         keepAlive: crawlerOptions.keepAlive,
-        requestQueue: await RequestQueue.open(),
+        requestQueue: await RequestQueue.open(CrawlerQueueName.PLAYWRIGHT_CONTENT_CRAWL_QUEUE, { storageClient: client }),
         autoscaledPoolOptions: { desiredConcurrency: 3 },
     });
 
