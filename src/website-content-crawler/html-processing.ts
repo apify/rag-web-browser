@@ -1,8 +1,8 @@
 import type { CheerioAPI } from 'cheerio';
 import { log } from 'crawlee';
 
-import { readableText } from './extractors.js';
-import type { PlaywrightScraperSettings } from './types.js';
+import { readableText } from './text-extractor.js';
+import type { PlaywrightScraperSettings } from '../types.js';
 
 /**
  * Process HTML with the selected HTML transformer (source: Website Content Crawler).

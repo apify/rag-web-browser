@@ -1,10 +1,10 @@
 import { load } from 'cheerio';
 import { htmlToText, log, PlaywrightCrawlingContext, sleep } from 'crawlee';
 
-import { processHtml } from './html-processing.js';
-import { htmlToMarkdown } from './markdown.js';
 import { handleResponse } from './responses.js';
 import { Output, PlaywrightScraperSettings, UserData } from './types.js';
+import { processHtml } from './website-content-crawler/html-processing.js';
+import { htmlToMarkdown } from './website-content-crawler/markdown.js';
 
 /**
  * Waits for the `time` to pass, but breaks early if the page is loaded (source: Website Content Crawler).
