@@ -4,7 +4,7 @@ import { htmlToText, log, PlaywrightCrawlingContext, sleep } from 'crawlee';
 import { processHtml } from './html-processing.js';
 import { htmlToMarkdown } from './markdown.js';
 import { handleResponse } from './responses.js';
-import { ScraperSettings, UserData } from './types.js';
+import { Output, ScraperSettings, UserData } from './types.js';
 
 /**
  * Waits for the `time` to pass, but breaks early if the page is loaded (source: Website Content Crawler).
@@ -56,22 +56,38 @@ export async function genericHandler(context: PlaywrightCrawlingContext<UserData
         return;
     }
 
-    const html = $('html').html()!;
-    const title = $('title').first().text();
+    const $html = $('html');
+    const html = $html.html()!;
     const processedHtml = await processHtml(html, request.url, settings, $);
 
     const isTooLarge = processedHtml.length > settings.maxHtmlCharsToProcess;
     const text = isTooLarge ? load(processedHtml).text() : htmlToText(load(processedHtml));
 
-    const markdown = htmlToMarkdown(processedHtml);
+    const result: Output = {
+        crawl: {
+            httpStatusCode: page ? response?.status() : null,
+            loadedTime: new Date(),
+        },
+        metadata: {
+            author: $('meta[name=author]').first().attr('content') ?? null,
+            title: $('title').first().text(),
+            description: $('meta[name=description]').first().attr('content') ?? null,
+            keywords: $('meta[name=keywords]').first().attr('content') ?? null,
+            languageCode: $html.first().attr('lang') ?? null,
+            url: request.url,
+        },
+        text,
+        markdown: settings.outputFormats.includes('markdown') ? htmlToMarkdown(processedHtml) : null,
+        html: settings.outputFormats.includes('html') ? processedHtml : null,
+    };
 
     log.info(`Adding result to the Apify dataset: ${request.url}`);
-    await context.pushData({ url: request.url, text, markdown });
+    await context.pushData(result);
 
     log.info(`Adding result to response: ${request.userData.responseId}, request.uniqueKey: ${request.uniqueKey}`);
     // Get responseId from the request.userData, which corresponds to the original search request
     const { responseId } = request.userData;
     if (responseId) {
-        handleResponse(responseId, { title, url: request.url, text, markdown });
+        handleResponse(responseId, result);
     }
 }

@@ -19,6 +19,26 @@
             "prefill": 3.0,
             "minimum": 1.0
         },
+        "outputFormats": {
+            "title": "Output formats",
+            "type": "array",
+            "description": "Select the output formats you want to retrieve from the search results.",
+            "editor": "select",
+            "default": ["text"],
+            "items": {
+                "type": "string",
+                "enum": ["text", "markdown", "html"],
+                "enumTitles": ["Text", "Markdown", "HTML"]
+            }
+        },
+        "proxyConfigurationSearch": {
+            "title": "Search: Proxy configuration",
+            "type": "string",
+            "description": "Enables loading the search results using different proxies.",
+            "editor": "select",
+            "default": "GOOGLE_SERP",
+            "enum": ["GOOGLE_SERP", "SHADER"]
+        },
         "proxyConfiguration": {
             "title": "Crawler: Proxy configuration",
             "type": "object",
@@ -29,7 +49,24 @@
             "prefill": {
                 "useApifyProxy": true
             },
-            "editor": "proxy"
+            "editor": "proxy",
+            "sectionCaption": "Crawler Settings"
+        },
+        "maxRequestRetries": {
+            "title": "Maximum number of retries on network / server errors",
+            "type": "integer",
+            "description": "The maximum number of times the crawler will retry the request on network, proxy or server errors. If the (n+1)-th request still fails, the crawler will mark this request as failed.",
+            "minimum": 0,
+            "maximum": 3,
+            "default": 1
+        },
+        "requestTimeoutSecs": {
+            "title": "Request timeout",
+            "type": "integer",
+            "description": "Timeout (in seconds) for making the request and processing its response.",
+            "minimum": 1,
+            "maximum": 600,
+            "default": 20
         }
     }
 }

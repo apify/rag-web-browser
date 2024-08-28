@@ -5,15 +5,14 @@
     "initialCookies": [],
     "keepAlive": true,
     "languageCode": "en",
-    "maxConcurrency": 20,
-    "maxRequestRetries": 3,
+    "maxConcurrency": 10,
+    "maxRequestRetries": 1,
     "maxResults": 3,
     "minConcurrency": 5,
+    "outputFormats": ["text", "markdown"],
     "proxyConfiguration": { "useApifyProxy": true },
     "query": "",
     "readableTextCharThreshold": 100,
     "removeCookieWarnings": true,
-    "requestTimeoutSecs": 30,
-    "saveHtml": false,
-    "saveMarkdown": false
+    "requestTimeoutSecs": 20
 }

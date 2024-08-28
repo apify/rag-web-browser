@@ -21,12 +21,11 @@ export async function processInput(originalInput: Partial<Input>) {
         dynamicContentWaitSecs,
         keepAlive,
         maxRequestRetries,
+        outputFormats,
         proxyConfiguration,
         readableTextCharThreshold,
         removeCookieWarnings,
         requestTimeoutSecs,
-        saveHtml,
-        saveMarkdown,
     } = input;
 
     const proxy = await Actor.createProxyConfiguration(proxyConfiguration);
@@ -34,10 +33,9 @@ export async function processInput(originalInput: Partial<Input>) {
     const scraperSettings: ScraperSettings = {
         dynamicContentWaitSecs,
         maxHtmlCharsToProcess: 1.5e6,
+        outputFormats,
         readableTextCharThreshold,
         removeCookieWarnings,
-        saveHtml,
-        saveMarkdown,
     };
 
     const crawlerOptions: PlaywrightCrawlerOptions = {

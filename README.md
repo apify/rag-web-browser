@@ -18,3 +18,8 @@ This Actor is a combination of a two more powerful Apify actors:
 
 Browsing Tool
 - https://community.openai.com/t/new-assistants-browse-with-bing-ability/479383/27
+
+### Run STANDBY mode using apify-cli for development
+```bash
+APIFY_META_ORIGIN=STANDBY apify run -p
+```

@@ -11,13 +11,11 @@ import { parseParameters, checkForExtraParams, createRequestSearch } from './uti
 
 await Actor.init();
 
-// Allow to run standby mode only when the actor is not running in the Apify platform (e.g. in local development)
-const RUN_STANDBY_MODE_AT_LOCAL = !Actor.isAtHome() && true;
-// const TIMEOUT_MS = 60000;
+const TIMEOUT_MS = 60000;
 const ROUTE_SEARCH = '/search';
 
 Actor.on('migrating', () => {
-    addTimeoutToAllResponses(60);
+    addTimeoutToAllResponses(TIMEOUT_MS / 1000);
 });
 
 async function getSearch(req: IncomingMessage, res: ServerResponse) {
@@ -68,7 +66,7 @@ const server = createServer(async (req, res) => {
     }
 });
 
-if ((Actor.isAtHome() && Actor.getEnv().metaOrigin === 'STANDBY') || RUN_STANDBY_MODE_AT_LOCAL) {
+if ((Actor.isAtHome() && Actor.getEnv().metaOrigin === 'STANDBY')) {
     log.info('Actor is running in Standby mode');
 
     const port = Actor.isAtHome() ? process.env.ACTOR_STANDBY_PORT : 3000;
