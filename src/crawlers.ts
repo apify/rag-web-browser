@@ -1,3 +1,4 @@
+import { MemoryStorage } from '@crawlee/memory-storage';
 import { RequestQueue } from 'apify';
 import { CheerioAPI } from 'cheerio';
 import { CheerioCrawlerOptions, RequestOptions,
@@ -22,7 +23,7 @@ enum CrawlerType {
 }
 
 const crawlers = new Map<string, CheerioCrawler | PlaywrightCrawler>();
-const queueSearchCrawler = await RequestQueue.open('cheerio-google-search-queue');
+// const queueSearchCrawler = await RequestQueue.open('cheerio-google-search-queue');
 
 log.setLevel(log.LEVELS.DEBUG);
 
@@ -56,9 +57,12 @@ export async function createAndStartSearchCrawler(
     playwrightScraperSettings: PlaywrightScraperSettings,
     startCrawler: boolean = true,
 ) {
+    const client = new MemoryStorage();
+    const queue = await RequestQueue.open(undefined, { storageClient: client });
+
     const crawler = new CheerioCrawler({
         ...(cheerioCrawlerOptions as CheerioCrawlerOptions),
-        requestQueue: queueSearchCrawler,
+        requestQueue: queue,
         requestHandler: async ({ request, $: _$ }: CheerioCrawlingContext<UserData>) => {
             // NOTE: we need to cast this to fix `cheerio` type errors
             const $ = _$ as CheerioAPI;
