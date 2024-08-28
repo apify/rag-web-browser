@@ -82,6 +82,7 @@ export async function createAndStartSearchCrawler(
         crawler.run().then(() => log.warning(`Google-search-crawler has finished`), () => {});
         log.info('Google-search-crawler has started 🫡');
     }
+    // The `crawlers` map is currently not required but is included for future use when different crawling options might be needed.
     const key = CrawlerType.CHEERIO_GOOGLE_SEARCH_CRAWLER;
     crawlers.set(key, crawler);
     return crawler;
@@ -105,6 +106,7 @@ export async function createAndStartCrawlerPlaywright(
         crawler.run().then(() => log.warning(`Crawler playwright has finished`), () => {});
         log.info('Crawler playwright has started 💪🏼');
     }
+    // The `crawlers` map is currently not required but is included for future use when different crawling options might be needed.
     const key = CrawlerType.PLAYWRIGHT_CONTENT_CRAWLER;
     crawlers.set(key, crawler);
     return crawler;
