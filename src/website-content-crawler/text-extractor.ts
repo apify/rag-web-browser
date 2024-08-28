@@ -1,7 +1,7 @@
 import { Readability, isProbablyReaderable } from '@mozilla/readability';
 import { JSDOM } from 'jsdom';
 
-import type { PlaywrightScraperSettings } from './types.js';
+import type { PlaywrightScraperSettings } from '../types.js';
 
 /**
  * Extracts readable text from the HTML using Mozilla's Readability (source: Website Content Crawler).

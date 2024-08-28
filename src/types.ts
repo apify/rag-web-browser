@@ -54,7 +54,8 @@ export type Output = {
     markdown?: string | null;
     crawl: {
         httpStatusCode?: number | null;
-        loadedTime: Date;
+        createdAt?: Date;
+        loadedAt?: Date;
         status: string;
     }
     metadata: {
