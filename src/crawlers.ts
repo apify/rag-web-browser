@@ -14,7 +14,7 @@ import {
 import { ServerResponse } from 'http';
 
 import { CrawlerQueueName, CrawlerType } from './const.js';
-import { scrapeOrganicResults } from './google-extractors-urls.js';
+import { scrapeOrganicResults } from './google-search/google-extractors-urls.js';
 import { genericHandler } from './playwright-req-handler.js';
 import { createResponse } from './responses.js';
 import { PlaywrightScraperSettings, UserData } from './types.js';
