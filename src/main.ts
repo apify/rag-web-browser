@@ -21,7 +21,7 @@ Actor.on('migrating', () => {
 async function getSearch(req: IncomingMessage, res: ServerResponse) {
     try {
         const params = parseParameters(req.url?.slice(ROUTE_SEARCH.length, req.url.length) ?? '');
-        log.info(`Received input parameters: ${JSON.stringify(params)}`);
+        log.info(`Received query parameters: ${JSON.stringify(params)}`);
         checkForExtraParams(params);
 
         const { input, cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings } = await processInput(params as Partial<Input>);
@@ -66,25 +66,25 @@ const server = createServer(async (req, res) => {
     }
 });
 
-if ((Actor.isAtHome() && Actor.getEnv().metaOrigin === 'STANDBY')) {
+const {
+    input,
+    cheerioCrawlerOptions,
+    playwrightCrawlerOptions,
+    playwrightScraperSettings,
+} = await processInput((await Actor.getInput<Partial<Input>>()) ?? ({} as Input));
+
+log.info(`Loaded input: ${JSON.stringify(input)},
+    cheerioCrawlerOptions: ${JSON.stringify(cheerioCrawlerOptions)},
+    playwrightCrawlerOptions: ${JSON.stringify(playwrightCrawlerOptions)},
+    playwrightScraperSettings ${JSON.stringify(playwrightScraperSettings)}
+`);
+
+if (Actor.getEnv().metaOrigin === 'STANDBY') {
     log.info('Actor is running in Standby mode');
 
     const port = Actor.isAtHome() ? process.env.ACTOR_STANDBY_PORT : 3000;
     server.listen(port, async () => {
         log.info(`Google-Search-Data-Extractor is listening for user requests`);
-
-        const {
-            input,
-            cheerioCrawlerOptions,
-            playwrightCrawlerOptions,
-            playwrightScraperSettings,
-        } = await processInput((await Actor.getInput<Partial<Input>>()) ?? ({} as Input));
-
-        log.info(`Loaded input: ${JSON.stringify(input)},
-            cheerioCrawlerOptions: ${JSON.stringify(cheerioCrawlerOptions)},
-            playwrightCrawlerOptions: ${JSON.stringify(playwrightCrawlerOptions)},
-            playwrightScraperSettings ${JSON.stringify(playwrightScraperSettings)}
-        `);
         // Pre-create common crawlers because crawler init can take about 1 sec
         await Promise.all([
             createAndStartSearchCrawler(cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings),
@@ -94,12 +94,10 @@ if ((Actor.isAtHome() && Actor.getEnv().metaOrigin === 'STANDBY')) {
 } else {
     log.info('Actor is running in the normal mode');
     try {
-        const processedInput = await processInput((await Actor.getInput<Partial<Input>>()) ?? ({} as Input));
-        const { input, cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings } = processedInput;
-        log.info(`Input parameters: ${JSON.stringify(input)}`);
         await checkInputsAreValid(input);
 
         cheerioCrawlerOptions.keepAlive = false;
+        playwrightCrawlerOptions.keepAlive = false;
         const searchCrawler = await createAndStartSearchCrawler(cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings, false);
         const contentCrawler = await createAndStartCrawlerPlaywright(playwrightCrawlerOptions, playwrightScraperSettings, false);
 
