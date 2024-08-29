@@ -5,17 +5,16 @@ import { createServer, IncomingMessage, ServerResponse } from 'http';
 import { addSearchRequest, createAndStartCrawlerPlaywright, createAndStartSearchCrawler } from './crawlers.js';
 import { UserInputError } from './errors.js';
 import { checkInputsAreValid, processInput } from './input.js';
-import { addTimeoutToAllResponses } from './responses.js';
+import { addTimeoutToAllResponses, sendResponseError } from './responses.js';
 import { Input } from './types.js';
 import { parseParameters, checkForExtraParams, createSearchRequest } from './utils.js';
 
 await Actor.init();
 
-const TIMEOUT_MS = 60000;
 const ROUTE_SEARCH = '/search';
 
 Actor.on('migrating', () => {
-    addTimeoutToAllResponses(TIMEOUT_MS / 1000);
+    addTimeoutToAllResponses(60);
 });
 
 async function getSearch(req: IncomingMessage, res: ServerResponse) {
@@ -28,15 +27,10 @@ async function getSearch(req: IncomingMessage, res: ServerResponse) {
         const { input, cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings } = await processInput(params as Partial<Input>);
         await checkInputsAreValid(input);
 
-        // setTimeout(() => {
-        //     const timeoutErrorMessage = {
-        //         errorMessage: `Response timed out.`,
-        //     };
-        //     sendResponseError(crawlerRequest.uniqueKey!, JSON.stringify(timeoutErrorMessage));
-        // }, TIMEOUT_MS);
-
         const crawlerRequest = createSearchRequest(input.query, input.maxResults, cheerioCrawlerOptions.proxyConfiguration);
         await addSearchRequest(crawlerRequest, res, cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings);
+
+        setTimeout(() => { sendResponseError(crawlerRequest.uniqueKey!, 'Response timed out.'); }, input.requestTimeoutSecs);
     } catch (e) {
         const error = e as Error;
         const errorMessage = { errorMessage: error.message };

@@ -19,15 +19,17 @@ export async function processInput(originalInput: Partial<Input>) {
 
     const {
         dynamicContentWaitSecs,
+        initialConcurrency,
         keepAlive,
+        maxConcurrency,
         maxRequestRetries,
         maxRequestRetriesSearch,
         outputFormats,
-        proxyGroupSearch,
         proxyConfiguration,
+        proxyGroupSearch,
         readableTextCharThreshold,
         removeCookieWarnings,
-        requestTimeoutSecs,
+        requestTimeoutContentCrawlSecs,
     } = input;
 
     const proxySearch = await Actor.createProxyConfiguration({ groups: [proxyGroupSearch] });
@@ -42,7 +44,7 @@ export async function processInput(originalInput: Partial<Input>) {
         keepAlive,
         maxRequestRetries,
         proxyConfiguration: proxy,
-        requestHandlerTimeoutSecs: requestTimeoutSecs,
+        requestHandlerTimeoutSecs: requestTimeoutContentCrawlSecs,
         launchContext: {
             launcher: firefox,
         },
@@ -53,6 +55,10 @@ export async function processInput(originalInput: Partial<Input>) {
                 },
             },
             retireInactiveBrowserAfterSecs: 60,
+        },
+        autoscaledPoolOptions: {
+            desiredConcurrency: initialConcurrency === 0 ? undefined : Math.min(initialConcurrency, maxConcurrency),
+            maxConcurrency,
         },
     };
 

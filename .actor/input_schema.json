@@ -62,12 +62,26 @@
             "default": 1
         },
         "requestTimeoutSecs": {
-            "title": "Request timeout",
+            "title": "Request timeout in seconds",
             "type": "integer",
-            "description": "Timeout (in seconds) for making the request and processing its response.",
+            "description": "Timeout (in seconds) for making the search request and processing its response.",
             "minimum": 1,
             "maximum": 600,
-            "default": 20
+            "default": 60
+        },
+        "requestTimeoutContentCrawlSecs": {
+            "title": "Request timeout for content crawling",
+            "type": "integer",
+            "description": "Timeout (in seconds) for making requests for each search result, including fetching and processing its content.\n\nThe value must be smaller than the 'Request timeout in seconds' setting.",
+            "minimum": 1,
+            "maximum": 60,
+            "default": 30
+        },
+        "debugMode": {
+            "title": "Debug mode (stores debugging information in dataset)",
+            "type": "boolean",
+            "description": "If enabled, the Actor will store debugging information in the dataset's debug field",
+            "default": false
         }
     }
 }

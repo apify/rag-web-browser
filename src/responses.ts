@@ -23,7 +23,6 @@ const getResponse = (responseId: string): ResponseData | null => {
     const res = responseData.get(responseId);
     if (res) return res;
 
-    log.info(`Response for request ${responseId} not found`);
     return null;
 };
 
@@ -43,7 +42,7 @@ export const addEmptyResultToResponse = (responseId: string, uniqueKey: string, 
     if (!res) return;
 
     const result: Partial<Output> = {
-        crawl: { createdAt: new Date(), status: ContentCrawlerStatus.PENDING, uniqueKey },
+        crawl: { createdAt: new Date(), requestStatus: ContentCrawlerStatus.PENDING, uniqueKey },
         metadata: { url },
     };
     res.resultsMap.set(uniqueKey, result as Output);
@@ -71,11 +70,30 @@ export const sendResponseOk = (responseId: string, result: unknown, contentType:
     responseData.delete(responseId);
 };
 
-export const sendResponseError = (responseId: string, result: string, statusCode: number = 500) => {
+/**
+ * Send response with error status code. If the response contains some handled requests, return 200 status otherwise 500.
+ */
+export const sendResponseError = (responseId: string, message: string) => {
     const res = getResponse(responseId);
     if (!res) return;
-    res.response.writeHead(statusCode, { 'Content-Type': 'application/json' });
-    res.response.end(result);
+
+    let returnStatusCode = 500;
+    for (const key of res.resultsMap.keys()) {
+        const { requestStatus } = res.resultsMap.get(key)!.crawl;
+        if (requestStatus === ContentCrawlerStatus.PENDING) {
+            res.resultsMap.get(key)!.crawl.httpStatus = { code: 500, message };
+            res.resultsMap.get(key)!.crawl.requestStatus = ContentCrawlerStatus.FAILED;
+        } else if (requestStatus === ContentCrawlerStatus.HANDLED) {
+            returnStatusCode = 200;
+        }
+    }
+    res.response.writeHead(returnStatusCode, { 'Content-Type': 'application/json' });
+
+    if (returnStatusCode === 200) {
+        res.response.end(Array.from(res.resultsMap.values()));
+    } else {
+        res.response.end(JSON.stringify({ errorMessage: message }));
+    }
     responseData.delete(responseId);
 };
 
@@ -88,7 +106,7 @@ export const sendResponseIfFinished = (responseId: string) => {
 
     // Check if all results have been handled or failed
     const allResults = Array.from(res.resultsMap.values());
-    const allResultsHandled = allResults.every((_r) => _r.crawl.status !== ContentCrawlerStatus.PENDING);
+    const allResultsHandled = allResults.every((_r) => _r.crawl.requestStatus !== ContentCrawlerStatus.PENDING);
     if (allResultsHandled) {
         sendResponseOk(responseId, JSON.stringify(allResults), 'application/json');
         responseData.delete(responseId);

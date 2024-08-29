@@ -23,3 +23,36 @@ Browsing Tool
 ```bash
 APIFY_META_ORIGIN=STANDBY apify run -p
 ```
+
+# Open question:
+
+Response object - should we create an envelope object for the response?
+```json
+{
+    "statusCode": 200,
+    "message": "Finished",
+    "results": [
+        {
+            "text": "Content",
+            "crawl": {
+                "httpStatus": 200,
+                "requestStatus": "handled"
+            },
+            "metadata": {
+                "url": "https://example.com",
+                "title": "Example"
+            }
+        },
+        {
+            "text": "",
+            "crawl": {
+                "httpStatus": 500,
+                "requestStatus": "failed"
+            },
+            "metadata": {
+                "url": "https://example.com"
+            }
+        }
+    ]
+}
+```

@@ -15,8 +15,8 @@ import { ServerResponse } from 'http';
 
 import { CrawlerQueueName, CrawlerType } from './const.js';
 import { scrapeOrganicResults } from './google-search/google-extractors-urls.js';
-import { genericHandler } from './playwright-req-handler.js';
-import { createResponse, addEmptyResultToResponse } from './responses.js';
+import { failedRequestHandlerPlaywright, requestHandlerPlaywright } from './playwright-req-handler.js';
+import { createResponse, addEmptyResultToResponse, sendResponseError } from './responses.js';
 import { PlaywrightScraperSettings, UserData } from './types.js';
 import { createRequest } from './utils.js';
 
@@ -59,6 +59,11 @@ export async function createAndStartSearchCrawler(
                 await addContentCrawlRequest(r, responseId, playwrightCrawlerOptions, playwrightScraperSettings);
             }
         },
+        failedRequestHandler: async ({ request }, err) => {
+            log.error(`Google-search-crawler failed to process request ${request.url}, error ${err.message}`);
+            const errorResponse = { errorMessage: err.message };
+            sendResponseError(request.uniqueKey, JSON.stringify(errorResponse));
+        },
     });
     if (startCrawler) {
         crawler.run().then(() => log.warning(`Google-search-crawler has finished`), () => {});
@@ -78,10 +83,10 @@ export async function createAndStartCrawlerPlaywright(
     log.info('Creating Playwright crawler with Options: ', crawlerOptions);
     const crawler = new PlaywrightCrawler({
         ...(crawlerOptions as PlaywrightCrawlerOptions),
-        requestHandler: (context: PlaywrightCrawlingContext) => genericHandler(context, settings),
         keepAlive: crawlerOptions.keepAlive,
         requestQueue: await RequestQueue.open(CrawlerQueueName.PLAYWRIGHT_CONTENT_CRAWL_QUEUE, { storageClient: client }),
-        autoscaledPoolOptions: { desiredConcurrency: 3 },
+        requestHandler: (context: PlaywrightCrawlingContext) => requestHandlerPlaywright(context, settings),
+        failedRequestHandler: ({ request }, err) => failedRequestHandlerPlaywright(request, err),
     });
 
     if (startCrawler) {

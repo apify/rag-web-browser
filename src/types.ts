@@ -4,6 +4,8 @@ type OutputFormats = 'text' | 'markdown' | 'html';
 
 export type Input = {
 
+    requestTimeoutSecs: number;
+
     // both
     keepAlive: boolean;
 
@@ -25,7 +27,7 @@ export type Input = {
     proxyConfiguration: ProxyConfigurationOptions;
     readableTextCharThreshold: number;
     removeCookieWarnings: boolean;
-    requestTimeoutSecs: number;
+    requestTimeoutContentCrawlSecs: number;
 };
 
 export type OrganicResult = {
@@ -33,11 +35,18 @@ export type OrganicResult = {
     url?: string;
 };
 
+export interface TimeMeasure {
+    event: 'request received' | 'before queue add' | 'crawlee internal run task' | 'crawlee internal request handler' | 'pre-navigation hook' |
+        'page loaded' | 'handler end' | 'error' | 'failed request',
+    time: number,
+}
+
 export type UserData = {
     startedAt?: Date;
     finishedAt?: Date;
     responseId?: string;
     maxResults?: number;
+    timeMeasures: TimeMeasure[];
 };
 
 export interface PlaywrightScraperSettings {
@@ -48,16 +57,21 @@ export interface PlaywrightScraperSettings {
     removeCookieWarnings?: boolean;
 }
 
+export type httpStatus = {
+    code?: number | null;
+    message?: string | null;
+}
+
 export type Output = {
     text: string;
     html?: string | null;
     markdown?: string | null;
     crawl: {
-        uniqueKey: string;
-        httpStatusCode?: number | null;
         createdAt?: Date;
+        httpStatus?: httpStatus;
         loadedAt?: Date;
-        status: string;
+        requestStatus: string;
+        uniqueKey: string;
     }
     metadata: {
         author?: string | null;
