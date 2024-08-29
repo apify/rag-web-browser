@@ -7,7 +7,7 @@ import { UserInputError } from './errors.js';
 import { checkInputsAreValid, processInput } from './input.js';
 import { addTimeoutToAllResponses } from './responses.js';
 import { Input } from './types.js';
-import { parseParameters, checkForExtraParams, createRequestSearch } from './utils.js';
+import { parseParameters, checkForExtraParams, createSearchRequest } from './utils.js';
 
 await Actor.init();
 
@@ -24,10 +24,9 @@ async function getSearch(req: IncomingMessage, res: ServerResponse) {
         log.info(`Received query parameters: ${JSON.stringify(params)}`);
         checkForExtraParams(params);
 
+        // Process the query parameters the same way se normal inputs
         const { input, cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings } = await processInput(params as Partial<Input>);
         await checkInputsAreValid(input);
-
-        const crawlerRequest = createRequestSearch(input.query, input.maxResults, cheerioCrawlerOptions.proxyConfiguration);
 
         // setTimeout(() => {
         //     const timeoutErrorMessage = {
@@ -36,7 +35,8 @@ async function getSearch(req: IncomingMessage, res: ServerResponse) {
         //     sendResponseError(crawlerRequest.uniqueKey!, JSON.stringify(timeoutErrorMessage));
         // }, TIMEOUT_MS);
 
-        await addSearchRequest(crawlerRequest, res, input.maxResults, cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings);
+        const crawlerRequest = createSearchRequest(input.query, input.maxResults, cheerioCrawlerOptions.proxyConfiguration);
+        await addSearchRequest(crawlerRequest, res, cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings);
     } catch (e) {
         const error = e as Error;
         const errorMessage = { errorMessage: error.message };
@@ -101,8 +101,8 @@ if (Actor.getEnv().metaOrigin === 'STANDBY') {
         const searchCrawler = await createAndStartSearchCrawler(cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings, false);
         const contentCrawler = await createAndStartCrawlerPlaywright(playwrightCrawlerOptions, playwrightScraperSettings, false);
 
-        const crawlerRequest = createRequestSearch(input.query, input.maxResults, cheerioCrawlerOptions.proxyConfiguration);
-        await addSearchRequest(crawlerRequest, null, input.maxResults, cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings);
+        const crawlerRequest = createSearchRequest(input.query, input.maxResults, cheerioCrawlerOptions.proxyConfiguration);
+        await addSearchRequest(crawlerRequest, null, cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings);
         log.info(`Running search crawler with request: ${JSON.stringify(crawlerRequest)}`);
         await searchCrawler.run();
         await contentCrawler.run();

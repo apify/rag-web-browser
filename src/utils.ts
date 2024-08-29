@@ -16,11 +16,19 @@ export function checkForExtraParams(params: ParsedUrlQuery) {
     for (const key of Object.keys(params)) {
         if (!defaults.hasOwnProperty(key)) {
             log.warning(`Unknown parameter: ${key}. Supported parameters: ${Object.keys(defaults).join(', ')}`);
+            delete params[key];
         }
     }
 }
 
-export function createRequestSearch(queries: string, maxResults: number, proxyConfiguration: ProxyConfiguration | undefined): RequestOptions<UserData> {
+/**
+ * Create a search request with the provided queries and maxResults.
+ * Add some overhead for the maxResults to account for the fact that some results are not Organic.
+ *
+ * The maxResults parameter is passed to the UserData object, when the request is handled it is used to limit
+ * the number of search results without the created overhead .
+ */
+export function createSearchRequest(queries: string, maxResults: number, proxyConfiguration: ProxyConfiguration | undefined): RequestOptions<UserData> {
     // add some overhead for the maxResults to account for the fact that some results are not Organic
     const n = maxResults + 5;
 

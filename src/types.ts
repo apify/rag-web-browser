@@ -53,6 +53,7 @@ export type Output = {
     html?: string | null;
     markdown?: string | null;
     crawl: {
+        uniqueKey: string;
         httpStatusCode?: number | null;
         createdAt?: Date;
         loadedAt?: Date;

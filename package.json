@@ -1,8 +1,8 @@
 {
-	"name": "store-fast-google-search",
+	"name": "rag-web-browser",
 	"version": "0.0.1",
 	"type": "module",
-	"description": "This is a boilerplate of an Apify actor.",
+	"description": "RAG Web Browser - run Google Search queries and extract content from the top search results.",
 	"engines": {
 		"node": ">=18.0.0"
 	},
@@ -40,6 +40,6 @@
 		"lint:fix": "eslint ./src --ext .ts --fix",
 		"test": "echo \"Error: oops, the actor has no tests yet, sad!\" && exit 1"
 	},
-	"author": "It's not you it's me",
+	"author": "Apify",
 	"license": "ISC"
 }

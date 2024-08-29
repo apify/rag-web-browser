@@ -16,7 +16,7 @@ import { ServerResponse } from 'http';
 import { CrawlerQueueName, CrawlerType } from './const.js';
 import { scrapeOrganicResults } from './google-search/google-extractors-urls.js';
 import { genericHandler } from './playwright-req-handler.js';
-import { createResponse, createEmptyResultInResponse } from './responses.js';
+import { createResponse, addEmptyResultToResponse } from './responses.js';
 import { PlaywrightScraperSettings, UserData } from './types.js';
 import { createRequest } from './utils.js';
 
@@ -56,7 +56,7 @@ export async function createAndStartSearchCrawler(
             const responseId = request.uniqueKey;
             for (const url of searchUrls) {
                 const r = createRequest(url, responseId);
-                await addContentCrawlRequest(r, playwrightCrawlerOptions, playwrightScraperSettings);
+                await addContentCrawlRequest(r, responseId, playwrightCrawlerOptions, playwrightScraperSettings);
             }
         },
     });
@@ -101,7 +101,6 @@ export async function createAndStartCrawlerPlaywright(
 export const addSearchRequest = async (
     request: RequestOptions<UserData>,
     response: ServerResponse | null,
-    maxResults: number,
     cheerioCrawlerOptions: CheerioCrawlerOptions,
     playwrightCrawlerOptions: PlaywrightCrawlerOptions,
     playwrightScraperSettings: PlaywrightScraperSettings,
@@ -114,7 +113,7 @@ export const addSearchRequest = async (
     );
 
     if (response) {
-        createResponse(request.uniqueKey!, response, maxResults);
+        createResponse(request.uniqueKey!, response);
         log.info(`Created response for request ${request.uniqueKey}, request.url: ${request.url}`);
     }
     await crawler.requestQueue!.addRequest(request);
@@ -127,11 +126,15 @@ export const addSearchRequest = async (
  */
 export const addContentCrawlRequest = async (
     request: RequestOptions<UserData>,
+    responseId: string,
     crawlerOptions: PlaywrightCrawlerOptions,
     scraperSettings: PlaywrightScraperSettings,
 ) => {
     const key = CrawlerType.PLAYWRIGHT_CONTENT_CRAWLER;
     const crawler = crawlers.get(key) ?? await createAndStartCrawlerPlaywright(crawlerOptions, scraperSettings);
     await crawler.requestQueue!.addRequest(request);
+    // create an empty result in search request response
+    // do not use request.uniqueKey as responseId as it is not id of a search request
+    addEmptyResultToResponse(responseId, request.uniqueKey!, request.url);
     log.info(`Added request to the playwright-content-crawler: ${request.url}`);
 };

@@ -9,12 +9,12 @@
     "maxRequestRetries": 1,
     "maxRequestRetriesSearch": 3,
     "maxResults": 3,
-    "minConcurrency": 5,
+    "minConcurrency": 3,
     "outputFormats": ["text", "markdown"],
     "proxyConfiguration": { "useApifyProxy": true },
     "proxyGroupSearch": "GOOGLE_SERP",
     "query": "",
     "readableTextCharThreshold": 100,
     "removeCookieWarnings": true,
-    "requestTimeoutSecs": 20
+    "requestTimeoutSecs": 30
 }

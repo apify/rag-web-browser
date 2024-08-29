@@ -1,7 +1,8 @@
 import { load } from 'cheerio';
 import { htmlToText, log, PlaywrightCrawlingContext, sleep } from 'crawlee';
 
-import { handleResponse } from './responses.js';
+import { ContentCrawlerStatus } from './const.js';
+import { addResultToResponse, sendResponseIfFinished } from './responses.js';
 import { Output, PlaywrightScraperSettings, UserData } from './types.js';
 import { processHtml } from './website-content-crawler/html-processing.js';
 import { htmlToMarkdown } from './website-content-crawler/markdown.js';
@@ -67,7 +68,8 @@ export async function genericHandler(context: PlaywrightCrawlingContext<UserData
         crawl: {
             httpStatusCode: page ? response?.status() : null,
             loadedAt: new Date(),
-            status: 'success',
+            uniqueKey: request.uniqueKey,
+            status: ContentCrawlerStatus.HANDLED,
         },
         metadata: {
             author: $('meta[name=author]').first().attr('content') ?? null,
@@ -89,6 +91,7 @@ export async function genericHandler(context: PlaywrightCrawlingContext<UserData
     // Get responseId from the request.userData, which corresponds to the original search request
     const { responseId } = request.userData;
     if (responseId) {
-        handleResponse(responseId, result);
+        addResultToResponse(responseId, request.uniqueKey, result);
+        sendResponseIfFinished(responseId);
     }
 }
