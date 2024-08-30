@@ -28,7 +28,7 @@ export async function processHtml(
             ${simplifiedBody}
         </body>
     </html>`
-        : html ?? '';
+        : (html ?? '');
 
     let ret = null;
     try {
@@ -36,5 +36,5 @@ export async function processHtml(
     } catch (error) {
         log.warning(`Processing of HTML failed with error:`, { error });
     }
-    return ret ?? simplified as string;
+    return ret ?? (simplified as string);
 }

@@ -3,7 +3,7 @@ import type { ProxyConfigurationOptions } from 'apify';
 type OutputFormats = 'text' | 'markdown' | 'html';
 
 export type Input = {
-
+    debugMode: boolean;
     requestTimeoutSecs: number;
 
     // both
@@ -19,7 +19,7 @@ export type Input = {
 
     // content crawler parameters
     dynamicContentWaitSecs: number;
-    outputFormats: OutputFormats[]
+    outputFormats: OutputFormats[];
     initialConcurrency: number;
     maxConcurrency: number;
     maxRequestRetries: number;
@@ -36,9 +36,26 @@ export type OrganicResult = {
 };
 
 export interface TimeMeasure {
-    event: 'request received' | 'before queue add' | 'crawlee internal run task' | 'crawlee internal request handler' | 'pre-navigation hook' |
-        'page loaded' | 'handler end' | 'error' | 'failed request',
-    time: number,
+    event:
+        | 'actor-started'
+        | 'before-cheerio-queue-add'
+        | 'before-cheerio-run'
+        | 'before-playwright-queue-add'
+        | 'before-playwright-run'
+        | 'cheerio-failed-request'
+        | 'cheerio-request-end'
+        | 'cheerio-request-handler-start'
+        | 'error'
+        | 'playwright-request-start'
+        | 'playwright-wait-dynamic-content'
+        | 'playwright-parse-with-cheerio'
+        | 'playwright-process-html'
+        | 'playwright-remove-cookie'
+        | 'playwright-before-response-send'
+        | 'playwright-failed-request'
+        | 'request-received';
+    timeMs: number;
+    timeDeltaPrevMs: number;
 }
 
 export type UserData = {
@@ -46,10 +63,11 @@ export type UserData = {
     finishedAt?: Date;
     responseId?: string;
     maxResults?: number;
-    timeMeasures: TimeMeasure[];
+    timeMeasures?: TimeMeasure[];
 };
 
 export interface PlaywrightScraperSettings {
+    debugMode: boolean;
     dynamicContentWaitSecs: number;
     maxHtmlCharsToProcess: number;
     outputFormats: OutputFormats[];
@@ -57,28 +75,25 @@ export interface PlaywrightScraperSettings {
     removeCookieWarnings?: boolean;
 }
 
-export type httpStatus = {
-    code?: number | null;
-    message?: string | null;
-}
-
 export type Output = {
     text: string;
     html?: string | null;
     markdown?: string | null;
     crawl: {
+        debug?: unknown;
         createdAt?: Date;
-        httpStatus?: httpStatus;
+        httpStatusCode?: number | null;
+        httpStatusMessage?: string | null;
         loadedAt?: Date;
         requestStatus: string;
         uniqueKey: string;
-    }
+    };
     metadata: {
         author?: string | null;
         description?: string | null;
         keywords?: string | null;
-        languageCode?: string | null
+        languageCode?: string | null;
         title?: string | null;
         url: string;
     };
-}
+};

@@ -1,7 +1,7 @@
 import { log } from 'apify';
 import { ServerResponse } from 'http';
 
-import { ContentCrawlerStatus } from './const';
+import { ContentCrawlerStatus } from './const.js';
 import { Output } from './types.js';
 
 class ResponseData {
@@ -27,7 +27,8 @@ const getResponse = (responseId: string): ResponseData | null => {
 };
 
 /**
- * Create a response object for a search request (for content crawler requests there is no need to create a response object).
+ * Create a response object for a search request
+ * (for content crawler requests there is no need to create a response object).
  */
 export const createResponse = (responseId: string, response: ServerResponse) => {
     responseData.set(responseId, new ResponseData(response));
@@ -53,7 +54,9 @@ export const addResultToResponse = (responseId: string, uniqueKey: string, resul
     if (!res) return;
 
     if (!res.resultsMap.get(uniqueKey)) {
-        log.info(`Result for request ${result.metadata.url} (key: ${uniqueKey}) were not found in response ${responseId}`);
+        log.info(
+            `Result for request ${result.metadata.url} (key: ${uniqueKey}) were not found in response ${responseId}`,
+        );
         return;
     }
     res.resultsMap.set(uniqueKey, { ...res.resultsMap.get(uniqueKey), ...result });
@@ -71,7 +74,8 @@ export const sendResponseOk = (responseId: string, result: unknown, contentType:
 };
 
 /**
- * Send response with error status code. If the response contains some handled requests, return 200 status otherwise 500.
+ * Send response with error status code. If the response contains some handled requests,
+ * return 200 status otherwise 500.
  */
 export const sendResponseError = (responseId: string, message: string) => {
     const res = getResponse(responseId);
@@ -81,7 +85,8 @@ export const sendResponseError = (responseId: string, message: string) => {
     for (const key of res.resultsMap.keys()) {
         const { requestStatus } = res.resultsMap.get(key)!.crawl;
         if (requestStatus === ContentCrawlerStatus.PENDING) {
-            res.resultsMap.get(key)!.crawl.httpStatus = { code: 500, message };
+            res.resultsMap.get(key)!.crawl.httpStatusCode = 500;
+            res.resultsMap.get(key)!.crawl.httpStatusMessage = message;
             res.resultsMap.get(key)!.crawl.requestStatus = ContentCrawlerStatus.FAILED;
         } else if (requestStatus === ContentCrawlerStatus.HANDLED) {
             returnStatusCode = 200;

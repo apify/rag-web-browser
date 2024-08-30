@@ -18,6 +18,7 @@ export async function processInput(originalInput: Partial<Input>) {
     }
 
     const {
+        debugMode,
         dynamicContentWaitSecs,
         initialConcurrency,
         keepAlive,
@@ -29,7 +30,6 @@ export async function processInput(originalInput: Partial<Input>) {
         proxyGroupSearch,
         readableTextCharThreshold,
         removeCookieWarnings,
-        requestTimeoutContentCrawlSecs,
     } = input;
 
     const proxySearch = await Actor.createProxyConfiguration({ groups: [proxyGroupSearch] });
@@ -37,6 +37,7 @@ export async function processInput(originalInput: Partial<Input>) {
         keepAlive,
         maxRequestRetries: maxRequestRetriesSearch,
         proxyConfiguration: proxySearch,
+        autoscaledPoolOptions: { desiredConcurrency: 1 },
     };
     const proxy = await Actor.createProxyConfiguration(proxyConfiguration);
     const playwrightCrawlerOptions: PlaywrightCrawlerOptions = {
@@ -44,7 +45,7 @@ export async function processInput(originalInput: Partial<Input>) {
         keepAlive,
         maxRequestRetries,
         proxyConfiguration: proxy,
-        requestHandlerTimeoutSecs: requestTimeoutContentCrawlSecs,
+        requestHandlerTimeoutSecs: input.requestTimeoutContentCrawlSecs,
         launchContext: {
             launcher: firefox,
         },
@@ -63,6 +64,7 @@ export async function processInput(originalInput: Partial<Input>) {
     };
 
     const playwrightScraperSettings: PlaywrightScraperSettings = {
+        debugMode,
         dynamicContentWaitSecs,
         maxHtmlCharsToProcess: 1.5e6,
         outputFormats,

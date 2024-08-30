@@ -6,7 +6,7 @@ import type { OrganicResult } from '../types.js';
 /**
  * Deduplicates search results based on their title and URL (source @apify/google-search).
  */
-export const deduplicateResults = <T extends { title?: string, url?: string }>(results: T[]): T[] => {
+export const deduplicateResults = <T extends { title?: string; url?: string }>(results: T[]): T[] => {
     const deduplicatedResults = [];
     const resultHashes = new Set();
     for (const result of results) {
@@ -27,7 +27,11 @@ const extractResultsFromSelectors = ($: CheerioAPI, selectors: string[]) => {
     const searchResults = [];
     const selector = selectors.join(', ');
     for (const resultEl of $(selector)) {
-        searchResults.push(...$(resultEl).map((_i, el) => parseResult($, el as Element)).toArray());
+        searchResults.push(
+            ...$(resultEl)
+                .map((_i, el) => parseResult($, el as Element))
+                .toArray(),
+        );
     }
     return searchResults;
 };
