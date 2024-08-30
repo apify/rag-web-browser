@@ -40,6 +40,35 @@
                             }
                         }
                     }
+                },
+                "timeMeasures": {
+                    "title": "Time Measures",
+                    "description": "Time measures for various events during the crawl",
+                    "transformation": {
+                        "fields": [
+                            "crawl.debug.timeMeasures.event",
+                            "crawl.debug.timeMeasures.timeMs",
+                            "crawl.debug.timeMeasures.timeDeltaPrevMs"
+                        ],
+                        "flatten": ["crawl.debug.timeMeasures"]
+                    },
+                    "display": {
+                        "component": "table",
+                        "properties": {
+                            "crawl.debug.timeMeasures.event": {
+                                "label": "Event",
+                                "format": "text"
+                            },
+                            "crawl.debug.timeMeasures.timeMs": {
+                                "label": "Time (ms)",
+                                "format": "number"
+                            },
+                            "crawl.debug.timeMeasures.timeDeltaPrevMs": {
+                                "label": "Delta (ms)",
+                                "format": "number"
+                            }
+                        }
+                    }
                 }
             }
         }

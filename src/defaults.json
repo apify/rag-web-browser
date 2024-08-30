@@ -1,5 +1,6 @@
 {
     "countryCode": "US",
+    "debugMode": true,
     "dynamicContentWaitSecs": 10,
     "initialConcurrency": 3,
     "initialCookies": [],
@@ -9,12 +10,13 @@
     "maxRequestRetries": 1,
     "maxRequestRetriesSearch": 3,
     "maxResults": 3,
-    "minConcurrency": 5,
+    "minConcurrency": 3,
     "outputFormats": ["text", "markdown"],
     "proxyConfiguration": { "useApifyProxy": true },
     "proxyGroupSearch": "GOOGLE_SERP",
-    "query": "",
+    "query": "site:apify.com actor",
     "readableTextCharThreshold": 100,
     "removeCookieWarnings": true,
-    "requestTimeoutSecs": 20
+    "requestTimeoutSecs": 60,
+    "requestTimeoutContentCrawlSecs": 30
 }

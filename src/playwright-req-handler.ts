@@ -1,8 +1,10 @@
 import { load } from 'cheerio';
-import { htmlToText, log, PlaywrightCrawlingContext, sleep } from 'crawlee';
+import { htmlToText, log, PlaywrightCrawlingContext, sleep, Request } from 'crawlee';
 
-import { handleResponse } from './responses.js';
+import { ContentCrawlerStatus } from './const.js';
+import { addResultToResponse, sendResponseError, sendResponseIfFinished } from './responses.js';
 import { Output, PlaywrightScraperSettings, UserData } from './types.js';
+import { addTimeMeasureEvent, transformTimeMeasuresToRelative } from './utils.js';
 import { processHtml } from './website-content-crawler/html-processing.js';
 import { htmlToMarkdown } from './website-content-crawler/markdown.js';
 
@@ -34,20 +36,27 @@ function isValidContentType(contentType: string | undefined) {
 /**
  * Generic handler for processing the page content (adapted from: Website Content Crawler).
  */
-export async function genericHandler(context: PlaywrightCrawlingContext<UserData>, settings: PlaywrightScraperSettings) {
+export async function requestHandlerPlaywright(
+    context: PlaywrightCrawlingContext<UserData>,
+    settings: PlaywrightScraperSettings,
+) {
     const { request, contentType, page, response, closeCookieModals } = context;
 
     log.info(`Processing URL: ${request.url}`);
+    addTimeMeasureEvent(request.userData, 'playwright-request-start');
     if (settings.dynamicContentWaitSecs > 0) {
         await waitForDynamicContent(context, settings.dynamicContentWaitSecs * 1000);
+        addTimeMeasureEvent(request.userData, 'playwright-wait-dynamic-content');
     }
 
     if (page && settings.removeCookieWarnings) {
         await closeCookieModals();
+        addTimeMeasureEvent(request.userData, 'playwright-remove-cookie');
     }
 
     // Parsing the page after the dynamic content has been loaded / cookie warnings removed
     const $ = await context.parseWithCheerio();
+    addTimeMeasureEvent(request.userData, 'playwright-parse-with-cheerio');
 
     const headers = response?.headers instanceof Function ? response.headers() : response?.headers;
     // @ts-expect-error false-positive?
@@ -59,6 +68,7 @@ export async function genericHandler(context: PlaywrightCrawlingContext<UserData
     const $html = $('html');
     const html = $html.html()!;
     const processedHtml = await processHtml(html, request.url, settings, $);
+    addTimeMeasureEvent(request.userData, 'playwright-process-html');
 
     const isTooLarge = processedHtml.length > settings.maxHtmlCharsToProcess;
     const text = isTooLarge ? load(processedHtml).text() : htmlToText(load(processedHtml));
@@ -66,8 +76,9 @@ export async function genericHandler(context: PlaywrightCrawlingContext<UserData
     const result: Output = {
         crawl: {
             httpStatusCode: page ? response?.status() : null,
-            loadedTime: new Date(),
-            status: 'success',
+            loadedAt: new Date(),
+            uniqueKey: request.uniqueKey,
+            requestStatus: ContentCrawlerStatus.HANDLED,
         },
         metadata: {
             author: $('meta[name=author]').first().attr('content') ?? null,
@@ -82,13 +93,28 @@ export async function genericHandler(context: PlaywrightCrawlingContext<UserData
         html: settings.outputFormats.includes('html') ? processedHtml : null,
     };
 
-    log.info(`Adding result to the Apify dataset: ${request.url}`);
+    addTimeMeasureEvent(request.userData, 'playwright-before-response-send');
+    if (settings.debugMode) {
+        result.crawl.debug = { timeMeasures: transformTimeMeasuresToRelative(request.userData.timeMeasures!) };
+    }
+    log.info(`Adding result to the Apify dataset, url: ${request.url}`);
     await context.pushData(result);
 
     log.info(`Adding result to response: ${request.userData.responseId}, request.uniqueKey: ${request.uniqueKey}`);
     // Get responseId from the request.userData, which corresponds to the original search request
     const { responseId } = request.userData;
     if (responseId) {
-        handleResponse(responseId, result);
+        addResultToResponse(responseId, request.uniqueKey, result);
+        sendResponseIfFinished(responseId);
+    }
+}
+
+export async function failedRequestHandlerPlaywright(request: Request, err: Error) {
+    log.error(`Playwright-content-crawler failed to process request ${request.url}, error ${err.message}`);
+    request.userData.timeMeasures!.push({ event: 'playwright-failed-request', time: Date.now() });
+    const { responseId } = request.userData;
+    if (responseId) {
+        const errorResponse = { errorMessage: err.message };
+        sendResponseError(responseId, JSON.stringify(errorResponse));
     }
 }

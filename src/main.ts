@@ -5,45 +5,58 @@ import { createServer, IncomingMessage, ServerResponse } from 'http';
 import { addSearchRequest, createAndStartCrawlerPlaywright, createAndStartSearchCrawler } from './crawlers.js';
 import { UserInputError } from './errors.js';
 import { checkInputsAreValid, processInput } from './input.js';
-import { addTimeoutToAllResponses } from './responses.js';
+import { addTimeoutToAllResponses, sendResponseError } from './responses.js';
 import { Input } from './types.js';
-import { parseParameters, checkForExtraParams, createRequestSearch } from './utils.js';
+import { parseParameters, checkForExtraParams, createSearchRequest, addTimeMeasureEvent } from './utils.js';
 
 await Actor.init();
 
-const TIMEOUT_MS = 60000;
 const ROUTE_SEARCH = '/search';
 
 Actor.on('migrating', () => {
-    addTimeoutToAllResponses(TIMEOUT_MS / 1000);
+    addTimeoutToAllResponses(60);
 });
 
-async function getSearch(req: IncomingMessage, res: ServerResponse) {
+async function getSearch(request: IncomingMessage, response: ServerResponse) {
     try {
-        const params = parseParameters(req.url?.slice(ROUTE_SEARCH.length, req.url.length) ?? '');
+        const requestReceivedTime = Date.now();
+        const params = parseParameters(request.url?.slice(ROUTE_SEARCH.length, request.url.length) ?? '');
         log.info(`Received query parameters: ${JSON.stringify(params)}`);
         checkForExtraParams(params);
 
-        const { input, cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings } = await processInput(params as Partial<Input>);
+        // Process the query parameters the same way se normal inputs
+        const {
+            input,
+            cheerioCrawlerOptions,
+            playwrightCrawlerOptions,
+            playwrightScraperSettings,
+        } = await processInput(params as Partial<Input>);
+
         await checkInputsAreValid(input);
 
-        const crawlerRequest = createRequestSearch(input.query, input.maxResults, cheerioCrawlerOptions.proxyConfiguration);
-
-        // setTimeout(() => {
-        //     const timeoutErrorMessage = {
-        //         errorMessage: `Response timed out.`,
-        //     };
-        //     sendResponseError(crawlerRequest.uniqueKey!, JSON.stringify(timeoutErrorMessage));
-        // }, TIMEOUT_MS);
-
-        await addSearchRequest(crawlerRequest, res, input.maxResults, cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings);
+        const req = createSearchRequest(
+            input.query,
+            input.maxResults,
+            cheerioCrawlerOptions.proxyConfiguration,
+        );
+        addTimeMeasureEvent(req.userData!, 'request-received', requestReceivedTime);
+        await addSearchRequest(
+            req,
+            response,
+            cheerioCrawlerOptions,
+            playwrightCrawlerOptions,
+            playwrightScraperSettings,
+        );
+        setTimeout(() => {
+            sendResponseError(req.uniqueKey!, 'Response timed out.');
+        }, input.requestTimeoutSecs * 1000);
     } catch (e) {
         const error = e as Error;
         const errorMessage = { errorMessage: error.message };
         const statusCode = error instanceof UserInputError ? 400 : 500;
         log.error(`UserInputError occurred: ${error.message}`);
-        res.writeHead(statusCode, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(errorMessage));
+        response.writeHead(statusCode, { 'Content-Type': 'application/json' });
+        response.end(JSON.stringify(errorMessage));
     }
 }
 
@@ -62,16 +75,17 @@ const server = createServer(async (req, res) => {
         }
     } else {
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ message: 'RAG Web Browser is running in standby mode, sent request to GET "/search?query=apify"' }));
+        res.end(
+            JSON.stringify({
+                message: 'RAG Web Browser is running in standby mode, sent request to GET "/search?query=apify"',
+            }),
+        );
     }
 });
 
-const {
-    input,
-    cheerioCrawlerOptions,
-    playwrightCrawlerOptions,
-    playwrightScraperSettings,
-} = await processInput((await Actor.getInput<Partial<Input>>()) ?? ({} as Input));
+const { input, cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings } = await processInput(
+    (await Actor.getInput<Partial<Input>>()) ?? ({} as Input),
+);
 
 log.info(`Loaded input: ${JSON.stringify(input)},
     cheerioCrawlerOptions: ${JSON.stringify(cheerioCrawlerOptions)},
@@ -80,7 +94,8 @@ log.info(`Loaded input: ${JSON.stringify(input)},
 `);
 
 if (Actor.getEnv().metaOrigin === 'STANDBY') {
-    log.info('Actor is running in Standby mode');
+    log.info('Actor is running in STANDBY mode with default parameters. '
+        + 'Changing these parameters on the fly is not supported at the moment.');
 
     const port = Actor.isAtHome() ? process.env.ACTOR_STANDBY_PORT : 3000;
     server.listen(port, async () => {
@@ -92,19 +107,44 @@ if (Actor.getEnv().metaOrigin === 'STANDBY') {
         ]);
     });
 } else {
-    log.info('Actor is running in the normal mode');
+    log.info('Actor is running in the NORMAL mode');
     try {
+        const startedTime = Date.now();
         await checkInputsAreValid(input);
 
         cheerioCrawlerOptions.keepAlive = false;
         playwrightCrawlerOptions.keepAlive = false;
-        const searchCrawler = await createAndStartSearchCrawler(cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings, false);
-        const contentCrawler = await createAndStartCrawlerPlaywright(playwrightCrawlerOptions, playwrightScraperSettings, false);
+        const searchCrawler = await createAndStartSearchCrawler(
+            cheerioCrawlerOptions,
+            playwrightCrawlerOptions,
+            playwrightScraperSettings,
+            false,
+        );
+        const contentCrawler = await createAndStartCrawlerPlaywright(
+            playwrightCrawlerOptions,
+            playwrightScraperSettings,
+            false,
+        );
 
-        const crawlerRequest = createRequestSearch(input.query, input.maxResults, cheerioCrawlerOptions.proxyConfiguration);
-        await addSearchRequest(crawlerRequest, null, input.maxResults, cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings);
-        log.info(`Running search crawler with request: ${JSON.stringify(crawlerRequest)}`);
+        const req = createSearchRequest(
+            input.query,
+            input.maxResults,
+            cheerioCrawlerOptions.proxyConfiguration,
+        );
+        addTimeMeasureEvent(req.userData!, 'actor-started', startedTime);
+        await addSearchRequest(
+            req,
+            null,
+            cheerioCrawlerOptions,
+            playwrightCrawlerOptions,
+            playwrightScraperSettings,
+        );
+        log.info(`Running search crawler with request: ${JSON.stringify(req)}`);
+        addTimeMeasureEvent(req.userData!, 'before-cheerio-run', startedTime);
         await searchCrawler.run();
+
+        log.info(`Running content crawler with request: ${JSON.stringify(req)}`);
+        addTimeMeasureEvent(req.userData!, 'before-playwright-run', startedTime);
         await contentCrawler.run();
     } catch (e) {
         const error = e as Error;
