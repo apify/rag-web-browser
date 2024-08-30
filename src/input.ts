@@ -22,6 +22,7 @@ export async function processInput(originalInput: Partial<Input>) {
         dynamicContentWaitSecs,
         initialConcurrency,
         keepAlive,
+        minConcurrency,
         maxConcurrency,
         maxRequestRetries,
         maxRequestRetriesSearch,
@@ -60,6 +61,7 @@ export async function processInput(originalInput: Partial<Input>) {
         autoscaledPoolOptions: {
             desiredConcurrency: initialConcurrency === 0 ? undefined : Math.min(initialConcurrency, maxConcurrency),
             maxConcurrency,
+            minConcurrency,
         },
     };
 

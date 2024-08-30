@@ -56,3 +56,7 @@ Response object - should we create an envelope object for the response?
     ]
 }
 ```
+
+*Current limitations*:
+It is not supported to run actor in a standby mode and change configuration using
+query parameters.

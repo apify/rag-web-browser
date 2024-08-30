@@ -93,10 +93,11 @@ export const sendResponseError = (responseId: string, message: string) => {
         }
     }
     res.response.writeHead(returnStatusCode, { 'Content-Type': 'application/json' });
-
     if (returnStatusCode === 200) {
-        res.response.end(Array.from(res.resultsMap.values()));
+        log.warning(`Response for request ${responseId} has been sent with partial results`);
+        res.response.end(JSON.stringify(Array.from(res.resultsMap.values())));
     } else {
+        log.error(`Response for request ${responseId} has been sent with error: ${message}`);
         res.response.end(JSON.stringify({ errorMessage: message }));
     }
     responseData.delete(responseId);

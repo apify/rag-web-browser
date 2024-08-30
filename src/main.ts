@@ -94,7 +94,8 @@ log.info(`Loaded input: ${JSON.stringify(input)},
 `);
 
 if (Actor.getEnv().metaOrigin === 'STANDBY') {
-    log.info('Actor is running in STANDBY mode');
+    log.info('Actor is running in STANDBY mode with default parameters. '
+        + 'Changing these parameters on the fly is not supported at the moment.');
 
     const port = Actor.isAtHome() ? process.env.ACTOR_STANDBY_PORT : 3000;
     server.listen(port, async () => {
