@@ -59,10 +59,11 @@ export interface TimeMeasure {
 }
 
 export type UserData = {
-    startedAt?: Date;
     finishedAt?: Date;
-    responseId?: string;
     maxResults?: number;
+    query?: string;
+    responseId?: string;
+    startedAt?: Date;
     timeMeasures?: TimeMeasure[];
 };
 
@@ -79,6 +80,7 @@ export type Output = {
     text: string;
     html?: string | null;
     markdown?: string | null;
+    query?: string;
     crawl: {
         debug?: unknown;
         createdAt?: Date;

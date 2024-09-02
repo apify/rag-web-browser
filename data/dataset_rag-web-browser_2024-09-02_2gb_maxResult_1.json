@@ -1,0 +1,219 @@
+[{
+  "crawl": {
+    "httpStatusCode": 200,
+    "loadedAt": "2024-09-02T13:12:20.344Z",
+    "uniqueKey": "a1209d71-5d46-45bb-b1f6-10d68515d46b",
+    "requestStatus": "handled",
+    "debug": {
+      "timeMeasures": [
+        {
+          "event": "request-received",
+          "timeMs": 0,
+          "timeDeltaPrevMs": 0
+        },
+        {
+          "event": "before-cheerio-queue-add",
+          "timeMs": 147,
+          "timeDeltaPrevMs": 147
+        },
+        {
+          "event": "cheerio-request-handler-start",
+          "timeMs": 2575,
+          "timeDeltaPrevMs": 2428
+        },
+        {
+          "event": "before-playwright-queue-add",
+          "timeMs": 2666,
+          "timeDeltaPrevMs": 91
+        },
+        {
+          "event": "playwright-request-start",
+          "timeMs": 31967,
+          "timeDeltaPrevMs": 29301
+        },
+        {
+          "event": "playwright-wait-dynamic-content",
+          "timeMs": 42053,
+          "timeDeltaPrevMs": 10086
+        },
+        {
+          "event": "playwright-remove-cookie",
+          "timeMs": 42750,
+          "timeDeltaPrevMs": 697
+        },
+        {
+          "event": "playwright-parse-with-cheerio",
+          "timeMs": 45065,
+          "timeDeltaPrevMs": 2315
+        },
+        {
+          "event": "playwright-process-html",
+          "timeMs": 49361,
+          "timeDeltaPrevMs": 4296
+        },
+        {
+          "event": "playwright-before-response-send",
+          "timeMs": 49762,
+          "timeDeltaPrevMs": 401
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "author": null,
+    "title": "Apify: Full-stack web scraping and data extraction platform",
+    "description": "Cloud platform for web scraping, browser automation, and data for AI. Use 2,000+ ready-made tools, code templates, or order a custom solution.",
+    "keywords": "web scraper,web crawler,scraping,data extraction,API",
+    "languageCode": "en",
+    "url": "https://apify.com/"
+  },
+  "text": "Full-stack web scraping and data extraction platformStar apify/crawlee on GitHubProblem loading pageBack ButtonSearch IconFilter Icon\npowering the world's top data-driven teams\nSimplify scraping with\nCrawlee\nGive your crawlers an unfair advantage with Crawlee, our popular library for building reliable scrapers in Node.js.\n\nimport\n{\nPuppeteerCrawler,\nDataset\n}\nfrom 'crawlee';\nconst crawler = new PuppeteerCrawler(\n{\nasync requestHandler(\n{\nrequest, page,\nenqueueLinks\n}\n) \n{\nurl: request.url,\ntitle: await page.title(),\nawait enqueueLinks();\nawait crawler.run(['https://crawlee.dev']);\nUse your favorite libraries\nApify works great with both Python and JavaScript, with Playwright, Puppeteer, Selenium, Scrapy, or any other library.\nStart with our code templates\nfrom scrapy.spiders import CrawlSpider, Rule\nclass Scraper(CrawlSpider):\nname = \"scraper\"\nstart_urls = [\"https://the-coolest-store.com/\"]\ndef parse_item(self, response):\nitem = Item()\nitem[\"price\"] = response.css(\".price_color::text\").get()\nreturn item\nTurn your code into an Apify Actor\nActors are serverless microapps that are easy to develop, run, share, and integrate. The infra, proxies, and storages are ready to go.\nLearn more about Actors\nimport\n{ Actor\n}\nfrom 'apify'\nawait Actor.init();\nDeploy to the cloud\nNo config required. Use a single CLI command or build directly from GitHub.\nDeploy to Apify\n> apify push\nInfo: Deploying Actor 'computer-scraper' to Apify.\nRun: Updated version 0.0 for scraper Actor.\nRun: Building Actor scraper\nACTOR: Pushing Docker image to repository.\nACTOR: Build finished.\nActor build detail -> https://console.apify.com/actors#/builds/0.0.2\nSuccess: Actor was deployed to Apify cloud and built there.\nRun your Actors\nStart from Apify Console, CLI, via API, or schedule your Actor to start at any time. It’s your call.\nPOST/v2/acts/4cT0r1D/runs\nRun object\n{ \"id\": \"seHnBnyCTfiEnXft\", \"startedAt\": \"2022-12-01T13:42:00.364Z\", \"finishedAt\": null, \"status\": \"RUNNING\", \"options\": { \"build\": \"version-3\", \"timeoutSecs\": 3600, \"memoryMbytes\": 4096 }, \"defaultKeyValueStoreId\": \"EiGjhZkqseHnBnyC\", \"defaultDatasetId\": \"vVh7jTthEiGjhZkq\", \"defaultRequestQueueId\": \"TfiEnXftvVh7jTth\" }\nNever get blocked\nUse our large pool of datacenter and residential proxies. Rely on smart IP address rotation with human-like browser fingerprints.\nLearn more about Apify Proxy\nawait Actor.createProxyConfiguration(\n{\ncountryCode: 'US',\ngroups: ['RESIDENTIAL'],\nStore and share crawling results\nUse distributed queues of URLs to crawl. Store structured data or binary files. Export datasets in CSV, JSON, Excel or other formats.\nLearn more about Apify Storage\nGET/v2/datasets/d4T453t1D/items\nDataset items\n[ { \"title\": \"myPhone 99 Super Max\", \"description\": \"Such phone, max 99, wow!\", \"price\": 999 }, { \"title\": \"myPad Hyper Thin\", \"description\": \"So thin it's 2D.\", \"price\": 1499 } ]\nMonitor performance over time\nInspect all Actor runs, their logs, and runtime costs. Listen to events and get custom automated alerts.\nIntegrations. Everywhere.\nConnect to hundreds of apps right away using ready-made integrations, or set up your own with webhooks and our API.\nSee all integrations\nCrawls websites using raw HTTP requests, parses the HTML with the Cheerio library, and extracts data from the pages using a Node.js code. Supports both recursive crawling and lists of URLs. This actor is a high-performance alternative to apify/web-scraper for websites that do not require JavaScript.\nCrawls arbitrary websites using the Chrome browser and extracts data from pages using JavaScript code. The Actor supports both recursive crawling and lists of URLs and automatically manages concurrency for maximum performance. This is Apify's basic tool for web crawling and scraping.\nExtract data from hundreds of Google Maps locations and businesses. Get Google Maps data including reviews, images, contact info, opening hours, location, popular times, prices & more. Export scraped data, run the scraper via API, schedule and monitor runs, or integrate with other tools.\nYouTube crawler and video scraper. Alternative YouTube API with no limits or quotas. Extract and download channel name, likes, number of views, and number of subscribers.\nScrape Booking with this hotels scraper and get data about accommodation on Booking.com. You can crawl by keywords or URLs for hotel prices, ratings, addresses, number of reviews, stars. You can also download all that room and hotel data from Booking.com with a few clicks: CSV, JSON, HTML, and Excel\nCrawls websites with the headless Chrome and Puppeteer library using a provided server-side Node.js code. This crawler is an alternative to apify/web-scraper that gives you finer control over the process. Supports both recursive crawling and list of URLs. Supports login to website.\nUse this Amazon scraper to collect data based on URL and country from the Amazon website. Extract product information without using the Amazon API, including reviews, prices, descriptions, and Amazon Standard Identification Numbers (ASINs). Download data in various structured formats.\nScrape tweets from any Twitter user profile. Top Twitter API alternative to scrape Twitter hashtags, threads, replies, followers, images, videos, statistics, and Twitter history. Export scraped data, run the scraper via API, schedule and monitor runs or integrate with other tools.\nBrowse 2,000+ Actors",
+  "markdown": "# Full-stack web scraping and data extraction platformStar apify/crawlee on GitHubProblem loading pageBack ButtonSearch IconFilter Icon\n\npowering the world's top data-driven teams\n\n#### \n\nSimplify scraping with\n\n![Crawlee](https://apify.com/img/icons/crawlee-mark.svg)Crawlee\n\nGive your crawlers an unfair advantage with Crawlee, our popular library for building reliable scrapers in Node.js.\n\n  \n\nimport\n\n{\n\n \n\nPuppeteerCrawler,\n\n \n\nDataset\n\n}\n\n \n\nfrom 'crawlee';\n\nconst crawler = new PuppeteerCrawler(\n\n{\n\n    \n\nasync requestHandler(\n\n{\n\n \n\nrequest, page,\n\n \n\nenqueueLinks\n\n}\n\n) \n\n{\n\nurl: request.url,\n\ntitle: await page.title(),\n\nawait enqueueLinks();\n\nawait crawler.run(\\['https://crawlee.dev'\\]);\n\n![Simplify scraping example](https://apify.com/img/homepage/develop_headstart.svg)\n\n#### Use your favorite libraries\n\nApify works great with both Python and JavaScript, with Playwright, Puppeteer, Selenium, Scrapy, or any other library.\n\n[Start with our code templates](https://apify.com/templates)\n\nfrom scrapy.spiders import CrawlSpider, Rule\n\nclass Scraper(CrawlSpider):\n\nname = \"scraper\"\n\nstart\\_urls = \\[\"https://the-coolest-store.com/\"\\]\n\ndef parse\\_item(self, response):\n\nitem = Item()\n\nitem\\[\"price\"\\] = response.css(\".price\\_color::text\").get()\n\nreturn item\n\n#### Turn your code into an Apify Actor\n\nActors are serverless microapps that are easy to develop, run, share, and integrate. The infra, proxies, and storages are ready to go.\n\n[Learn more about Actors](https://apify.com/actors)\n\nimport\n\n{ Actor\n\n}\n\n from 'apify'\n\nawait Actor.init();\n\n![Turn code into Actor example](https://apify.com/img/homepage/deploy_code.svg)\n\n#### Deploy to the cloud\n\nNo config required. Use a single CLI command or build directly from GitHub.\n\n[Deploy to Apify](https://console.apify.com/actors/new)\n\n\\> apify push\n\nInfo: Deploying Actor 'computer-scraper' to Apify.\n\nRun: Updated version 0.0 for scraper Actor.\n\nRun: Building Actor scraper\n\nACTOR: Pushing Docker image to repository.\n\nACTOR: Build finished.\n\nActor build detail -> https://console.apify.com/actors#/builds/0.0.2\n\nSuccess: Actor was deployed to Apify cloud and built there.\n\n![Deploy to cloud example](https://apify.com/img/homepage/deploy_cloud.svg)\n\n#### Run your Actors\n\nStart from Apify Console, CLI, via API, or schedule your Actor to start at any time. It’s your call.\n\n```\nPOST/v2/acts/4cT0r1D/runs\n```\n\nRun object\n\n```\n{\n    \"id\": \"seHnBnyCTfiEnXft\",\n    \"startedAt\": \"2022-12-01T13:42:00.364Z\",\n    \"finishedAt\": null,\n    \"status\": \"RUNNING\",\n    \"options\": {\n        \"build\": \"version-3\",\n        \"timeoutSecs\": 3600,\n        \"memoryMbytes\": 4096\n    },\n    \"defaultKeyValueStoreId\": \"EiGjhZkqseHnBnyC\",\n    \"defaultDatasetId\": \"vVh7jTthEiGjhZkq\",\n    \"defaultRequestQueueId\": \"TfiEnXftvVh7jTth\"\n}\n```\n\n![Run Actors example](https://apify.com/img/homepage/code_start.svg)\n\n#### Never get blocked\n\nUse our large pool of datacenter and residential proxies. Rely on smart IP address rotation with human-like browser fingerprints.\n\n[Learn more about Apify Proxy](https://apify.com/proxy)\n\nawait Actor.createProxyConfiguration(\n\n{\n\ncountryCode: 'US',\n\ngroups: \\['RESIDENTIAL'\\],\n\n![Never get blocked example](https://apify.com/img/homepage/code_blocked.svg)\n\n#### Store and share crawling results\n\nUse distributed queues of URLs to crawl. Store structured data or binary files. Export datasets in CSV, JSON, Excel or other formats.\n\n[Learn more about Apify Storage](https://apify.com/storage)\n\n```\nGET/v2/datasets/d4T453t1D/items\n```\n\nDataset items\n\n```\n[\n    {\n        \"title\": \"myPhone 99 Super Max\",\n        \"description\": \"Such phone, max 99, wow!\",\n        \"price\": 999\n    },\n    {\n        \"title\": \"myPad Hyper Thin\",\n        \"description\": \"So thin it's 2D.\",\n        \"price\": 1499\n    }\n]\n```\n\n![Store example](https://apify.com/img/homepage/code_store.svg)\n\n#### Monitor performance over time\n\nInspect all Actor runs, their logs, and runtime costs. Listen to events and get custom automated alerts.\n\n![Performance tooltip](https://apify.com/img/homepage/performance-tooltip.svg)\n\n#### Integrations. Everywhere.\n\nConnect to hundreds of apps right away using ready-made integrations, or set up your own with webhooks and our API.\n\n[See all integrations](https://apify.com/integrations)\n\n[\n\nCrawls websites using raw HTTP requests, parses the HTML with the Cheerio library, and extracts data from the pages using a Node.js code. Supports both recursive crawling and lists of URLs. This actor is a high-performance alternative to apify/web-scraper for websites that do not require JavaScript.\n\n](https://apify.com/apify/cheerio-scraper)[\n\nCrawls arbitrary websites using the Chrome browser and extracts data from pages using JavaScript code. The Actor supports both recursive crawling and lists of URLs and automatically manages concurrency for maximum performance. This is Apify's basic tool for web crawling and scraping.\n\n](https://apify.com/apify/web-scraper)[\n\nExtract data from hundreds of Google Maps locations and businesses. Get Google Maps data including reviews, images, contact info, opening hours, location, popular times, prices & more. Export scraped data, run the scraper via API, schedule and monitor runs, or integrate with other tools.\n\n](https://apify.com/compass/crawler-google-places)[\n\nYouTube crawler and video scraper. Alternative YouTube API with no limits or quotas. Extract and download channel name, likes, number of views, and number of subscribers.\n\n](https://apify.com/streamers/youtube-scraper)[\n\nScrape Booking with this hotels scraper and get data about accommodation on Booking.com. You can crawl by keywords or URLs for hotel prices, ratings, addresses, number of reviews, stars. You can also download all that room and hotel data from Booking.com with a few clicks: CSV, JSON, HTML, and Excel\n\n](https://apify.com/voyager/booking-scraper)[\n\nCrawls websites with the headless Chrome and Puppeteer library using a provided server-side Node.js code. This crawler is an alternative to apify/web-scraper that gives you finer control over the process. Supports both recursive crawling and list of URLs. Supports login to website.\n\n](https://apify.com/apify/puppeteer-scraper)[\n\nUse this Amazon scraper to collect data based on URL and country from the Amazon website. Extract product information without using the Amazon API, including reviews, prices, descriptions, and Amazon Standard Identification Numbers (ASINs). Download data in various structured formats.\n\n](https://apify.com/junglee/Amazon-crawler)[\n\nScrape tweets from any Twitter user profile. Top Twitter API alternative to scrape Twitter hashtags, threads, replies, followers, images, videos, statistics, and Twitter history. Export scraped data, run the scraper via API, schedule and monitor runs or integrate with other tools.\n\n](https://apify.com/quacker/twitter-scraper)\n\n[Browse 2,000+ Actors](https://apify.com/store)",
+  "html": null
+},
+{
+  "crawl": {
+    "httpStatusCode": 200,
+    "loadedAt": "2024-09-02T13:13:09.545Z",
+    "uniqueKey": "0a6047dd-ee49-41e9-819e-11dd43b3dff6",
+    "requestStatus": "handled",
+    "debug": {
+      "timeMeasures": [
+        {
+          "event": "request-received",
+          "timeMs": 0,
+          "timeDeltaPrevMs": 0
+        },
+        {
+          "event": "before-cheerio-queue-add",
+          "timeMs": 124,
+          "timeDeltaPrevMs": 124
+        },
+        {
+          "event": "cheerio-request-handler-start",
+          "timeMs": 2524,
+          "timeDeltaPrevMs": 2400
+        },
+        {
+          "event": "before-playwright-queue-add",
+          "timeMs": 2607,
+          "timeDeltaPrevMs": 83
+        },
+        {
+          "event": "playwright-request-start",
+          "timeMs": 11709,
+          "timeDeltaPrevMs": 9102
+        },
+        {
+          "event": "playwright-wait-dynamic-content",
+          "timeMs": 12710,
+          "timeDeltaPrevMs": 1001
+        },
+        {
+          "event": "playwright-remove-cookie",
+          "timeMs": 13132,
+          "timeDeltaPrevMs": 422
+        },
+        {
+          "event": "playwright-parse-with-cheerio",
+          "timeMs": 13616,
+          "timeDeltaPrevMs": 484
+        },
+        {
+          "event": "playwright-process-html",
+          "timeMs": 15707,
+          "timeDeltaPrevMs": 2091
+        },
+        {
+          "event": "playwright-before-response-send",
+          "timeMs": 16004,
+          "timeDeltaPrevMs": 297
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "author": null,
+    "title": "Home | Donald J. Trump",
+    "description": "Certified Website of Donald J. Trump For President 2024. America's comeback starts right now. Join our movement to Make America Great Again!",
+    "keywords": null,
+    "languageCode": "en",
+    "url": "https://www.donaldjtrump.com/"
+  },
+  "text": "Home | Donald J. Trump\n\"THEY’RE NOT AFTER ME, \nTHEY’RE AFTER YOU \n…I’M JUST STANDING \nIN THE WAY!”\nDONALD J. TRUMP, 45th President of the United States \nContribute VOLUNTEER \nAgenda47 Platform\nAmerica needs determined Republican Leadership at every level of Government to address the core threats to our very survival: Our disastrously Open Border, our weakened Economy, crippling restrictions on American Energy Production, our depleted Military, attacks on the American System of Justice, and much more. \nTo make clear our commitment, we offer to the American people the 2024 GOP Platform to Make America Great Again! It is a forward-looking Agenda that begins with the following twenty promises that we will accomplish very quickly when we win the White House and Republican Majorities in the House and Senate. \nPlatform \nI AM YOUR VOICE. AMERICA FIRST!\nPresident Trump Will Stop China From Owning America\nI will ensure America's future remains firmly in America's hands!\nPresident Donald J. Trump Calls for Probe into Intelligence Community’s Role in Online Censorship\nThe ‘Twitter Files’ prove that we urgently need my plan to dismantle the illegal censorship regime — a regime like nobody’s ever seen in the history of our country or most other countries for that matter,” President Trump said.\nPresident Donald J. Trump — Free Speech Policy Initiative\nPresident Donald J. Trump announced a new policy initiative aimed to dismantle the censorship cartel and restore free speech.\nPresident Donald J. Trump Declares War on Cartels\nJoe Biden prepares to make his first-ever trip to the southern border that he deliberately erased, President Trump announced that when he is president again, it will be the official policy of the United States to take down the drug cartels just as we took down ISIS.\nAgenda47: Ending the Nightmare of the Homeless, Drug Addicts, and Dangerously Deranged\nFor a small fraction of what we spend upon Ukraine, we could take care of every homeless veteran in America. Our veterans are being treated horribly.\nAgenda47: Liberating America from Biden’s Regulatory Onslaught\nNo longer will unelected members of the Washington Swamp be allowed to act as the fourth branch of our Republic.\nAgenda47: Firing the Radical Marxist Prosecutors Destroying America\nIf we cannot restore the fair and impartial rule of law, we will not be a free country.\nAgenda47: President Trump Announces Plan to Stop the America Last Warmongers and Globalists\nPresident Donald J. Trump announced his plan to defeat the America Last warmongers and globalists in the Deep State, the Pentagon, the State Department, and the national security industrial complex.\nAgenda47: President Trump Announces Plan to End Crime and Restore Law and Order\nPresident Donald J. Trump unveiled his new plan to stop out-of-control crime and keep all Americans safe. In his first term, President Trump reduced violent crime and stood strongly with America’s law enforcement. On Joe Biden’s watch, violent crime has skyrocketed and communities have become less safe as he defunded, defamed, and dismantled police forces. www.DonaldJTrump.com Text TRUMP to 88022\nAgenda47: President Trump on Making America Energy Independent Again\nBiden's War on Energy Is The Key Driver of the Worst Inflation in 58 Years! When I'm back in Office, We Will Eliminate Every Democrat Regulation That Hampers Domestic Enery Production!\nPresident Trump Will Build a New Missile Defense Shield\nWe must be able to defend our homeland, our allies, and our military assets around the world from the threat of hypersonic missiles, no matter where they are launched from. Just as President Trump rebuilt our military, President Trump will build a state-of-the-art next-generation missile defense shield to defend America from missile attack.\nPresident Trump Calls for Immediate De-escalation and Peace\nJoe Biden's weakness and incompetence has brought us to the brink of nuclear war and leading us to World War 3. It's time for all parties involved to pursue a peaceful end to the war in Ukraine before it spirals out of control and into nuclear war.\nPresident Trump’s Plan to Protect Children from Left-Wing Gender Insanity\nPresident Trump today announced his plan to stop the chemical, physical, and emotional mutilation of our youth.\nPresident Trump’s Plan to Save American Education and Give Power Back to Parents\nOur public schools have been taken over by the Radical Left Maniacs!\nWe Must Protect Medicare and Social Security\nUnder no circumstances should Republicans vote to cut a single penny from Medicare or Social Security\nPresident Trump Will Stop China From Owning America\nI will ensure America's future remains firmly in America's hands!\nPresident Donald J. Trump Calls for Probe into Intelligence Community’s Role in Online Censorship\nThe ‘Twitter Files’ prove that we urgently need my plan to dismantle the illegal censorship regime — a regime like nobody’s ever seen in the history of our country or most other countries for that matter,” President Trump said.\nPresident Donald J. Trump — Free Speech Policy Initiative\nPresident Donald J. Trump announced a new policy initiative aimed to dismantle the censorship cartel and restore free speech.\nPresident Donald J. Trump Declares War on Cartels\nJoe Biden prepares to make his first-ever trip to the southern border that he deliberately erased, President Trump announced that when he is president again, it will be the official policy of the United States to take down the drug cartels just as we took down ISIS.\nAgenda47: Ending the Nightmare of the Homeless, Drug Addicts, and Dangerously Deranged\nFor a small fraction of what we spend upon Ukraine, we could take care of every homeless veteran in America. Our veterans are being treated horribly.\nAgenda47: Liberating America from Biden’s Regulatory Onslaught\nNo longer will unelected members of the Washington Swamp be allowed to act as the fourth branch of our Republic.",
+  "markdown": "# Home | Donald J. Trump\n\n## \"THEY’RE NOT AFTER ME,  \nTHEY’RE AFTER YOU  \n…I’M JUST STANDING  \nIN THE WAY!”\n\nDONALD J. TRUMP, 45th President of the United States\n\n[Contribute](https://secure.winred.com/trump-national-committee-jfc/lp-website-contribute-button) [VOLUNTEER](https://www.donaldjtrump.com/join)\n\n## Agenda47 Platform\n\nAmerica needs determined Republican Leadership at every level of Government to address the core threats to our very survival: Our disastrously Open Border, our weakened Economy, crippling restrictions on American Energy Production, our depleted Military, attacks on the American System of Justice, and much more.\n\nTo make clear our commitment, we offer to the American people the 2024 GOP Platform to Make America Great Again! It is a forward-looking Agenda that begins with the following twenty promises that we will accomplish very quickly when we win the White House and Republican Majorities in the House and Senate.\n\n[Platform](https://www.donaldjtrump.com/platform)\n\n![](https://cdn.donaldjtrump.com/djtweb24/general/homepage_rally.jpeg)\n\n![](https://cdn.donaldjtrump.com/djtweb24/general/bg1.jpg)\n\n## I AM **YOUR VOICE**. AMERICA FIRST!\n\n[](https://rumble.com/embed/v23gkay/?rel=0)\n\n### President Trump Will Stop China From Owning America\n\nI will ensure America's future remains firmly in America's hands!\n\n[](https://rumble.com/embed/v22aczi/?rel=0)\n\n### President Donald J. Trump Calls for Probe into Intelligence Community’s Role in Online Censorship\n\nThe ‘Twitter Files’ prove that we urgently need my plan to dismantle the illegal censorship regime — a regime like nobody’s ever seen in the history of our country or most other countries for that matter,” President Trump said.\n\n[](https://rumble.com/embed/v1y7kp8/?rel=0)\n\n### President Donald J. Trump — Free Speech Policy Initiative\n\nPresident Donald J. Trump announced a new policy initiative aimed to dismantle the censorship cartel and restore free speech.\n\n[](https://rumble.com/embed/v21etrc/?rel=0)\n\n### President Donald J. Trump Declares War on Cartels\n\nJoe Biden prepares to make his first-ever trip to the southern border that he deliberately erased, President Trump announced that when he is president again, it will be the official policy of the United States to take down the drug cartels just as we took down ISIS.\n\n[](https://rumble.com/embed/v2g7i07/?rel=0)\n\n### Agenda47: Ending the Nightmare of the Homeless, Drug Addicts, and Dangerously Deranged\n\nFor a small fraction of what we spend upon Ukraine, we could take care of every homeless veteran in America. Our veterans are being treated horribly.\n\n[](https://rumble.com/embed/v2fmn6y/?rel=0)\n\n### Agenda47: Liberating America from Biden’s Regulatory Onslaught\n\nNo longer will unelected members of the Washington Swamp be allowed to act as the fourth branch of our Republic.\n\n[](https://rumble.com/embed/v2ff6i4/?rel=0)\n\n### Agenda47: Firing the Radical Marxist Prosecutors Destroying America\n\nIf we cannot restore the fair and impartial rule of law, we will not be a free country.\n\n[](https://rumble.com/embed/v27rnh8/?rel=0)\n\n### Agenda47: President Trump Announces Plan to Stop the America Last Warmongers and Globalists\n\nPresident Donald J. Trump announced his plan to defeat the America Last warmongers and globalists in the Deep State, the Pentagon, the State Department, and the national security industrial complex.\n\n[](https://rumble.com/embed/v27mkjo/?rel=0)\n\n### Agenda47: President Trump Announces Plan to End Crime and Restore Law and Order\n\nPresident Donald J. Trump unveiled his new plan to stop out-of-control crime and keep all Americans safe. In his first term, President Trump reduced violent crime and stood strongly with America’s law enforcement. On Joe Biden’s watch, violent crime has skyrocketed and communities have become less safe as he defunded, defamed, and dismantled police forces. www.DonaldJTrump.com Text TRUMP to 88022\n\n[](https://rumble.com/embed/v26a8h6/?rel=0)\n\n### Agenda47: President Trump on Making America Energy Independent Again\n\nBiden's War on Energy Is The Key Driver of the Worst Inflation in 58 Years! When I'm back in Office, We Will Eliminate Every Democrat Regulation That Hampers Domestic Enery Production!\n\n[](https://rumble.com/embed/v24rq6y/?rel=0)\n\n### President Trump Will Build a New Missile Defense Shield\n\nWe must be able to defend our homeland, our allies, and our military assets around the world from the threat of hypersonic missiles, no matter where they are launched from. Just as President Trump rebuilt our military, President Trump will build a state-of-the-art next-generation missile defense shield to defend America from missile attack.\n\n[](https://rumble.com/embed/v25d8w0/?rel=0)\n\n### President Trump Calls for Immediate De-escalation and Peace\n\nJoe Biden's weakness and incompetence has brought us to the brink of nuclear war and leading us to World War 3. It's time for all parties involved to pursue a peaceful end to the war in Ukraine before it spirals out of control and into nuclear war.\n\n[](https://rumble.com/embed/v2597vg/?rel=0)\n\n### President Trump’s Plan to Protect Children from Left-Wing Gender Insanity\n\nPresident Trump today announced his plan to stop the chemical, physical, and emotional mutilation of our youth.\n\n[](https://rumble.com/embed/v24n0j2/?rel=0)\n\n### President Trump’s Plan to Save American Education and Give Power Back to Parents\n\nOur public schools have been taken over by the Radical Left Maniacs!\n\n[](https://rumble.com/embed/v23qmwu/?rel=0)\n\n### We Must Protect Medicare and Social Security\n\nUnder no circumstances should Republicans vote to cut a single penny from Medicare or Social Security\n\n[](https://rumble.com/embed/v23gkay/?rel=0)\n\n### President Trump Will Stop China From Owning America\n\nI will ensure America's future remains firmly in America's hands!\n\n[](https://rumble.com/embed/v22aczi/?rel=0)\n\n### President Donald J. Trump Calls for Probe into Intelligence Community’s Role in Online Censorship\n\nThe ‘Twitter Files’ prove that we urgently need my plan to dismantle the illegal censorship regime — a regime like nobody’s ever seen in the history of our country or most other countries for that matter,” President Trump said.\n\n[](https://rumble.com/embed/v1y7kp8/?rel=0)\n\n### President Donald J. Trump — Free Speech Policy Initiative\n\nPresident Donald J. Trump announced a new policy initiative aimed to dismantle the censorship cartel and restore free speech.\n\n[](https://rumble.com/embed/v21etrc/?rel=0)\n\n### President Donald J. Trump Declares War on Cartels\n\nJoe Biden prepares to make his first-ever trip to the southern border that he deliberately erased, President Trump announced that when he is president again, it will be the official policy of the United States to take down the drug cartels just as we took down ISIS.\n\n[](https://rumble.com/embed/v2g7i07/?rel=0)\n\n### Agenda47: Ending the Nightmare of the Homeless, Drug Addicts, and Dangerously Deranged\n\nFor a small fraction of what we spend upon Ukraine, we could take care of every homeless veteran in America. Our veterans are being treated horribly.\n\n[](https://rumble.com/embed/v2fmn6y/?rel=0)\n\n### Agenda47: Liberating America from Biden’s Regulatory Onslaught\n\nNo longer will unelected members of the Washington Swamp be allowed to act as the fourth branch of our Republic.\n\n![](https://cdn.donaldjtrump.com/djtweb24/general/bg2.jpg)",
+  "html": null
+},
+{
+  "crawl": {
+    "httpStatusCode": 200,
+    "loadedAt": "2024-09-02T13:14:31.146Z",
+    "uniqueKey": "14308ff6-c2e4-42c0-8a76-3fc1f24149e9",
+    "requestStatus": "handled",
+    "debug": {
+      "timeMeasures": [
+        {
+          "event": "request-received",
+          "timeMs": 0,
+          "timeDeltaPrevMs": 0
+        },
+        {
+          "event": "before-cheerio-queue-add",
+          "timeMs": 115,
+          "timeDeltaPrevMs": 115
+        },
+        {
+          "event": "cheerio-request-handler-start",
+          "timeMs": 2783,
+          "timeDeltaPrevMs": 2668
+        },
+        {
+          "event": "before-playwright-queue-add",
+          "timeMs": 2869,
+          "timeDeltaPrevMs": 86
+        },
+        {
+          "event": "playwright-request-start",
+          "timeMs": 11575,
+          "timeDeltaPrevMs": 8706
+        },
+        {
+          "event": "playwright-wait-dynamic-content",
+          "timeMs": 21575,
+          "timeDeltaPrevMs": 10000
+        },
+        {
+          "event": "playwright-remove-cookie",
+          "timeMs": 23675,
+          "timeDeltaPrevMs": 2100
+        },
+        {
+          "event": "playwright-parse-with-cheerio",
+          "timeMs": 37567,
+          "timeDeltaPrevMs": 13892
+        },
+        {
+          "event": "playwright-process-html",
+          "timeMs": 42666,
+          "timeDeltaPrevMs": 5099
+        },
+        {
+          "event": "playwright-before-response-send",
+          "timeMs": 42676,
+          "timeDeltaPrevMs": 10
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "author": null,
+    "title": "Boston.com: Local breaking news, sports, weather, and things to do",
+    "description": "What Boston cares about right now: Get breaking updates on news, sports, and weather. Local alerts, things to do, and more on Boston.com.",
+    "keywords": null,
+    "languageCode": "en-US",
+    "url": "https://www.boston.com/"
+  },
+  "text": "Local breaking news, sports, weather, and things to doSafeFrame ContainerSafeFrame ContainerBack ButtonSearch IconFilter Icon\nSome areas of this page may shift around if you resize the browser window. Be sure to check heading and document order.",
+  "markdown": "# Local breaking news, sports, weather, and things to doSafeFrame ContainerSafeFrame ContainerBack ButtonSearch IconFilter Icon\n\nSome areas of this page may shift around if you resize the browser window. Be sure to check heading and document order.\n\n![](https://adservice.google.com/ddm/fls/z/src=11164343;type=landi0;cat=landi0;ord=1;num=2182378527772;npa=0;auiddc=*;pscdl=noapi;frm=0;gtm=45fe48s0v9181813931za200;gcs=G111;gcd=13t3t3l3l5l1;dma=0;tag_exp=0;epver=2;~oref=https%3A%2F%2Fwww.boston.com%2F)\n\n![](https://pagead2.googlesyndication.com/pagead/sodar?id=sodar2&v=225&li=gpt_m202408270101&jk=2047207683755252&rc=)\n\n![](https://static.adsafeprotected.com/skeleton.gif?service=ad&adid=hljkl&adnum=5243850)",
+  "html": null
+}]
