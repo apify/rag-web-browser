@@ -89,6 +89,7 @@ export async function requestHandlerPlaywright(
             url: request.url,
         },
         text,
+        query: request.userData.query,
         markdown: settings.outputFormats.includes('markdown') ? htmlToMarkdown(processedHtml) : null,
         html: settings.outputFormats.includes('html') ? processedHtml : null,
     };

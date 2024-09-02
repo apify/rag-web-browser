@@ -22,26 +22,26 @@ export function checkForExtraParams(params: ParsedUrlQuery) {
 }
 
 /**
- * Create a search request with the provided queries and maxResults.
+ * Create a search request with the provided query and maxResults.
  * Add some overhead for the maxResults to account for the fact that some results are not Organic.
  *
  * The maxResults parameter is passed to the UserData object, when the request is handled it is used to limit
  * the number of search results without the created overhead .
  */
 export function createSearchRequest(
-    queries: string,
+    query: string,
     maxResults: number,
     proxyConfiguration: ProxyConfiguration | undefined,
 ): RequestOptions<UserData> {
     // add some overhead for the maxResults to account for the fact that some results are not Organic
-    const n = maxResults + 5;
+    const n = Number(maxResults) + 5;
 
     // @ts-expect-error is there a better way to get group information?
     // (e.g. to  create extended CheerioCrawlOptions and pass it there?)
     const groups = proxyConfiguration?.groups || [];
     const protocol = groups.includes('GOOGLE_SERP') ? 'http' : 'https';
-    const urlSearch = `${protocol}://www.google.com/search?q=${queries}&num=${n}`;
-    return { url: urlSearch, uniqueKey: uuidv4(), userData: { maxResults, timeMeasures: [] } };
+    const urlSearch = `${protocol}://www.google.com/search?q=${query}&num=${n}`;
+    return { url: urlSearch, uniqueKey: uuidv4(), userData: { maxResults, timeMeasures: [], query } };
 }
 
 export function createRequest(
