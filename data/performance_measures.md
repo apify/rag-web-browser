@@ -93,16 +93,16 @@ Time taken on average 36147.333333333336
     199, 4190,   3,   2,  90
   ]
 }
-request-received: 0 s
-before-cheerio-queue-add: 144 s
-cheerio-request-handler-start: 3341 s
-before-playwright-queue-add: 73 s
-playwright-request-start: 62232 s
-playwright-wait-dynamic-content: 4308 s
-playwright-remove-cookie: 2702 s
-playwright-parse-with-cheerio: 9330 s
-playwright-process-html: 5721 s
-playwright-before-response-send: 939 s
+request-received: 0
+before-cheerio-queue-add: 144
+cheerio-request-handler-start: 3341
+before-playwright-queue-add: 73
+playwright-request-start: 62232
+playwright-wait-dynamic-content: 4308
+playwright-remove-cookie: 2702
+playwright-parse-with-cheerio: 9330
+playwright-process-html: 5721
+playwright-before-response-send: 939
 Time taken for each request: [
    45715,  75189, 119289,
   143911, 153109,  38262,
@@ -127,16 +127,16 @@ Time taken for each request: [
 'playwright-before-response-send' => [ 207, 111, 11 ]
 
 AVG:
-request-received: 0 s
-before-cheerio-queue-add: 123 s
-cheerio-request-handler-start: 2637 s
-before-playwright-queue-add: 12 s
-playwright-request-start: 8517 s
-playwright-wait-dynamic-content: 6013 s
-playwright-remove-cookie: 497 s
-playwright-parse-with-cheerio: 2296 s
-playwright-process-html: 1664 s
-playwright-before-response-send: 110 s
+request-received: 0
+before-cheerio-queue-add: 123
+cheerio-request-handler-start: 2637
+before-playwright-queue-add: 12
+playwright-request-start: 8517
+playwright-wait-dynamic-content: 6013 
+playwright-remove-cookie: 497 
+playwright-parse-with-cheerio: 2296 
+playwright-process-html: 1664 
+playwright-before-response-send: 110 
 Time taken for each request: [ 25433, 14899, 25276 ]
 Time taken on average 21869.333333333332
 ```
@@ -205,15 +205,15 @@ Time taken on average 21869.333333333332
   ]
 }
 request-received: 0 s
-before-cheerio-queue-add: 145 s
-cheerio-request-handler-start: 3117 s
-before-playwright-queue-add: 41 s
-playwright-request-start: 31449 s
-playwright-wait-dynamic-content: 4987 s
-playwright-remove-cookie: 1742 s
-playwright-parse-with-cheerio: 2020 s
-playwright-process-html: 2451 s
-playwright-before-response-send: 558 s
+before-cheerio-queue-add: 145 
+cheerio-request-handler-start: 3117 
+before-playwright-queue-add: 41 
+playwright-request-start: 31449 
+playwright-wait-dynamic-content: 4987 
+playwright-remove-cookie: 1742 
+playwright-parse-with-cheerio: 2020 
+playwright-process-html: 2451 
+playwright-before-response-send: 558 
 Time taken for each request: [
   26517, 33101, 58388,
   71906, 81101, 30794,
