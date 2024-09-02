@@ -14,15 +14,15 @@
 
 AVG:
 request-received: 0 s
-before-cheerio-queue-add: 129 s
-cheerio-request-handler-start: 2499 s
-before-playwright-queue-add: 87 s
-playwright-request-start: 15703 s
-playwright-wait-dynamic-content: 7029 s
-playwright-remove-cookie: 1073 s
-playwright-parse-with-cheerio: 5564 s
-playwright-process-html: 3829 s
-playwright-before-response-send: 236 s
+before-cheerio-queue-add: 129
+cheerio-request-handler-start: 2499
+before-playwright-queue-add: 87
+playwright-request-start: 15703
+playwright-wait-dynamic-content: 7029
+playwright-remove-cookie: 1073
+playwright-parse-with-cheerio: 5564
+playwright-process-html: 3829
+playwright-before-response-send: 236 
 Time taken for each request: [ 49762, 16004, 42676 ]
 Time taken on average 36147.333333333336
 
