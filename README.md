@@ -100,12 +100,15 @@ The numbers below are based on the following search terms: "apify", "Donald Trum
 Browsing Tool
 - https://community.openai.com/t/new-assistants-browse-with-bing-ability/479383/27
 
-### Run STANDBY mode using apify-cli for development
+
+### Development
+
+#### Run STANDBY mode using apify-cli for development
 ```bash
 APIFY_META_ORIGIN=STANDBY apify run -p
 ```
 
-# Open question:
+##### Open question:
 
 Response object - should we create an envelope object for the response?
 ```json
