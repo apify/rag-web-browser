@@ -24,7 +24,11 @@ For optimal performance, it is recommended to run the Actor in Standby mode.
 This allows the Actor to stay active, enabling it to retrieve results with lower latency.
 
 *Limitations*: Running the Actor in Standby mode does not support changing crawling and scraping configurations using query parameters.
-Supporting this would require creating crawlers on the fly, which would add an overhead of 1-2 seconds.
+Supporting this would require the following:
+- Creating crawlers on the fly, which would introduce an overhead of 1-2 seconds and potentially result in a large number of crawlers.
+- Setting up a new queue for each crawler to ensure that requests are properly handled by the corresponding crawler.
+- Implementing this will require some refactoring. The simplest approach is to create a new key that combines both crawlers, and then create a named queue and crawler based on this key.
+  `const key = JSON.stringify(cheerioCrawlerOptions) + JSON.stringify(playwrightCrawlerOptions) + JSON.stringify(playwrightScraperSettings);`
 
 #### 🔥 How to start the Actor in a Standby mode?
 
@@ -101,9 +105,14 @@ However, if you're looking for a cost-effective solution, you can run the Actor 
 
 ### 👷🏼 Development
 
-#### Run STANDBY mode using apify-cli for development
+**Run STANDBY mode using apify-cli for development**
 ```bash
 APIFY_META_ORIGIN=STANDBY apify run -p
+```
+
+**Install playwright dependencies**
+```bash
+npx playwright install --with-deps
 ```
 
 ##### Open question:
