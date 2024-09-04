@@ -1,11 +1,11 @@
-## RAG Web Browser
+## 🔎 RAG Web Browser
 
 This Actor retrieves website content from the top Google Search Results Pages (SERPs).
 Given a search query, it fetches the top Google search result URLs and then follows each URL to extract the text content from the targeted websites.
 
 The RAG Web Browser is designed for Large Language Model (LLM) applications or LLM agents to provide up-to-date Google search knowledge.
 
-**Main features**:
+**🚀 Main features**:
 - Searches Google and extracts the top Organic results.
 - Follows the top URLs to scrape HTML and extract website text, excluding navigation, ads, banners, etc.
 - Capable of extracting content from JavaScript-enabled websites and bypassing anti-scraping protections.
@@ -15,7 +15,7 @@ This Actor is a combination of a two specialized actors:
 - [Google Search Results Scraper](https://apify.com/apify/google-search-scraper)
 - [Website Content Crawler](https://apify.com/apify/website-content-crawler)
 
-### Fast responses using the Standby mode
+### 🏎️ Fast responses using the Standby mode
 
 This Actor can be run in both normal and [standby modes](https://docs.apify.com/platform/actors/running/standby).
 Normal mode is useful for testing and running in ad-hoc settings, but it comes with some overhead due to the Actor's initial startup time.
@@ -26,7 +26,7 @@ This allows the Actor to stay active, enabling it to retrieve results with lower
 *Limitations*: Running the Actor in Standby mode does not support changing crawling and scraping configurations using query parameters.
 Supporting this would require creating crawlers on the fly, which would add an overhead of 1-2 seconds.
 
-#### How to start the Actor in a Standby mode?
+#### 🔥 How to start the Actor in a Standby mode?
 
 You need the Actor's standby URL and `APIFY_API_TOKEN`. Then, you can send requests to the `/search` path along with your `query` and the number of results (`maxResults`) you want to retrieve.
 
@@ -72,36 +72,41 @@ When running in the standby mode the RAG Web Browser accept the following query 
 | `requestTimeoutSecs` | Timeout (in seconds) for making the search request and processing its response                       |
 
 
-### What is the best way to run the RAG Web Browser?
+### 🏃 What is the best way to run the RAG Web Browser?
 
 The RAG Web Browser is designed to be run in Standby mode for optimal performance.
 The Standby mode allows the Actor to stay active, enabling it to retrieve results with lower latency.
+
+### 🕒 What is the expected latency?
+
 The latency is proportional to the memory allocated to the Actor and number of results requested.
 
 Here is a typical latency breakdown for the RAG Web Browser.
-Please note the these results are only indicative and may vary based on the search term and the target websites.
+Please note the these results are only indicative and may vary based on the search term, the target websites,
+and network latency.
 
-The numbers below are based on the following search terms: "apify", "Donald Trump", "boston". Results were averaged for the three queries.
+The numbers below are based on the following search terms: "apify", "Donald Trump", "boston".
+Results were averaged for the three queries.
 
 | Memory (GB) | Max Results | Latency (s) |
 |-------------|-------------|-------------|
 | 2           | 1           | 36          |
 | 2           | 5           | 88          |
 | 4           | 1           | 22          |
+| 4           | 3           | 31          |
 | 4           | 5           | 46          |
+
+⚖️ Based on your requirements, if low latency is a priority, consider running the Actor with 4GB or more of memory.
+However, if you're looking for a cost-effective solution, you can run the Actor with 2GB of memory.
 
 
 #### Looking to scrape Google Search Results?
 - Check out the [Google Search Results Scraper](https://apify.com/apify/google-search-scraper) actor.
 
 #### Need to extract content from a list of URLs?
-- Explore the the [Website Content Crawler](https://apify.com/apify/website-content-crawler) actor.
+- Explore the [Website Content Crawler](https://apify.com/apify/website-content-crawler) actor.
 
-Browsing Tool
-- https://community.openai.com/t/new-assistants-browse-with-bing-ability/479383/27
-
-
-### Development
+### 👷🏼 Development
 
 #### Run STANDBY mode using apify-cli for development
 ```bash
