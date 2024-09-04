@@ -1,4 +1,4 @@
-## 🔎 RAG Web Browser
+## 🌐 RAG Web Browser
 
 This Actor retrieves website content from the top Google Search Results Pages (SERPs).
 Given a search query, it fetches the top Google search result URLs and then follows each URL to extract the text content from the targeted websites.
@@ -60,7 +60,7 @@ Here’s an example of the server response (truncated for brevity):
 The Standby mode has several configuration parameters, such as Max Requests per Run, Memory, and Idle Timeout.
 You can find the details in the [Standby Mode documentation](https://docs.apify.com/platform/actors/running/standby#how-do-i-customize-standby-configuration).
 
-## API parameters
+## 📧 API parameters
 
 When running in the standby mode the RAG Web Browser accept the following query parameters:
 
@@ -96,7 +96,7 @@ Results were averaged for the three queries.
 | 4           | 3           | 31          |
 | 4           | 5           | 46          |
 
-⚖️ Based on your requirements, if low latency is a priority, consider running the Actor with 4GB or more of memory.
+Based on your requirements, if low latency is a priority, consider running the Actor with 4GB or more of memory.
 However, if you're looking for a cost-effective solution, you can run the Actor with 2GB of memory.
 
 
