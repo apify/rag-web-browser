@@ -22,7 +22,7 @@ playwright-wait-dynamic-content: 7029
 playwright-remove-cookie: 1073
 playwright-parse-with-cheerio: 5564
 playwright-process-html: 3829
-playwright-before-response-send: 236 
+playwright-before-response-send: 236
 Time taken for each request: [ 49762, 16004, 42676 ]
 Time taken on average 36147.333333333336
 
@@ -132,13 +132,86 @@ before-cheerio-queue-add: 123
 cheerio-request-handler-start: 2637
 before-playwright-queue-add: 12
 playwright-request-start: 8517
-playwright-wait-dynamic-content: 6013 
-playwright-remove-cookie: 497 
-playwright-parse-with-cheerio: 2296 
-playwright-process-html: 1664 
-playwright-before-response-send: 110 
+playwright-wait-dynamic-content: 6013
+playwright-remove-cookie: 497
+playwright-parse-with-cheerio: 2296
+playwright-process-html: 1664
+playwright-before-response-send: 110
 Time taken for each request: [ 25433, 14899, 25276 ]
 Time taken on average 21869.333333333332
+```
+
+# Memory 4GB, Max Results 3, Proxy: auto
+
+```text
+Average time for each time measure event: Map(10) {
+  'request-received' => [
+    0, 0, 0, 0, 0,
+    0, 0, 0, 0
+  ],
+  'before-cheerio-queue-add' => [
+    157, 157, 157,
+    107, 107, 107,
+    122, 122, 122
+  ],
+  'cheerio-request-handler-start' => [
+    1699, 1699, 1699,
+    4312, 4312, 4312,
+    2506, 2506, 2506
+  ],
+  'before-playwright-queue-add' => [
+    10, 10, 10, 13, 13,
+    13,  5,  5,  5
+  ],
+  'playwright-request-start' => [
+    16249, 17254, 26159,
+     6726,  9821, 11124,
+     7349,  8212, 29345
+  ],
+  'playwright-wait-dynamic-content' => [
+    1110, 10080, 10076,
+    6132,  1524, 18367,
+    3077,  2508, 10001
+  ],
+  'playwright-remove-cookie' => [
+    1883,  914, 133,
+    1176, 5072, 241,
+     793, 4234, 120
+  ],
+  'playwright-parse-with-cheerio' => [
+    1203, 1490,  801,
+     698, 2919,  507,
+     798, 1378, 2756
+  ],
+  'playwright-process-html' => [
+    2597, 1304, 1398,
+    1099, 6756, 1031,
+    2110, 5416, 2028
+  ],
+  'playwright-before-response-send' => [
+    105,  112, 74,
+    501, 3381, 26,
+    101, 1570, 69
+  ]
+}
+request-received: 0 s
+before-cheerio-queue-add: 129 s
+cheerio-request-handler-start: 2839 s
+before-playwright-queue-add: 9 s
+playwright-request-start: 14693 s
+playwright-wait-dynamic-content: 6986 s
+playwright-remove-cookie: 1618 s
+playwright-parse-with-cheerio: 1394 s
+playwright-process-html: 2638 s
+playwright-before-response-send: 660 s
+Time taken for each request: [
+  25013, 33020,
+  40507, 20764,
+  33905, 35728,
+  16861, 25951,
+  46952
+]
+Time taken on average 30966.777777777777
 ```
 
 # Memory 4GB, Max Results 5, Proxy: auto
@@ -205,15 +278,15 @@ Time taken on average 21869.333333333332
   ]
 }
 request-received: 0 s
-before-cheerio-queue-add: 145 
-cheerio-request-handler-start: 3117 
-before-playwright-queue-add: 41 
-playwright-request-start: 31449 
-playwright-wait-dynamic-content: 4987 
-playwright-remove-cookie: 1742 
-playwright-parse-with-cheerio: 2020 
-playwright-process-html: 2451 
-playwright-before-response-send: 558 
+before-cheerio-queue-add: 145
+cheerio-request-handler-start: 3117
+before-playwright-queue-add: 41
+playwright-request-start: 31449
+playwright-wait-dynamic-content: 4987
+playwright-remove-cookie: 1742
+playwright-parse-with-cheerio: 2020
+playwright-process-html: 2451
+playwright-before-response-send: 558
 Time taken for each request: [
   26517, 33101, 58388,
   71906, 81101, 30794,
