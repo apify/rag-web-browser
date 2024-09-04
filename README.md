@@ -12,8 +12,8 @@ The RAG Web Browser is designed for Large Language Model (LLM) applications or L
 - Output formats include plain text, markdown, and HTML.
 
 This Actor is a combination of a two specialized actors:
-- [Google Search Results Scraper](https://apify.com/apify/google-search-scraper)
-- [Website Content Crawler](https://apify.com/apify/website-content-crawler)
+- Are you looking to scrape Google Search Results? Check out the [Google Search Results Scraper](https://apify.com/apify/google-search-scraper) actor.
+- Do you need extract content from a list of URLs? Explore the [Website Content Crawler](https://apify.com/apify/website-content-crawler) actor.
 
 ### 🏎️ Fast responses using the Standby mode
 
@@ -98,13 +98,6 @@ Results were averaged for the three queries.
 
 Based on your requirements, if low latency is a priority, consider running the Actor with 4GB or more of memory.
 However, if you're looking for a cost-effective solution, you can run the Actor with 2GB of memory.
-
-
-#### Looking to scrape Google Search Results?
-- Check out the [Google Search Results Scraper](https://apify.com/apify/google-search-scraper) actor.
-
-#### Need to extract content from a list of URLs?
-- Explore the [Website Content Crawler](https://apify.com/apify/website-content-crawler) actor.
 
 ### 👷🏼 Development
 
