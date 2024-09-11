@@ -32,7 +32,8 @@ Supporting this would require the following:
 
 #### 🔥 How to start the Actor in a Standby mode?
 
-You need the Actor's standby URL and `APIFY_API_TOKEN`. Then, you can send requests to the `/search` path along with your `query` and the number of results (`maxResults`) you want to retrieve.
+You need the Actor's standby URL and `APIFY_API_TOKEN`.
+Then, you can send requests to the `/search` path along with your `query` and the number of results (`maxResults`) you want to retrieve.
 
 ```shell
 curl -X GET https://jiri-spilka--rag-web-browser.apify.actor/search?token=APIFY_API_TOKEN?query=apify&maxResults=1
@@ -47,6 +48,11 @@ Here’s an example of the server response (truncated for brevity):
       "loadedAt": "2024-09-02T08:44:41.750Z",
       "uniqueKey": "3e8452bb-c703-44af-9590-bd5257902378",
       "requestStatus": "handled"
+    },
+    "googleSearchResult": {
+      "url": "https://apify.com/",
+      "title": "Apify: Full-stack web scraping and data extraction platform",
+      "description": "Cloud platform for web scraping, browser automation, and data for AI...."
     },
     "metadata": {
       "author": null,
@@ -102,6 +108,11 @@ Results were averaged for the three queries.
 
 Based on your requirements, if low latency is a priority, consider running the Actor with 4GB or more of memory.
 However, if you're looking for a cost-effective solution, you can run the Actor with 2GB of memory.
+
+### 📚 How to use RAG Web Browser in your GPT as custom action?
+
+You can easily call the RAG Web Browser to your GPT by uploading its OpenAPI specification and creating a custom action.
+Follow the steps in the article [Add custom actions to your GPTs with Apify Actors](https://blog.apify.com/add-custom-actions-to-your-gpts/).
 
 ### 👷🏼 Development
 
