@@ -1,6 +1,6 @@
 {
     "countryCode": "US",
-    "debugMode": true,
+    "debugMode": false,
     "dynamicContentWaitSecs": 10,
     "initialConcurrency": 3,
     "initialCookies": [],

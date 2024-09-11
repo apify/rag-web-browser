@@ -36,7 +36,7 @@ You need the Actor's standby URL and `APIFY_API_TOKEN`.
 Then, you can send requests to the `/search` path along with your `query` and the number of results (`maxResults`) you want to retrieve.
 
 ```shell
-curl -X GET https://jiri-spilka--rag-web-browser.apify.actor/search?token=APIFY_API_TOKEN?query=apify&maxResults=1
+CURL -X GET https://rag-web-browser.apify.actor?token=APIFY_API_TOKEN?query=apify&maxResults=3
 ```
 
 Here’s an example of the server response (truncated for brevity):
