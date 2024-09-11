@@ -46,24 +46,24 @@
                     "description": "Title, Description and URL of the Google Search Results",
                     "transformation": {
                         "fields": [
-                            "googleSearchResults.description",
-                            "googleSearchResults.title",
-                            "googleSearchResults.url"
+                            "googleSearchResult.description",
+                            "googleSearchResult.title",
+                            "googleSearchResult.url"
                         ],
-                        "flatten": ["googleSearchResults"]
+                        "flatten": ["googleSearchResult"]
                     },
                     "display": {
                         "component": "table",
                         "properties": {
-                            "googleSearchResults.description": {
+                            "googleSearchResult.description": {
                                 "label": "Description",
                                 "format": "text"
                             },
-                            "googleSearchResults.title": {
+                            "googleSearchResult.title": {
                                 "label": "Title",
                                 "format": "text"
                             },
-                            "googleSearchResults.url": {
+                            "googleSearchResult.url": {
                                 "label": "URL",
                                 "format": "text"
                             }
