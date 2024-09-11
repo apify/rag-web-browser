@@ -3,7 +3,7 @@
     "name": "rag-web-browser",
     "title": "RAG Web browser",
     "description": "Web browser for a retrieval augmented generation workflows. Retrieve and return website content from the top Google Search Results Pages",
-    "version": "0.0",
+    "version": "0.1",
     "input": "./input_schema.json",
     "dockerfile": "./Dockerfile",
     "storages": {
