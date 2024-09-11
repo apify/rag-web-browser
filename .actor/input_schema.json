@@ -8,7 +8,7 @@
             "title": "Search term(s)",
             "type": "string",
             "description": "Use regular search words or enter Google Search URLs. You can also apply [advanced Google search techniques](https://blog.apify.com/how-to-scrape-google-like-a-pro/), such as <code>AI site:twitter.com</code> or <code>javascript OR python</code>.",
-            "prefill": "site:apify.com apify\nllm",
+            "prefill": "apify llm solutions",
             "editor": "textarea",
             "pattern": "[^\\s]+"
         },

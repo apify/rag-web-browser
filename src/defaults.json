@@ -14,7 +14,7 @@
     "outputFormats": ["text", "markdown"],
     "proxyConfiguration": { "useApifyProxy": true },
     "proxyGroupSearch": "GOOGLE_SERP",
-    "query": "site:apify.com actor",
+    "query": "",
     "readableTextCharThreshold": 100,
     "removeCookieWarnings": true,
     "requestTimeoutSecs": 60,
