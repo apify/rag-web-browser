@@ -76,6 +76,7 @@ export async function requestHandlerPlaywright(
     const result: Output = {
         crawl: {
             httpStatusCode: page ? response?.status() : null,
+            httpStatusMessage: "OK",
             loadedAt: new Date(),
             uniqueKey: request.uniqueKey,
             requestStatus: ContentCrawlerStatus.HANDLED,
