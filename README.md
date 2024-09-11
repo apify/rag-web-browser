@@ -70,7 +70,7 @@ When running in the standby mode the RAG Web Browser accept the following query 
 
 | parameter            | description                                                                                          |
 |----------------------|------------------------------------------------------------------------------------------------------|
-| `quety`              | Search term(s)                                                                                       |
+| `query`              | Search term(s)                                                                                       |
 | `maxResults`         | Number of top search results to return from Google. Only organic results are returned and counted    |
 | `outputFormats`      | Specifies the output formats you want to return (e.g., "markdown", "html"); text is always returned  |
 | `requestTimeoutSecs` | Timeout (in seconds) for making the search request and processing its response                       |
@@ -114,39 +114,3 @@ APIFY_META_ORIGIN=STANDBY apify run -p
 ```bash
 npx playwright install --with-deps
 ```
-
-##### Open question:
-
-Response object - should we create an envelope object for the response?
-```json
-{
-    "statusCode": 200,
-    "message": "Finished",
-    "results": [
-        {
-            "text": "Content",
-            "crawl": {
-                "httpStatus": 200,
-                "requestStatus": "handled"
-            },
-            "metadata": {
-                "url": "https://example.com",
-                "title": "Example"
-            }
-        },
-        {
-            "text": "",
-            "crawl": {
-                "httpStatus": 500,
-                "requestStatus": "failed"
-            },
-            "metadata": {
-                "url": "https://example.com"
-            }
-        }
-    ]
-}
-```
-
-
-

@@ -41,31 +41,31 @@
                         }
                     }
                 },
-                "timeMeasures": {
-                    "title": "Time Measures",
-                    "description": "Time measures for various events during the crawl",
+                "googleSearchResults": {
+                    "title": "Google Search Results",
+                    "description": "Title, Description and URL of the Google Search Results",
                     "transformation": {
                         "fields": [
-                            "crawl.debug.timeMeasures.event",
-                            "crawl.debug.timeMeasures.timeMs",
-                            "crawl.debug.timeMeasures.timeDeltaPrevMs"
+                            "googleSearchResults.description",
+                            "googleSearchResults.title",
+                            "googleSearchResults.url"
                         ],
-                        "flatten": ["crawl.debug.timeMeasures"]
+                        "flatten": ["googleSearchResults"]
                     },
                     "display": {
                         "component": "table",
                         "properties": {
-                            "crawl.debug.timeMeasures.event": {
-                                "label": "Event",
+                            "googleSearchResults.description": {
+                                "label": "Description",
                                 "format": "text"
                             },
-                            "crawl.debug.timeMeasures.timeMs": {
-                                "label": "Time (ms)",
-                                "format": "number"
+                            "googleSearchResults.title": {
+                                "label": "Title",
+                                "format": "text"
                             },
-                            "crawl.debug.timeMeasures.timeDeltaPrevMs": {
-                                "label": "Delta (ms)",
-                                "format": "number"
+                            "googleSearchResults.url": {
+                                "label": "URL",
+                                "format": "text"
                             }
                         }
                     }

@@ -80,6 +80,7 @@ export async function requestHandlerPlaywright(
             uniqueKey: request.uniqueKey,
             requestStatus: ContentCrawlerStatus.HANDLED,
         },
+        googleSearchResult: request.userData.googleSearchResult!,
         metadata: {
             author: $('meta[name=author]').first().attr('content') ?? null,
             title: $('title').first().text(),

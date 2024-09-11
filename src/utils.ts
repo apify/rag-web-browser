@@ -3,7 +3,7 @@ import { parse, ParsedUrlQuery } from 'querystring';
 import { v4 as uuidv4 } from 'uuid';
 
 import defaults from './defaults.json' assert { type: 'json' };
-import { TimeMeasure, UserData } from './types.js';
+import { OrganicResult, TimeMeasure, UserData } from './types.js';
 
 export function parseParameters(url: string): ParsedUrlQuery {
     return parse(url.slice(1));
@@ -45,11 +45,19 @@ export function createSearchRequest(
 }
 
 export function createRequest(
-    url: string,
+    result: OrganicResult,
     responseId: string,
     timeMeasures: TimeMeasure[] | null,
 ): RequestOptions<UserData> {
-    return { url, uniqueKey: uuidv4(), userData: { responseId, timeMeasures: timeMeasures ? [...timeMeasures] : [] } };
+    return {
+        url: result.url!,
+        uniqueKey: uuidv4(),
+        userData: {
+            responseId,
+            googleSearchResult: result,
+            timeMeasures: timeMeasures ? [...timeMeasures] : [],
+        },
+    };
 }
 
 export function addTimeMeasureEvent(userData: UserData, event: TimeMeasure['event'], time: number | null = null) {

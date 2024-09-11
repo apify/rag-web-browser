@@ -76,6 +76,8 @@ export const sendResponseOk = (responseId: string, result: unknown, contentType:
 /**
  * Send response with error status code. If the response contains some handled requests,
  * return 200 status otherwise 500.
+ *
+ * Also, copy title and description from Google search result to the response.
  */
 export const sendResponseError = (responseId: string, message: string) => {
     const res = getResponse(responseId);
@@ -85,9 +87,12 @@ export const sendResponseError = (responseId: string, message: string) => {
     for (const key of res.resultsMap.keys()) {
         const { requestStatus } = res.resultsMap.get(key)!.crawl;
         if (requestStatus === ContentCrawlerStatus.PENDING) {
-            res.resultsMap.get(key)!.crawl.httpStatusCode = 500;
-            res.resultsMap.get(key)!.crawl.httpStatusMessage = message;
-            res.resultsMap.get(key)!.crawl.requestStatus = ContentCrawlerStatus.FAILED;
+            const r = res.resultsMap.get(key)!;
+            r.crawl.httpStatusCode = 500;
+            r.crawl.httpStatusMessage = message;
+            r.crawl.requestStatus = ContentCrawlerStatus.FAILED;
+            r.metadata.title = r.googleSearchResult.title;
+            r.text = r.googleSearchResult.description || '';
         } else if (requestStatus === ContentCrawlerStatus.HANDLED) {
             returnStatusCode = 200;
         }
