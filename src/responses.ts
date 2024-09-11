@@ -1,8 +1,9 @@
 import { log } from 'apify';
+import { RequestOptions } from 'crawlee';
 import { ServerResponse } from 'http';
 
 import { ContentCrawlerStatus } from './const.js';
-import { Output } from './types.js';
+import { Output, UserData } from './types.js';
 
 class ResponseData {
     response: ServerResponse;
@@ -38,15 +39,16 @@ export const createResponse = (responseId: string, response: ServerResponse) => 
  * Add empty result to response object when the content crawler request is created.
  * This is needed to keep track of all results and to know that all results have been handled.
  */
-export const addEmptyResultToResponse = (responseId: string, uniqueKey: string, url: string) => {
+export const addEmptyResultToResponse = (responseId: string, request: RequestOptions<UserData>) => {
     const res = getResponse(responseId);
     if (!res) return;
 
     const result: Partial<Output> = {
-        crawl: { createdAt: new Date(), requestStatus: ContentCrawlerStatus.PENDING, uniqueKey },
-        metadata: { url },
+        crawl: { createdAt: new Date(), requestStatus: ContentCrawlerStatus.PENDING, uniqueKey: request.uniqueKey! },
+        metadata: { url: request.url },
+        googleSearchResult: request.userData?.googleSearchResult,
     };
-    res.resultsMap.set(uniqueKey, result as Output);
+    res.resultsMap.set(request.uniqueKey!, result as Output);
 };
 
 export const addResultToResponse = (responseId: string, uniqueKey: string, result: Output) => {
@@ -76,6 +78,8 @@ export const sendResponseOk = (responseId: string, result: unknown, contentType:
 /**
  * Send response with error status code. If the response contains some handled requests,
  * return 200 status otherwise 500.
+ *
+ * Also, copy title and description from Google search result to the response.
  */
 export const sendResponseError = (responseId: string, message: string) => {
     const res = getResponse(responseId);
@@ -85,9 +89,12 @@ export const sendResponseError = (responseId: string, message: string) => {
     for (const key of res.resultsMap.keys()) {
         const { requestStatus } = res.resultsMap.get(key)!.crawl;
         if (requestStatus === ContentCrawlerStatus.PENDING) {
-            res.resultsMap.get(key)!.crawl.httpStatusCode = 500;
-            res.resultsMap.get(key)!.crawl.httpStatusMessage = message;
-            res.resultsMap.get(key)!.crawl.requestStatus = ContentCrawlerStatus.FAILED;
+            const r = res.resultsMap.get(key)!;
+            r.crawl.httpStatusCode = 500;
+            r.crawl.httpStatusMessage = message;
+            r.crawl.requestStatus = ContentCrawlerStatus.FAILED;
+            r.metadata.title = r.googleSearchResult?.title;
+            r.text = r.googleSearchResult?.description || '';
         } else if (requestStatus === ContentCrawlerStatus.HANDLED) {
             returnStatusCode = 200;
         }

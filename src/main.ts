@@ -48,7 +48,7 @@ async function getSearch(request: IncomingMessage, response: ServerResponse) {
             playwrightScraperSettings,
         );
         setTimeout(() => {
-            sendResponseError(req.uniqueKey!, 'Response timed out.');
+            sendResponseError(req.uniqueKey!, 'Timed out');
         }, input.requestTimeoutSecs * 1000);
     } catch (e) {
         const error = e as Error;

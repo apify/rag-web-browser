@@ -49,17 +49,17 @@ export async function createAndStartSearchCrawler(
             log.info(`${CrawlerType.CHEERIO_GOOGLE_SEARCH_CRAWLER} requestHandler: Processing URL: ${request.url}`);
             const organicResults = scrapeOrganicResults($);
 
-            let searchUrls = organicResults
-                .map((result) => result.url)
-                .filter((url): url is string => url !== undefined);
+            // filter organic results to get only results with URL
+            let results = organicResults.filter((result) => result.url !== undefined);
+
             // limit the number of search results to the maxResults
-            searchUrls = searchUrls.slice(0, request.userData?.maxResults ?? searchUrls.length);
-            log.info(`Extracted ${searchUrls.length} URLs: \n${searchUrls.join('\n')}`);
+            results = results.slice(0, request.userData?.maxResults ?? results.length);
+            log.info(`Extracted ${results.length} results: \n${results.map((r) => r.url).join('\n')}`);
 
             addTimeMeasureEvent(request.userData!, 'before-playwright-queue-add');
             const responseId = request.uniqueKey;
-            for (const url of searchUrls) {
-                const r = createRequest(url, responseId, request.userData.timeMeasures!);
+            for (const result of results) {
+                const r = createRequest(result, responseId, request.userData.timeMeasures!);
                 await addContentCrawlRequest(r, responseId, playwrightCrawlerOptions, playwrightScraperSettings);
             }
         },
@@ -153,6 +153,6 @@ export const addContentCrawlRequest = async (
     await crawler.requestQueue!.addRequest(request);
     // create an empty result in search request response
     // do not use request.uniqueKey as responseId as it is not id of a search request
-    addEmptyResultToResponse(responseId, request.uniqueKey!, request.url);
+    addEmptyResultToResponse(responseId, request);
     log.info(`Added request to the playwright-content-crawler: ${request.url}`);
 };

@@ -42,9 +42,11 @@ const extractResultsFromSelectors = ($: CheerioAPI, selectors: string[]) => {
 const parseResult = ($: CheerioAPI, el: Element) => {
     $(el).find('div.action-menu').remove();
 
+    const descriptionSelector = '.VwiC3b span';
     const searchResult: OrganicResult = {
-        title: $(el).find('h3').first().text(),
-        url: $(el).find('a').first().attr('href'),
+        description: ($(el).find(descriptionSelector).text() || '').trim(),
+        title: $(el).find('h3').first().text() || '',
+        url: $(el).find('a').first().attr('href') || '',
     };
 
     return searchResult;

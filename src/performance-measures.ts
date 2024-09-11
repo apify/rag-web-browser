@@ -8,10 +8,12 @@ import { Actor } from 'apify';
 // const datasetId = 'giAPLL8dhd2PDqPlf'; // 2GB, maxResults=5
 // const datasetId = 'VKzel6raVqisgIYfe'; // 4GB, maxResults=1
 // const datasetId = 'KkTaLd70HbFgAO35y'; // 4GB, maxResults=3
-const datasetId = 'fm9tO0GDBUagMT0df'; // 4GB, maxResults=5
+// const datasetId = 'fm9tO0GDBUagMT0df'; // 4GB, maxResults=5
+// const datasetId = '6ObH057Icr9z1bgXl'; // 8GB, maxResults=1
+const datasetId = 'lfItikr0vAXv7oXwH'; // 8GB, maxResults=3
 
 // set environment variables APIFY_TOKEN
-process.env.APIFY_TOKEN = 'apify_api_IoPOM26vW1hV4tqum7jVYsoFvm0UZt4iEOPH';
+process.env.APIFY_TOKEN = '';
 
 const dataset = await Actor.openDataset(datasetId, { forceCloud: true });
 const remoteDataset = await dataset.getData();

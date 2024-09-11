@@ -31,6 +31,7 @@ export type Input = {
 };
 
 export type OrganicResult = {
+    description?: string;
     title?: string;
     url?: string;
 };
@@ -65,6 +66,7 @@ export type UserData = {
     responseId?: string;
     startedAt?: Date;
     timeMeasures?: TimeMeasure[];
+    googleSearchResult?: OrganicResult;
 };
 
 export interface PlaywrightScraperSettings {
@@ -90,6 +92,7 @@ export type Output = {
         requestStatus: string;
         uniqueKey: string;
     };
+    googleSearchResult: OrganicResult;
     metadata: {
         author?: string | null;
         description?: string | null;

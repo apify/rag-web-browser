@@ -76,10 +76,12 @@ export async function requestHandlerPlaywright(
     const result: Output = {
         crawl: {
             httpStatusCode: page ? response?.status() : null,
+            httpStatusMessage: "OK",
             loadedAt: new Date(),
             uniqueKey: request.uniqueKey,
             requestStatus: ContentCrawlerStatus.HANDLED,
         },
+        googleSearchResult: request.userData.googleSearchResult!,
         metadata: {
             author: $('meta[name=author]').first().attr('content') ?? null,
             title: $('title').first().text(),
