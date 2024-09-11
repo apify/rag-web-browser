@@ -100,14 +100,13 @@ Results were averaged for the three queries.
 
 | Memory (GB) | Max Results | Latency (s) |
 |-------------|-------------|-------------|
-| 2           | 1           | 36          |
-| 2           | 5           | 88          |
 | 4           | 1           | 22          |
 | 4           | 3           | 31          |
-| 4           | 5           | 46          |
+| 8           | 1           | 16          |
+| 8           | 3           | 17          |
 
-Based on your requirements, if low latency is a priority, consider running the Actor with 4GB or more of memory.
-However, if you're looking for a cost-effective solution, you can run the Actor with 2GB of memory.
+Based on your requirements, if low latency is a priority, consider running the Actor with 4GB or 8GB of memory.
+However, if you're looking for a cost-effective solution, you can run the Actor with 2GB of memory but it will be slow.
 
 ### 📚 How to use RAG Web Browser in your GPT as custom action?
 

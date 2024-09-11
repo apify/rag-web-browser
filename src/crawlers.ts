@@ -153,6 +153,6 @@ export const addContentCrawlRequest = async (
     await crawler.requestQueue!.addRequest(request);
     // create an empty result in search request response
     // do not use request.uniqueKey as responseId as it is not id of a search request
-    addEmptyResultToResponse(responseId, request.uniqueKey!, request.url);
+    addEmptyResultToResponse(responseId, request);
     log.info(`Added request to the playwright-content-crawler: ${request.url}`);
 };

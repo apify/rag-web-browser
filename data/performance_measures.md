@@ -297,3 +297,105 @@ Time taken for each request: [
 Time taken on average 46511.13333333333
 
 ```
+
+# Memory 8GB, Max Results 1, Proxy: auto
+
+```text
+Average time for each time measure event: Map(10) {
+  'request-received' => [ 0, 0, 0 ],
+  'before-cheerio-queue-add' => [ 132, 157, 128 ],
+  'cheerio-request-handler-start' => [ 2354, 2606, 2609 ],
+  'before-playwright-queue-add' => [ 13, 7, 12 ],
+  'playwright-request-start' => [ 7214, 8876, 5463 ],
+  'playwright-wait-dynamic-content' => [ 6502, 2432, 6927 ],
+  'playwright-remove-cookie' => [ 100, 114, 141 ],
+  'playwright-parse-with-cheerio' => [ 483, 388, 477 ],
+  'playwright-process-html' => [ 1056, 509, 724 ],
+  'playwright-before-response-send' => [ 124, 10, 21 ]
+}
+request-received: 0 s
+before-cheerio-queue-add: 139 s
+cheerio-request-handler-start: 2523 s
+before-playwright-queue-add: 11 s
+playwright-request-start: 7184 s
+playwright-wait-dynamic-content: 5287 s
+playwright-remove-cookie: 118 s
+playwright-parse-with-cheerio: 449 s
+playwright-process-html: 763 s
+playwright-before-response-send: 52 s
+Time taken for each request: [ 17978, 15099, 16502 ]
+Time taken on average 16526.333333333332
+```
+
+# Memory 8GB, Max Results 3, Proxy: auto
+
+```text
+Average time for each time measure event: Map(10) {
+  'request-received' => [
+    0, 0, 0, 0,
+    0, 0, 0, 0
+  ],
+  'before-cheerio-queue-add' => [
+    148, 148, 178,
+    178, 178, 167,
+    167, 167
+  ],
+  'cheerio-request-handler-start' => [
+    2421, 2421, 2486,
+    2486, 2486, 2474,
+    2474, 2474
+  ],
+  'before-playwright-queue-add' => [
+    19, 19, 27, 27,
+    27,  9,  9,  9
+  ],
+  'playwright-request-start' => [
+    11465, 12067,
+     5774,  4998,
+    14786,  4785,
+     5145,  9222
+  ],
+  'playwright-wait-dynamic-content' => [
+    1826, 10001, 1003,
+    1309, 10001, 1001,
+    1196,  2051
+  ],
+  'playwright-remove-cookie' => [
+     463,  99, 392,
+    2817, 136, 195,
+     102, 127
+  ],
+  'playwright-parse-with-cheerio' => [
+    662, 497, 627,
+    490, 439, 154,
+    132,  86
+  ],
+  'playwright-process-html' => [
+    1959, 1011, 1237,
+    3201,  301,  200,
+     513,  243
+  ],
+  'playwright-before-response-send' => [
+      37, 98, 65,
+    1086, 42,  4,
+     102, 15
+  ]
+}
+request-received: 0 s
+before-cheerio-queue-add: 166 s
+cheerio-request-handler-start: 2465 s
+before-playwright-queue-add: 18 s
+playwright-request-start: 8530 s
+playwright-wait-dynamic-content: 3549 s
+playwright-remove-cookie: 541 s
+playwright-parse-with-cheerio: 386 s
+playwright-process-html: 1083 s
+playwright-before-response-send: 181 s
+Time taken for each request: [
+  19000, 26361,
+  11789, 16592,
+  28396,  8989,
+   9840, 14394
+]
+Time taken on average 16920.125
+```
