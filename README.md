@@ -11,9 +11,9 @@ The RAG Web Browser is designed for Large Language Model (LLM) applications or L
 - Capable of extracting content from JavaScript-enabled websites and bypassing anti-scraping protections.
 - Output formats include plain text, markdown, and HTML.
 
-This Actor is a combination of a two specialized actors:
-- Are you looking to scrape Google Search Results? Check out the [Google Search Results Scraper](https://apify.com/apify/google-search-scraper) actor.
-- Do you need extract content from a list of URLs? Explore the [Website Content Crawler](https://apify.com/apify/website-content-crawler) actor.
+This Actor combines the functionality of two specialized actors: the [Google Search Results Scraper](https://apify.com/apify/google-search-scraper) and the [Website Content Crawler](https://apify.com/apify/website-content-crawler).
+- To scrape only Google Search Results, use the [Google Search Results Scraper](https://apify.com/apify/google-search-scraper) actor.
+- To extract content from a list of URLs, use the [Website Content Crawler](https://apify.com/apify/website-content-crawler) actor.
 
 ## 🏎️ Fast responses using the Standby mode
 
@@ -36,7 +36,7 @@ You need the Actor's standby URL and `APIFY_API_TOKEN`.
 Then, you can send requests to the `/search` path along with your `query` and the number of results (`maxResults`) you want to retrieve.
 
 ```shell
-curl -X GET https://rag-web-browser.apify.actor?token=APIFY_API_TOKEN?query=apify&maxResults=3
+curl -X GET https://rag-web-browser.apify.actor?token=APIFY_API_TOKEN?query=apify
 ```
 
 Here’s an example of the server response (truncated for brevity):
@@ -106,11 +106,11 @@ Results were averaged for the three queries.
 | 8           | 3           | 17          |
 
 Based on your requirements, if low latency is a priority, consider running the Actor with 4GB or 8GB of memory.
-However, if you're looking for a cost-effective solution, you can run the Actor with 2GB of memory but it will be slow.
+However, if you're looking for a cost-effective solution, you can run the Actor with 2GB of memory, but you may experience higher latency and might need to set a longer timeout.
 
 ## 📊 How to set up request timeout?
 
-You can set the `requestTimeoutSecs` parameter to define how long the Actor should spend on making the search request and processing its response.
+You can set the `requestTimeoutSecs` parameter to define how long the Actor should spend on making the search request and crawling.
 If the timeout is exceeded, the Actor will return whatever results were scraped up to that point.
 
 For example, the following outputs (truncated for brevity) illustrate this behavior:
