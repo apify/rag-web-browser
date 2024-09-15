@@ -26,11 +26,15 @@ export function checkForExtraParams(params: ParsedUrlQuery) {
  * Add some overhead for the maxResults to account for the fact that some results are not Organic.
  *
  * The maxResults parameter is passed to the UserData object, when the request is handled it is used to limit
- * the number of search results without the created overhead .
+ * the number of search results without the created overhead.
+ *
+ * Also add the playwrightCrawlerKey to the UserData object to be able to identify the playwright crawler should
+ * handle the crawling .
  */
 export function createSearchRequest(
     query: string,
     maxResults: number,
+    playwrightCrawlerKey: string,
     proxyConfiguration: ProxyConfiguration | undefined,
 ): RequestOptions<UserData> {
     // add some overhead for the maxResults to account for the fact that some results are not Organic
@@ -41,7 +45,11 @@ export function createSearchRequest(
     const groups = proxyConfiguration?.groups || [];
     const protocol = groups.includes('GOOGLE_SERP') ? 'http' : 'https';
     const urlSearch = `${protocol}://www.google.com/search?q=${query}&num=${n}`;
-    return { url: urlSearch, uniqueKey: uuidv4(), userData: { maxResults, timeMeasures: [], query } };
+    return {
+        url: urlSearch,
+        uniqueKey: uuidv4(),
+        userData: { maxResults, timeMeasures: [], query, playwrightCrawlerKey },
+    };
 }
 
 export function createRequest(

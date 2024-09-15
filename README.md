@@ -23,13 +23,6 @@ Normal mode is useful for testing and running in ad-hoc settings, but it comes w
 For optimal performance, it is recommended to run the Actor in Standby mode.
 This allows the Actor to stay active, enabling it to retrieve results with lower latency.
 
-*Limitations*: Running the Actor in Standby mode does not support changing crawling and scraping configurations using query parameters.
-Supporting this would require the following:
-- Creating crawlers on the fly, which would introduce an overhead of 1-2 seconds and potentially result in a large number of crawlers.
-- Setting up a new queue for each crawler to ensure that requests are properly handled by the corresponding crawler.
-- Implementing this will require some refactoring. The simplest approach is to create a new key that combines both crawlers, and then create a named queue and crawler based on this key.
-  `const key = JSON.stringify(cheerioCrawlerOptions) + JSON.stringify(playwrightCrawlerOptions) + JSON.stringify(playwrightScraperSettings);`
-
 ### 🔥 How to start the Actor in a Standby mode?
 
 You need the Actor's standby URL and `APIFY_API_TOKEN`.
@@ -70,17 +63,33 @@ Here’s an example of the server response (truncated for brevity):
 The Standby mode has several configuration parameters, such as Max Requests per Run, Memory, and Idle Timeout.
 You can find the details in the [Standby Mode documentation](https://docs.apify.com/platform/actors/running/standby#how-do-i-customize-standby-configuration).
 
+**Note** Sending a search request to /search will also initiate Standby mode.
+You can use this endpoint for both purposes conveniently
+```shell
+curl -X GET https://rag-web-browser.apify.actor/search?token=APIFY_API_TOKEN?query=apify%20llm
+```
+
 ### 📧 API parameters
 
-When running in the standby mode the RAG Web Browser accept the following query parameters:
+When running in the standby mode the RAG Web Browser accepts the following query parameters:
 
-| parameter            | description                                                                                          |
-|----------------------|------------------------------------------------------------------------------------------------------|
-| `query`              | Search term(s)                                                                                       |
-| `maxResults`         | Number of top search results to return from Google. Only organic results are returned and counted    |
-| `outputFormats`      | Specifies the output formats you want to return (e.g., "markdown", "html"); text is always returned  |
-| `requestTimeoutSecs` | Timeout (in seconds) for making the search request and processing its response                       |
-
+| parameter                        | description                                                                                                                                            |
+|----------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `query`                          | Use regular search words or enter Google Search URLs. You can also apply advanced Google search techniques.                                            |
+| `maxResults`                     | The number of top organic search results to return and scrape text from.                                                                               |
+| `outputFormats`                  | Select the desired output formats for the retrieved content (e.g., "text", "markdown", "html").                                                        |
+| `requestTimeoutSecs`             | The maximum time (in seconds) allowed for the request. If the request exceeds this time, it will be marked as failed.                                  |
+| `proxyGroupSearch`               | Select the proxy group for loading search results. Options: 'GOOGLE_SERP', 'SHADER'.                                                                   |
+| `maxRequestRetriesSearch`        | Maximum number of retry attempts on network, proxy, or server errors for Google search requests.                                                       |
+| `proxyConfiguration`             | Enables loading the websites from IP addresses in specific geographies and to circumvent blocking.                                                     |
+| `initialConcurrency`             | Initial number of Playwright browsers running in parallel. The system scales this value based on CPU and memory usage.                                 |
+| `minConcurrency`                 | Minimum number of Playwright browsers running in parallel. Useful for defining a base level of parallelism.                                            |
+| `maxConcurrency`                 | Maximum number of browsers or clients running in parallel to avoid overloading target websites.                                                        |
+| `maxRequestRetries`              | Maximum number of retry attempts on network, proxy, or server errors for the Playwright content crawler.                                               |
+| `requestTimeoutContentCrawlSecs` | Timeout (in seconds) for making requests for each search result, including fetching and processing its content.                                        |
+| `dynamicContentWaitSecs`         | Maximum time (in seconds) to wait for dynamic content to load. The crawler processes the page once this time elapses or when the network becomes idle. |
+| `removeCookieWarnings`           | If enabled, removes cookie consent dialogs to improve text extraction accuracy. Note that this will impact latency.                                    |
+| `debugMode`                      | If enabled, the Actor will store debugging information in the dataset's debug field.                                                                   |
 
 ## 🏃 What is the best way to run the RAG Web Browser?
 
@@ -107,6 +116,18 @@ Results were averaged for the three queries.
 
 Based on your requirements, if low latency is a priority, consider running the Actor with 4GB or 8GB of memory.
 However, if you're looking for a cost-effective solution, you can run the Actor with 2GB of memory, but you may experience higher latency and might need to set a longer timeout.
+
+## 📈 How to optimize the RAG Web Browser for low latency?
+
+For low latency, it's recommended to run the RAG Web Browser with 8 GB of memory. Additionally, adjust these settings to further optimize performance:
+
+- **Initial Concurrency**: This controls the number of Playwright browsers running in parallel. If you only need a few results (e.g., three), set the initial concurrency to match this number to ensure content is processed simultaneously.
+- **Dynamic Content Wait Secs**: Set this to 0 if you don't need to wait for dynamic content. This can significantly reduce latency.
+- **Remove Cookie Warnings**: If the websites you're scraping don't have cookie warnings, set this to false to slightly improve latency.
+- **Debug Mode**: Enable this to store debugging information if you need to measure the Actor's latency.
+
+If you require a response within a certain timeframe, use the `requestTimeoutSecs` parameter to define the maximum duration the Actor should spend on making search requests and crawling.
+
 
 ## 📊 How to set up request timeout?
 

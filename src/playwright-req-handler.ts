@@ -58,10 +58,30 @@ export async function requestHandlerPlaywright(
     const $ = await context.parseWithCheerio();
     addTimeMeasureEvent(request.userData, 'playwright-parse-with-cheerio');
 
+    const { responseId } = request.userData;
     const headers = response?.headers instanceof Function ? response.headers() : response?.headers;
     // @ts-expect-error false-positive?
     if (!$ || !isValidContentType(headers['content-type'])) {
         log.info(`Skipping URL ${request.loadedUrl} as it could not be parsed.`, contentType as object);
+        const skippedResult: Output = {
+            crawl: {
+                httpStatusCode: response?.status(),
+                httpStatusMessage: "Couldn't parse the content",
+                loadedAt: new Date(),
+                uniqueKey: request.uniqueKey,
+                requestStatus: ContentCrawlerStatus.FAILED,
+            },
+            metadata: { url: request.url },
+            googleSearchResult: request.userData.googleSearchResult!,
+            query: request.userData.query,
+            text: request.userData.googleSearchResult?.description || '',
+        };
+        log.info(`Adding result to the Apify dataset, url: ${request.url}`);
+        await context.pushData(skippedResult);
+        if (responseId) {
+            addResultToResponse(responseId, request.uniqueKey, skippedResult);
+            sendResponseIfFinished(responseId);
+        }
         return;
     }
 
@@ -76,7 +96,7 @@ export async function requestHandlerPlaywright(
     const result: Output = {
         crawl: {
             httpStatusCode: page ? response?.status() : null,
-            httpStatusMessage: "OK",
+            httpStatusMessage: 'OK',
             loadedAt: new Date(),
             uniqueKey: request.uniqueKey,
             requestStatus: ContentCrawlerStatus.HANDLED,
@@ -105,7 +125,6 @@ export async function requestHandlerPlaywright(
 
     log.info(`Adding result to response: ${request.userData.responseId}, request.uniqueKey: ${request.uniqueKey}`);
     // Get responseId from the request.userData, which corresponds to the original search request
-    const { responseId } = request.userData;
     if (responseId) {
         addResultToResponse(responseId, request.uniqueKey, result);
         sendResponseIfFinished(responseId);
