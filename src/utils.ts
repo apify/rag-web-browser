@@ -2,8 +2,9 @@ import { RequestOptions, log, ProxyConfiguration } from 'crawlee';
 import { parse, ParsedUrlQuery } from 'querystring';
 import { v4 as uuidv4 } from 'uuid';
 
-import defaults from './defaults.json' assert { type: 'json' };
 import { OrganicResult, TimeMeasure, UserData } from './types.js';
+
+const defaults = await import('./defaults.json', { assert: { type: 'json' } }).then((module) => module.default);
 
 export function parseParameters(url: string): ParsedUrlQuery {
     return parse(url.slice(1));

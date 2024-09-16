@@ -2,9 +2,10 @@ import { Actor } from 'apify';
 import { BrowserName, CheerioCrawlerOptions, PlaywrightCrawlerOptions } from 'crawlee';
 import { firefox } from 'playwright';
 
-import defaults from './defaults.json' assert { type: 'json' };
 import { UserInputError } from './errors.js';
 import type { Input, PlaywrightScraperSettings } from './types.js';
+
+const defaults = await import('./defaults.json', { assert: { type: 'json' } }).then((module) => module.default);
 
 /**
  * Processes the input and returns the settings for the crawler (adapted from: Website Content Crawler).
