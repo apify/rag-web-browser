@@ -146,10 +146,11 @@ export const addSearchRequest = async (
     response: ServerResponse | null,
     cheerioCrawlerOptions: CheerioCrawlerOptions,
 ) => {
-    const crawler = crawlers.get(getSearchCrawlerKey(cheerioCrawlerOptions));
+    const key = getSearchCrawlerKey(cheerioCrawlerOptions);
+    const crawler = crawlers.get(key);
 
     if (!crawler) {
-        log.error(`Cheerio crawler with key ${getSearchCrawlerKey(cheerioCrawlerOptions)} not found`);
+        log.error(`Cheerio crawler not found: key ${key}`);
         return;
     }
 
@@ -173,7 +174,7 @@ export const addPlaywrightCrawlRequest = async (
 ) => {
     const crawler = crawlers.get(playwrightCrawlerKey);
     if (!crawler) {
-        log.error(`Playwright crawler with key ${playwrightCrawlerKey} not found`);
+        log.error(`Playwright crawler not found: key ${playwrightCrawlerKey}`);
         return;
     }
     await crawler.requestQueue!.addRequest(request);

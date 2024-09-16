@@ -2,7 +2,7 @@ import { Actor } from 'apify';
 import { BrowserName, CheerioCrawlerOptions, PlaywrightCrawlerOptions } from 'crawlee';
 import { firefox } from 'playwright';
 
-import defaults from './defaults.json' assert { type: 'json' };
+import defaults from './defaults.json' with { type: 'json' };
 import { UserInputError } from './errors.js';
 import type { Input, PlaywrightScraperSettings } from './types.js';
 
