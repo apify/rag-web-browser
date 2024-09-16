@@ -131,7 +131,7 @@ export async function requestHandlerPlaywright(
     }
 }
 
-export async function failedRequestHandlerPlaywright(request: Request, context: PlaywrightCrawlingContext, err: Error) {
+export async function failedRequestHandlerPlaywright(request: Request, err: Error, context: PlaywrightCrawlingContext) {
     log.error(`Playwright-content-crawler failed to process request ${request.url}, error ${err.message}`);
     request.userData.timeMeasures!.push({ event: 'playwright-failed-request', time: Date.now() });
     const { responseId } = request.userData;
