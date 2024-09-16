@@ -1,3 +1,4 @@
+import { Actor } from 'apify';
 import { load } from 'cheerio';
 import { htmlToText, log, PlaywrightCrawlingContext, sleep, Request } from 'crawlee';
 
@@ -131,7 +132,7 @@ export async function requestHandlerPlaywright(
     }
 }
 
-export async function failedRequestHandlerPlaywright(request: Request, err: Error, context: PlaywrightCrawlingContext) {
+export async function failedRequestHandlerPlaywright(request: Request, err: Error) {
     log.error(`Playwright-content-crawler failed to process request ${request.url}, error ${err.message}`);
     request.userData.timeMeasures!.push({ event: 'playwright-failed-request', time: Date.now() });
     const { responseId } = request.userData;
@@ -152,7 +153,7 @@ export async function failedRequestHandlerPlaywright(request: Request, err: Erro
             text: request.userData.googleSearchResult?.description || '',
         };
         log.info(`Adding result to the Apify dataset, url: ${request.url}`);
-        await context.pushData(resultErr);
+        await Actor.pushData({ resultErr });
         addResultToResponse(responseId, request.uniqueKey, resultErr);
         sendResponseIfFinished(responseId);
     }
