@@ -2,7 +2,7 @@ import { load } from 'cheerio';
 import { htmlToText, log, PlaywrightCrawlingContext, sleep, Request } from 'crawlee';
 
 import { ContentCrawlerStatus } from './const.js';
-import { addResultToResponse, sendResponseError, sendResponseIfFinished } from './responses.js';
+import { addResultToResponse, sendResponseIfFinished } from './responses.js';
 import { Output, PlaywrightScraperSettings, UserData } from './types.js';
 import { addTimeMeasureEvent, transformTimeMeasuresToRelative } from './utils.js';
 import { processHtml } from './website-content-crawler/html-processing.js';
@@ -63,7 +63,7 @@ export async function requestHandlerPlaywright(
     // @ts-expect-error false-positive?
     if (!$ || !isValidContentType(headers['content-type'])) {
         log.info(`Skipping URL ${request.loadedUrl} as it could not be parsed.`, contentType as object);
-        const skippedResult: Output = {
+        const resultSkipped: Output = {
             crawl: {
                 httpStatusCode: response?.status(),
                 httpStatusMessage: "Couldn't parse the content",
@@ -77,9 +77,9 @@ export async function requestHandlerPlaywright(
             text: request.userData.googleSearchResult?.description || '',
         };
         log.info(`Adding result to the Apify dataset, url: ${request.url}`);
-        await context.pushData(skippedResult);
+        await context.pushData(resultSkipped);
         if (responseId) {
-            addResultToResponse(responseId, request.uniqueKey, skippedResult);
+            addResultToResponse(responseId, request.uniqueKey, resultSkipped);
             sendResponseIfFinished(responseId);
         }
         return;
@@ -131,12 +131,29 @@ export async function requestHandlerPlaywright(
     }
 }
 
-export async function failedRequestHandlerPlaywright(request: Request, err: Error) {
+export async function failedRequestHandlerPlaywright(request: Request, context: PlaywrightCrawlingContext, err: Error) {
     log.error(`Playwright-content-crawler failed to process request ${request.url}, error ${err.message}`);
     request.userData.timeMeasures!.push({ event: 'playwright-failed-request', time: Date.now() });
     const { responseId } = request.userData;
     if (responseId) {
-        const errorResponse = { errorMessage: err.message };
-        sendResponseError(responseId, JSON.stringify(errorResponse));
+        const resultErr: Output = {
+            crawl: {
+                httpStatusCode: 500,
+                httpStatusMessage: err.message,
+                loadedAt: new Date(),
+                uniqueKey: request.uniqueKey,
+                requestStatus: ContentCrawlerStatus.FAILED,
+            },
+            googleSearchResult: request.userData.googleSearchResult!,
+            metadata: {
+                url: request.url,
+                title: request.userData.googleSearchResult?.title,
+            },
+            text: request.userData.googleSearchResult?.description || '',
+        };
+        log.info(`Adding result to the Apify dataset, url: ${request.url}`);
+        await context.pushData(resultErr);
+        addResultToResponse(responseId, request.uniqueKey, resultErr);
+        sendResponseIfFinished(responseId);
     }
 }
