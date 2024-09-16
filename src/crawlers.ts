@@ -13,7 +13,6 @@ import {
 } from 'crawlee';
 import { ServerResponse } from 'http';
 
-import { CrawlerQueueName, CrawlerType } from './const.js';
 import { scrapeOrganicResults } from './google-search/google-extractors-urls.js';
 import { failedRequestHandlerPlaywright, requestHandlerPlaywright } from './playwright-req-handler.js';
 import { createResponse, addEmptyResultToResponse, sendResponseError } from './responses.js';
@@ -25,28 +24,53 @@ const client = new MemoryStorage({ persistStorage: false });
 
 log.setLevel(log.LEVELS.DEBUG);
 
+export function getSearchCrawlerKey(cheerioCrawlerOptions: CheerioCrawlerOptions) {
+    return JSON.stringify(cheerioCrawlerOptions);
+}
+
+export function getPlaywrightCrawlerKey(
+    playwrightCrawlerOptions: PlaywrightCrawlerOptions,
+    playwrightScraperSettings: PlaywrightScraperSettings,
+) {
+    return JSON.stringify(playwrightCrawlerOptions) + JSON.stringify(playwrightScraperSettings);
+}
+
 /**
- * Creates and starts a Google search crawler with the provided configuration.
- * Additionally, it can use the playwright crawler configuration to spin up a new playwright crawler.
- *
- * Note: In the future, the actor might run in standby mode with a different configuration,
- * which may require creating a new Playwright content crawler with a different options and settings.
+ * Creates and starts a Google search crawler and Playwright content crawler with the provided configurations.
  */
-export async function createAndStartSearchCrawler(
+export async function createAndStartCrawlers(
     cheerioCrawlerOptions: CheerioCrawlerOptions,
     playwrightCrawlerOptions: PlaywrightCrawlerOptions,
     playwrightScraperSettings: PlaywrightScraperSettings,
+    startCrawlers: boolean = true,
+) {
+    const crawler1 = await createAndStartSearchCrawler(cheerioCrawlerOptions, startCrawlers);
+    const crawler2 = await createAndStartCrawlerPlaywright(playwrightCrawlerOptions, playwrightScraperSettings);
+    return [crawler1, crawler2];
+}
+
+/**
+ * Creates and starts a Google search crawler with the provided configuration.
+ */
+async function createAndStartSearchCrawler(
+    cheerioCrawlerOptions: CheerioCrawlerOptions,
     startCrawler: boolean = true,
 ) {
+    const key = getSearchCrawlerKey(cheerioCrawlerOptions);
+    if (crawlers.has(key)) {
+        return crawlers.get(key);
+    }
+
+    log.info(`Creating new cheerio crawler with key ${key}`);
     const crawler = new CheerioCrawler({
         ...(cheerioCrawlerOptions as CheerioCrawlerOptions),
-        requestQueue: await RequestQueue.open(CrawlerQueueName.CHEERIO_SEARCH_QUEUE, { storageClient: client }),
+        requestQueue: await RequestQueue.open(key, { storageClient: client }),
         requestHandler: async ({ request, $: _$ }: CheerioCrawlingContext<UserData>) => {
             // NOTE: we need to cast this to fix `cheerio` type errors
             addTimeMeasureEvent(request.userData!, 'cheerio-request-handler-start');
             const $ = _$ as CheerioAPI;
 
-            log.info(`${CrawlerType.CHEERIO_GOOGLE_SEARCH_CRAWLER} requestHandler: Processing URL: ${request.url}`);
+            log.info(`Search-crawler requestHandler: Processing URL: ${request.url}`);
             const organicResults = scrapeOrganicResults($);
 
             // filter organic results to get only results with URL
@@ -60,7 +84,7 @@ export async function createAndStartSearchCrawler(
             const responseId = request.uniqueKey;
             for (const result of results) {
                 const r = createRequest(result, responseId, request.userData.timeMeasures!);
-                await addContentCrawlRequest(r, responseId, playwrightCrawlerOptions, playwrightScraperSettings);
+                await addPlaywrightCrawlRequest(r, responseId, request.userData.playwrightCrawlerKey!);
             }
         },
         failedRequestHandler: async ({ request }, err) => {
@@ -77,24 +101,26 @@ export async function createAndStartSearchCrawler(
         );
         log.info('Google-search-crawler has started 🫡');
     }
-    // The `crawlers` map is currently not required but is included for future use when different crawling options
-    // might be needed.
-    const key = CrawlerType.CHEERIO_GOOGLE_SEARCH_CRAWLER;
     crawlers.set(key, crawler);
+    log.info(`Number of crawlers ${crawlers.size}`);
     return crawler;
 }
 
-export async function createAndStartCrawlerPlaywright(
+async function createAndStartCrawlerPlaywright(
     crawlerOptions: PlaywrightCrawlerOptions,
     settings: PlaywrightScraperSettings,
     startCrawler: boolean = true,
 ) {
+    const key = getPlaywrightCrawlerKey(crawlerOptions, settings);
+    if (crawlers.has(key)) {
+        return crawlers.get(key);
+    }
+
+    log.info(`Creating new playwright crawler with key ${key}`);
     const crawler = new PlaywrightCrawler({
         ...(crawlerOptions as PlaywrightCrawlerOptions),
         keepAlive: crawlerOptions.keepAlive,
-        requestQueue: await RequestQueue.open(CrawlerQueueName.PLAYWRIGHT_CONTENT_CRAWL_QUEUE, {
-            storageClient: client,
-        }),
+        requestQueue: await RequestQueue.open(key, { storageClient: client }),
         requestHandler: (context: PlaywrightCrawlingContext) => requestHandlerPlaywright(context, settings),
         failedRequestHandler: ({ request }, err) => failedRequestHandlerPlaywright(request, err),
     });
@@ -106,10 +132,8 @@ export async function createAndStartCrawlerPlaywright(
         );
         log.info('Crawler playwright has started 💪🏼');
     }
-    // The `crawlers` map is currently not required but is included for future use when different crawling options
-    // might be needed.
-    const key = CrawlerType.PLAYWRIGHT_CONTENT_CRAWLER;
     crawlers.set(key, crawler);
+    log.info(`Number of crawlers ${crawlers.size}`);
     return crawler;
 }
 
@@ -121,13 +145,14 @@ export const addSearchRequest = async (
     request: RequestOptions<UserData>,
     response: ServerResponse | null,
     cheerioCrawlerOptions: CheerioCrawlerOptions,
-    playwrightCrawlerOptions: PlaywrightCrawlerOptions,
-    playwrightScraperSettings: PlaywrightScraperSettings,
 ) => {
-    const key = CrawlerType.CHEERIO_GOOGLE_SEARCH_CRAWLER;
-    const crawler = crawlers.has(key)
-        ? crawlers.get(key)!
-        : await createAndStartSearchCrawler(cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings);
+    const key = getSearchCrawlerKey(cheerioCrawlerOptions);
+    const crawler = crawlers.get(key);
+
+    if (!crawler) {
+        log.error(`Cheerio crawler not found: key ${key}`);
+        return;
+    }
 
     if (response) {
         createResponse(request.uniqueKey!, response);
@@ -142,14 +167,16 @@ export const addSearchRequest = async (
  * Adds a content crawl request to the Playwright content crawler.
  * Get existing crawler based on crawlerOptions and scraperSettings, if not present -> create new
  */
-export const addContentCrawlRequest = async (
+export const addPlaywrightCrawlRequest = async (
     request: RequestOptions<UserData>,
     responseId: string,
-    crawlerOptions: PlaywrightCrawlerOptions,
-    scraperSettings: PlaywrightScraperSettings,
+    playwrightCrawlerKey: string,
 ) => {
-    const key = CrawlerType.PLAYWRIGHT_CONTENT_CRAWLER;
-    const crawler = crawlers.get(key) ?? (await createAndStartCrawlerPlaywright(crawlerOptions, scraperSettings));
+    const crawler = crawlers.get(playwrightCrawlerKey);
+    if (!crawler) {
+        log.error(`Playwright crawler not found: key ${playwrightCrawlerKey}`);
+        return;
+    }
     await crawler.requestQueue!.addRequest(request);
     // create an empty result in search request response
     // do not use request.uniqueKey as responseId as it is not id of a search request

@@ -1,8 +1,9 @@
+import { Actor } from 'apify';
 import { load } from 'cheerio';
 import { htmlToText, log, PlaywrightCrawlingContext, sleep, Request } from 'crawlee';
 
 import { ContentCrawlerStatus } from './const.js';
-import { addResultToResponse, sendResponseError, sendResponseIfFinished } from './responses.js';
+import { addResultToResponse, sendResponseIfFinished } from './responses.js';
 import { Output, PlaywrightScraperSettings, UserData } from './types.js';
 import { addTimeMeasureEvent, transformTimeMeasuresToRelative } from './utils.js';
 import { processHtml } from './website-content-crawler/html-processing.js';
@@ -58,10 +59,30 @@ export async function requestHandlerPlaywright(
     const $ = await context.parseWithCheerio();
     addTimeMeasureEvent(request.userData, 'playwright-parse-with-cheerio');
 
+    const { responseId } = request.userData;
     const headers = response?.headers instanceof Function ? response.headers() : response?.headers;
     // @ts-expect-error false-positive?
     if (!$ || !isValidContentType(headers['content-type'])) {
         log.info(`Skipping URL ${request.loadedUrl} as it could not be parsed.`, contentType as object);
+        const resultSkipped: Output = {
+            crawl: {
+                httpStatusCode: response?.status(),
+                httpStatusMessage: "Couldn't parse the content",
+                loadedAt: new Date(),
+                uniqueKey: request.uniqueKey,
+                requestStatus: ContentCrawlerStatus.FAILED,
+            },
+            metadata: { url: request.url },
+            googleSearchResult: request.userData.googleSearchResult!,
+            query: request.userData.query,
+            text: request.userData.googleSearchResult?.description || '',
+        };
+        log.info(`Adding result to the Apify dataset, url: ${request.url}`);
+        await context.pushData(resultSkipped);
+        if (responseId) {
+            addResultToResponse(responseId, request.uniqueKey, resultSkipped);
+            sendResponseIfFinished(responseId);
+        }
         return;
     }
 
@@ -76,7 +97,7 @@ export async function requestHandlerPlaywright(
     const result: Output = {
         crawl: {
             httpStatusCode: page ? response?.status() : null,
-            httpStatusMessage: "OK",
+            httpStatusMessage: 'OK',
             loadedAt: new Date(),
             uniqueKey: request.uniqueKey,
             requestStatus: ContentCrawlerStatus.HANDLED,
@@ -105,7 +126,6 @@ export async function requestHandlerPlaywright(
 
     log.info(`Adding result to response: ${request.userData.responseId}, request.uniqueKey: ${request.uniqueKey}`);
     // Get responseId from the request.userData, which corresponds to the original search request
-    const { responseId } = request.userData;
     if (responseId) {
         addResultToResponse(responseId, request.uniqueKey, result);
         sendResponseIfFinished(responseId);
@@ -117,7 +137,24 @@ export async function failedRequestHandlerPlaywright(request: Request, err: Erro
     request.userData.timeMeasures!.push({ event: 'playwright-failed-request', time: Date.now() });
     const { responseId } = request.userData;
     if (responseId) {
-        const errorResponse = { errorMessage: err.message };
-        sendResponseError(responseId, JSON.stringify(errorResponse));
+        const resultErr: Output = {
+            crawl: {
+                httpStatusCode: 500,
+                httpStatusMessage: err.message,
+                loadedAt: new Date(),
+                uniqueKey: request.uniqueKey,
+                requestStatus: ContentCrawlerStatus.FAILED,
+            },
+            googleSearchResult: request.userData.googleSearchResult!,
+            metadata: {
+                url: request.url,
+                title: request.userData.googleSearchResult?.title,
+            },
+            text: request.userData.googleSearchResult?.description || '',
+        };
+        log.info(`Adding result to the Apify dataset, url: ${request.url}`);
+        await Actor.pushData({ resultErr });
+        addResultToResponse(responseId, request.uniqueKey, resultErr);
+        sendResponseIfFinished(responseId);
     }
 }

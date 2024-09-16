@@ -76,6 +76,21 @@ export const sendResponseOk = (responseId: string, result: unknown, contentType:
 };
 
 /**
+ * Check if all results have been handled.
+ */
+const checkAllResultsHandled = (responseId: string) => {
+    const res = getResponse(responseId);
+    if (!res) return;
+
+    for (const key of res.resultsMap.keys()) {
+        if (res.resultsMap.get(key)!.crawl.requestStatus === ContentCrawlerStatus.PENDING) {
+            return false;
+        }
+    }
+    return true;
+};
+
+/**
  * Send response with error status code. If the response contains some handled requests,
  * return 200 status otherwise 500.
  *
@@ -117,11 +132,8 @@ export const sendResponseIfFinished = (responseId: string) => {
     const res = getResponse(responseId);
     if (!res) return;
 
-    // Check if all results have been handled or failed
-    const allResults = Array.from(res.resultsMap.values());
-    const allResultsHandled = allResults.every((_r) => _r.crawl.requestStatus !== ContentCrawlerStatus.PENDING);
-    if (allResultsHandled) {
-        sendResponseOk(responseId, JSON.stringify(allResults), 'application/json');
+    if (checkAllResultsHandled(responseId)) {
+        sendResponseOk(responseId, JSON.stringify(Array.from(res.resultsMap.values())), 'application/json');
         responseData.delete(responseId);
     }
 };
