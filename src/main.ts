@@ -34,10 +34,10 @@ async function getSearch(request: IncomingMessage, response: ServerResponse) {
 
         await checkInputsAreValid(input);
 
-        await createAndStartCrawlers(cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings);
-
         // playwrightCrawlerKey is used to identify the crawler that should process the search results
         const playwrightCrawlerKey = getPlaywrightCrawlerKey(playwrightCrawlerOptions, playwrightScraperSettings);
+        await createAndStartCrawlers(cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings);
+
         const req = createSearchRequest(
             input.query,
             input.maxResults,
