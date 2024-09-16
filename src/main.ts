@@ -111,6 +111,8 @@ if (Actor.getEnv().metaOrigin === 'STANDBY') {
         cheerioCrawlerOptions.keepAlive = false;
         playwrightCrawlerOptions.keepAlive = false;
 
+        // playwrightCrawlerKey is used to identify the crawler that should process the search results
+        const playwrightCrawlerKey = getPlaywrightCrawlerKey(playwrightCrawlerOptions, playwrightScraperSettings);
         const [searchCrawler, playwrightCrawler] = await createAndStartCrawlers(
             cheerioCrawlerOptions,
             playwrightCrawlerOptions,
@@ -118,8 +120,6 @@ if (Actor.getEnv().metaOrigin === 'STANDBY') {
             false,
         );
 
-        // playwrightCrawlerKey is used to identify the crawler that should process the search results
-        const playwrightCrawlerKey = getPlaywrightCrawlerKey(playwrightCrawlerOptions, playwrightScraperSettings);
         const req = createSearchRequest(
             input.query,
             input.maxResults,
