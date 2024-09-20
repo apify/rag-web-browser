@@ -153,7 +153,7 @@ export async function failedRequestHandlerPlaywright(request: Request, err: Erro
             text: request.userData.googleSearchResult?.description || '',
         };
         log.info(`Adding result to the Apify dataset, url: ${request.url}`);
-        await Actor.pushData({ resultErr });
+        await Actor.pushData(resultErr);
         addResultToResponse(responseId, request.uniqueKey, resultErr);
         sendResponseIfFinished(responseId);
     }
