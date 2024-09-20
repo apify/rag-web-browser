@@ -1,5 +1,10 @@
 This changelog summarizes all changes of the RAG Web Browser
 
+### 2024-09-20
+
+🐛 Bug Fixes
+- Fix response format when crawler fails
+
 ### 2024-09-24
 
 🚀 Features
