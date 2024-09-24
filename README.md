@@ -25,11 +25,15 @@ This allows the Actor to stay active, enabling it to retrieve results with lower
 
 ### 🔥 How to start the Actor in a Standby mode?
 
-You need the Actor's standby URL and `APIFY_API_TOKEN`.
-Then, you can send requests to the `/search` path along with your `query` and the number of results (`maxResults`) you want to retrieve.
+You need know the Actor's standby URL and `APIFY_API_TOKEN` to start the Actor in Standby mode.
 
 ```shell
-curl -X GET https://rag-web-browser.apify.actor?token=APIFY_API_TOKEN?query=apify
+curl -X GET https://rag-web-browser.apify.actor?token=APIFY_API_TOKEN
+```
+
+Then, you can send requests to the `/search` path along with your `query` and the number of results (`maxResults`) you want to retrieve.
+```shell
+curl -X GET https://rag-web-browser.apify.actor/search?token=APIFY_API_TOKEN&query=apify&maxResults=1
 ```
 
 Here’s an example of the server response (truncated for brevity):
@@ -63,7 +67,7 @@ Here’s an example of the server response (truncated for brevity):
 The Standby mode has several configuration parameters, such as Max Requests per Run, Memory, and Idle Timeout.
 You can find the details in the [Standby Mode documentation](https://docs.apify.com/platform/actors/running/standby#how-do-i-customize-standby-configuration).
 
-**Note** Sending a search request to /search will also initiate Standby mode.
+**Note** Sending a search request to `/search` will also initiate Standby mode.
 You can use this endpoint for both purposes conveniently
 ```shell
 curl -X GET https://rag-web-browser.apify.actor/search?token=APIFY_API_TOKEN?query=apify%20llm
