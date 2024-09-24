@@ -122,6 +122,7 @@ Results were averaged for the three queries.
 
 Based on your requirements, if low latency is a priority, consider running the Actor with 4GB or 8GB of memory.
 However, if you're looking for a cost-effective solution, you can run the Actor with 2GB of memory, but you may experience higher latency and might need to set a longer timeout.
+
 If you need to gather more results, you can increase the memory and adjust the `initialConcurrency` parameter accordingly.
 
 ## 🎢 How to optimize the RAG Web Browser for low latency?
