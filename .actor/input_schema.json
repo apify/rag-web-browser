@@ -111,7 +111,6 @@
             "default": 30
         },
         "dynamicContentWaitSecs": {
-            "sectionCaption": "HTML processing",
             "title": "Wait for dynamic content (seconds)",
             "type": "integer",
             "description": "Maximum time (in seconds) to wait for dynamic content to load. The crawler processes the page once this time elapses or when the network becomes idle.",
