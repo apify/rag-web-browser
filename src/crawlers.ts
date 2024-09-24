@@ -22,8 +22,6 @@ import { addTimeMeasureEvent, createRequest } from './utils.js';
 const crawlers = new Map<string, CheerioCrawler | PlaywrightCrawler>();
 const client = new MemoryStorage({ persistStorage: false });
 
-log.setLevel(log.LEVELS.DEBUG);
-
 export function getSearchCrawlerKey(cheerioCrawlerOptions: CheerioCrawlerOptions) {
     return JSON.stringify(cheerioCrawlerOptions);
 }

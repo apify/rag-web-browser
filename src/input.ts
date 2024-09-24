@@ -1,5 +1,5 @@
 import { Actor } from 'apify';
-import { BrowserName, CheerioCrawlerOptions, PlaywrightCrawlerOptions } from 'crawlee';
+import { BrowserName, CheerioCrawlerOptions, log, PlaywrightCrawlerOptions } from 'crawlee';
 import { firefox } from 'playwright';
 
 import defaults from './defaults.json' with { type: 'json' };
@@ -32,6 +32,8 @@ export async function processInput(originalInput: Partial<Input>) {
         readableTextCharThreshold,
         removeCookieWarnings,
     } = input;
+
+    if (input.debugMode) log.setLevel(log.LEVELS.DEBUG);
 
     const proxySearch = await Actor.createProxyConfiguration({ groups: [proxyGroupSearch] });
     const cheerioCrawlerOptions: CheerioCrawlerOptions = {
