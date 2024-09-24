@@ -1,5 +1,13 @@
 This changelog summarizes all changes of the RAG Web Browser
 
+### 2024-09-24
+
+🚀 Features
+- Updated README.md to include tips on improving latency
+- Set initialConcurrency to 5
+- Set minConcurrency to 3
+- Set logLevel to INFO
+
 ### 2024-09-20
 
 🐛 Bug Fixes

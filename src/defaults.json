@@ -1,7 +1,7 @@
 {
     "debugMode": false,
     "dynamicContentWaitSecs": 10,
-    "initialConcurrency": 3,
+    "initialConcurrency": 5,
     "keepAlive": true,
     "maxConcurrency": 10,
     "maxRequestRetries": 1,

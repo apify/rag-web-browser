@@ -25,11 +25,15 @@ This allows the Actor to stay active, enabling it to retrieve results with lower
 
 ### 🔥 How to start the Actor in a Standby mode?
 
-You need the Actor's standby URL and `APIFY_API_TOKEN`.
-Then, you can send requests to the `/search` path along with your `query` and the number of results (`maxResults`) you want to retrieve.
+You need know the Actor's standby URL and `APIFY_API_TOKEN` to start the Actor in Standby mode.
 
 ```shell
-curl -X GET https://rag-web-browser.apify.actor?token=APIFY_API_TOKEN?query=apify
+curl -X GET https://rag-web-browser.apify.actor?token=APIFY_API_TOKEN
+```
+
+Then, you can send requests to the `/search` path along with your `query` and the number of results (`maxResults`) you want to retrieve.
+```shell
+curl -X GET https://rag-web-browser.apify.actor/search?token=APIFY_API_TOKEN&query=apify&maxResults=1
 ```
 
 Here’s an example of the server response (truncated for brevity):
@@ -63,7 +67,7 @@ Here’s an example of the server response (truncated for brevity):
 The Standby mode has several configuration parameters, such as Max Requests per Run, Memory, and Idle Timeout.
 You can find the details in the [Standby Mode documentation](https://docs.apify.com/platform/actors/running/standby#how-do-i-customize-standby-configuration).
 
-**Note** Sending a search request to /search will also initiate Standby mode.
+**Note** Sending a search request to `/search` will also initiate Standby mode.
 You can use this endpoint for both purposes conveniently
 ```shell
 curl -X GET https://rag-web-browser.apify.actor/search?token=APIFY_API_TOKEN?query=apify%20llm
@@ -76,7 +80,7 @@ When running in the standby mode the RAG Web Browser accepts the following query
 | parameter                        | description                                                                                                                                            |
 |----------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `query`                          | Use regular search words or enter Google Search URLs. You can also apply advanced Google search techniques.                                            |
-| `maxResults`                     | The number of top organic search results to return and scrape text from.                                                                               |
+| `maxResults`                     | The number of top organic search results to return and scrape text from (maximum is 50).                                                               |
 | `outputFormats`                  | Select the desired output formats for the retrieved content (e.g., "text", "markdown", "html").                                                        |
 | `requestTimeoutSecs`             | The maximum time (in seconds) allowed for the request. If the request exceeds this time, it will be marked as failed.                                  |
 | `proxyGroupSearch`               | Select the proxy group for loading search results. Options: 'GOOGLE_SERP', 'SHADER'.                                                                   |
@@ -98,9 +102,11 @@ The Standby mode allows the Actor to stay active, enabling it to retrieve result
 
 ## ⏳ What is the expected latency?
 
-The latency is proportional to the memory allocated to the Actor and number of results requested.
+The latency is proportional to the **memory allocated** to the Actor and **number of results requested**.
 
-Here is a typical latency breakdown for the RAG Web Browser.
+Below is a typical latency breakdown for the RAG Web Browser with **initialConcurrency=3** and **maxResults** set to either 1 or 3.
+These settings allow for processing all search results in parallel.
+
 Please note the these results are only indicative and may vary based on the search term, the target websites,
 and network latency.
 
@@ -117,11 +123,13 @@ Results were averaged for the three queries.
 Based on your requirements, if low latency is a priority, consider running the Actor with 4GB or 8GB of memory.
 However, if you're looking for a cost-effective solution, you can run the Actor with 2GB of memory, but you may experience higher latency and might need to set a longer timeout.
 
+If you need to gather more results, you can increase the memory and adjust the `initialConcurrency` parameter accordingly.
+
 ## 🎢 How to optimize the RAG Web Browser for low latency?
 
 For low latency, it's recommended to run the RAG Web Browser with 8 GB of memory. Additionally, adjust these settings to further optimize performance:
 
-- **Initial Concurrency**: This controls the number of Playwright browsers running in parallel. If you only need a few results (e.g., three), set the initial concurrency to match this number to ensure content is processed simultaneously.
+- **Initial Concurrency**: This controls the number of Playwright browsers running in parallel. If you only need a few results (e.g., 3, 5, or 10), set the initial concurrency to match this number to ensure content is processed simultaneously.
 - **Dynamic Content Wait Secs**: Set this to 0 if you don't need to wait for dynamic content. This can significantly reduce latency.
 - **Remove Cookie Warnings**: If the websites you're scraping don't have cookie warnings, set this to false to slightly improve latency.
 - **Debug Mode**: Enable this to store debugging information if you need to measure the Actor's latency.
