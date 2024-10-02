@@ -6,7 +6,7 @@ Given a search query, it fetches the top Google search result URLs and then foll
 The RAG Web Browser is designed for Large Language Model (LLM) applications or LLM agents to provide up-to-date Google search knowledge.
 
 **✨ Main features**:
-- Searches Google and extracts the top Organic results.
+- Searches Google and extracts the top Organic results. The Google search country is set to the United States.
 - Follows the top URLs to scrape HTML and extract website text, excluding navigation, ads, banners, etc.
 - Capable of extracting content from JavaScript-enabled websites and bypassing anti-scraping protections.
 - Output formats include plain text, markdown, and HTML.
@@ -14,6 +14,11 @@ The RAG Web Browser is designed for Large Language Model (LLM) applications or L
 This Actor combines the functionality of two specialized actors: the [Google Search Results Scraper](https://apify.com/apify/google-search-scraper) and the [Website Content Crawler](https://apify.com/apify/website-content-crawler).
 - To scrape only Google Search Results, use the [Google Search Results Scraper](https://apify.com/apify/google-search-scraper) actor.
 - To extract content from a list of URLs, use the [Website Content Crawler](https://apify.com/apify/website-content-crawler) actor.
+
+ⓘ The Actor defaults to using Google Search in the United States.
+As a result, queries like "find the best restaurant nearby" will return results from the US.
+Other countries are not currently supported.
+If you need support for a different region, please create an issue to let us know.
 
 ## 🚀 Fast responses using the Standby mode
 
