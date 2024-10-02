@@ -6,7 +6,7 @@ Given a search query, it fetches the top Google search result URLs and then foll
 The RAG Web Browser is designed for Large Language Model (LLM) applications or LLM agents to provide up-to-date Google search knowledge.
 
 **✨ Main features**:
-- Searches Google and extracts the top Organic results. The Actor country is set to the United States.
+- Searches Google and extracts the top Organic results. The Google search country is set to the United States.
 - Follows the top URLs to scrape HTML and extract website text, excluding navigation, ads, banners, etc.
 - Capable of extracting content from JavaScript-enabled websites and bypassing anti-scraping protections.
 - Output formats include plain text, markdown, and HTML.
