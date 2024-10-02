@@ -1,0 +1,76 @@
+{
+    "actorSpecification": 1,
+    "name": "rag-web-browser",
+    "title": "RAG Web browser",
+    "description": "Web browser for a retrieval augmented generation workflows. Retrieve and return website content from the top Google Search Results Pages",
+    "version": "0.1",
+    "input": "./input_schema.json",
+    "dockerfile": "./Dockerfile",
+    "storages": {
+        "dataset": {
+            "actorSpecification": 1,
+            "title": "RAG Web browser",
+            "description": "Too see all scraped properties, export the whole dataset or select All fields instead of Overview",
+            "views": {
+                "overview": {
+                    "title": "Overview",
+                    "description": "Selected fields from the dataset",
+                    "transformation": {
+                        "fields": [
+                            "metadata.url",
+                            "metadata.title",
+                            "text"
+                        ],
+                        "flatten": ["metadata"]
+                    },
+                    "display": {
+                        "component": "table",
+                        "properties": {
+                            "metadata.url": {
+                                "label": "Page URL",
+                                "format": "text"
+                            },
+                            "metadata.title": {
+                                "label": "Page Title",
+                                "format": "text"
+                            },
+                            "text": {
+                                "label": "Extracted text",
+                                "format": "text"
+                            }
+                        }
+                    }
+                },
+                "googleSearchResults": {
+                    "title": "Google Search Results",
+                    "description": "Title, Description and URL of the Google Search Results",
+                    "transformation": {
+                        "fields": [
+                            "googleSearchResult.description",
+                            "googleSearchResult.title",
+                            "googleSearchResult.url"
+                        ],
+                        "flatten": ["googleSearchResult"]
+                    },
+                    "display": {
+                        "component": "table",
+                        "properties": {
+                            "googleSearchResult.description": {
+                                "label": "Description",
+                                "format": "text"
+                            },
+                            "googleSearchResult.title": {
+                                "label": "Title",
+                                "format": "text"
+                            },
+                            "googleSearchResult.url": {
+                                "label": "URL",
+                                "format": "text"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

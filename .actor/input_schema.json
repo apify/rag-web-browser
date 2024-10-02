@@ -1,0 +1,133 @@
+{
+    "title": "RAG Web Browser",
+    "description": "RAG Web Browser for a retrieval augmented generation workflows. Retrieve and return website content from the top Google Search Results Pages",
+    "type": "object",
+    "schemaVersion": 1,
+    "properties": {
+        "query": {
+            "title": "Search term(s)",
+            "type": "string",
+            "description": "Use regular search words or enter Google Search URLs. You can also apply [advanced Google search techniques](https://blog.apify.com/how-to-scrape-google-like-a-pro/), such as <code>AI site:twitter.com</code> or <code>javascript OR python</code>",
+            "prefill": "apify rag browser",
+            "editor": "textarea",
+            "pattern": "[^\\s]+"
+        },
+        "maxResults": {
+            "title": "Number of top search results to return from Google. Only organic results are returned and counted",
+            "type": "integer",
+            "description": "The number of top organic search results to return and scrape text from",
+            "prefill": 3,
+            "minimum": 1,
+            "maximum": 50
+        },
+        "outputFormats": {
+            "title": "Output formats",
+            "type": "array",
+            "description": "Select the desired output formats for the retrieved content",
+            "editor": "select",
+            "default": ["text"],
+            "items": {
+                "type": "string",
+                "enum": ["text", "markdown", "html"],
+                "enumTitles": ["Plain text", "Markdown", "HTML"]
+            }
+        },
+        "requestTimeoutSecs": {
+            "title": "Request timeout in seconds",
+            "type": "integer",
+            "description": "The maximum time (in seconds) allowed for request. If the request exceeds this time, it will be marked as failed and only already finished results will be returned",
+            "minimum": 1,
+            "maximum": 600,
+            "default": 60
+        },
+        "proxyGroupSearch": {
+            "title": "Search Proxy Group",
+            "type": "string",
+            "description": "Select the proxy group for loading search results",
+            "editor": "select",
+            "default": "GOOGLE_SERP",
+            "enum": ["GOOGLE_SERP", "SHADER"],
+            "sectionCaption": "Google Search Settings"
+        },
+        "maxRequestRetriesSearch": {
+            "title": "Maximum number of retries for Google search request on network / server errors",
+            "type": "integer",
+            "description": "The maximum number of times the Google search crawler will retry the request on network, proxy or server errors. If the (n+1)-th request still fails, the crawler will mark this request as failed.",
+            "minimum": 0,
+            "maximum": 3,
+            "default": 1
+        },
+        "proxyConfiguration": {
+            "title": "Crawler: Proxy configuration",
+            "type": "object",
+            "description": "Enables loading the websites from IP addresses in specific geographies and to circumvent blocking.",
+            "default": {
+                "useApifyProxy": true
+            },
+            "prefill": {
+                "useApifyProxy": true
+            },
+            "editor": "proxy",
+            "sectionCaption": "Content Crawler Settings"
+        },
+        "initialConcurrency": {
+            "title": "Initial concurrency",
+            "type": "integer",
+            "description": "Initial number of Playwright browsers running in parallel. The system scales this value based on CPU and memory usage.",
+            "minimum": 0,
+            "maximum": 50,
+            "default": 5
+        },
+        "minConcurrency": {
+            "title": "Minimal concurrency",
+            "type": "integer",
+            "description": "Minimum number of Playwright browsers running in parallel. Useful for defining a base level of parallelism.",
+            "minimum": 1,
+            "maximum": 50,
+            "default": 3
+        },
+        "maxConcurrency": {
+            "title": "Maximal concurrency",
+            "type": "integer",
+            "description": "Maximum number of browsers or clients running in parallel to avoid overloading target websites.",
+            "minimum": 1,
+            "maximum": 50,
+            "default": 10
+        },
+        "maxRequestRetries": {
+            "title": "Maximum number of retries for Playwright content crawler",
+            "type": "integer",
+            "description": "Maximum number of retry attempts on network, proxy, or server errors. If the (n+1)-th request fails, it will be marked as failed.",
+            "minimum": 0,
+            "maximum": 3,
+            "default": 1
+        },
+        "requestTimeoutContentCrawlSecs": {
+            "title": "Request timeout for content crawling",
+            "type": "integer",
+            "description": "Timeout (in seconds) for making requests for each search result, including fetching and processing its content.\n\nThe value must be smaller than the 'Request timeout in seconds' setting.",
+            "minimum": 1,
+            "maximum": 60,
+            "default": 30
+        },
+        "dynamicContentWaitSecs": {
+            "title": "Wait for dynamic content (seconds)",
+            "type": "integer",
+            "description": "Maximum time (in seconds) to wait for dynamic content to load. The crawler processes the page once this time elapses or when the network becomes idle.",
+            "default": 10
+        },
+        "removeCookieWarnings": {
+            "title": "Remove cookie warnings",
+            "type": "boolean",
+            "description": "If enabled, removes cookie consent dialogs to improve text extraction accuracy. Note that this will impact latency.",
+            "default": true
+        },
+        "debugMode": {
+            "title": "Debug mode (stores debugging information in dataset)",
+            "type": "boolean",
+            "description": "If enabled, the Actor will store debugging information in the dataset's debug field",
+            "default": false,
+            "sectionCaption": "Debug Settings"
+        }
+    }
+}
