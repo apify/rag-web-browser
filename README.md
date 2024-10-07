@@ -38,7 +38,7 @@ curl -X GET https://rag-web-browser.apify.actor?token=APIFY_API_TOKEN
 
 Then, you can send requests to the `/search` path along with your `query` and the number of results (`maxResults`) you want to retrieve.
 ```shell
-curl -X GET https://rag-web-browser.apify.actor/search?token=APIFY_API_TOKEN&query=apify&maxResults=1
+curl -X GET https://rag-web-browser.apify.actor/search?token=APIFY_API_TOKEN\&query=apify\&maxResults=1
 ```
 
 Here’s an example of the server response (truncated for brevity):
@@ -182,10 +182,22 @@ For example, the following outputs (truncated for brevity) illustrate this behav
 ]
 ```
 
-## ֎  How to use RAG Web Browser in your GPT as custom action?
+## ֎  How to use RAG Web Browser in your GPT as a custom action?
 
-You can easily call the RAG Web Browser to your GPT by uploading its OpenAPI specification and creating a custom action.
-Follow the steps in the article [Add custom actions to your GPTs with Apify Actors](https://blog.apify.com/add-custom-actions-to-your-gpts/).
+You can easily add the RAG Web Browser to your GPT by uploading its OpenAPI specification and creating a custom action.
+Follow the detailed guide in the article [Add custom actions to your GPTs with Apify Actors](https://blog.apify.com/add-custom-actions-to-your-gpts/).
+
+Here's a quick guide to adding the RAG Web Browser to your GPT as a custom action:
+
+1. Click on **Explore GPTs** in the left sidebar, then select **+ Create** in the top right corner.
+1. Complete all required details in the form.
+1. Under the **Actions** section, click **Create new action**.
+1. In the Action settings, set **Authentication** to **API key** and choose Bearer as **Auth Type**.
+1. In the **schema** field, paste the OpenAPI specification for the RAG Web Browser.
+   1. **Normal mode**: Copy the OpenAPI schema from the [RAG-Web-Browser Actor](https://console.apify.com/actors/3ox4R101TgZz67sLr/input) under the API -> OpenAPI specification.
+   1. **Standby mode**: Copy the OpenAPI schema from the [OpenAPI standby mode](https://raw.githubusercontent.com/apify/rag-web-browser/refs/heads/master/standby-openapi.json) json file.
+
+![Apify-RAG-Web-Browser-custom-action](https://raw.githubusercontent.com/apify/rag-web-browser/refs/heads/master/docs/apify-gpt-custom-action.png)
 
 ## 👷🏼 Development
 
