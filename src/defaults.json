@@ -14,6 +14,6 @@
     "query": "",
     "readableTextCharThreshold": 100,
     "removeCookieWarnings": true,
-    "requestTimeoutSecs": 60,
+    "requestTimeoutSecs": 45,
     "requestTimeoutContentCrawlSecs": 30
 }

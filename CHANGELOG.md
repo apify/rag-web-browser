@@ -1,5 +1,10 @@
 This changelog summarizes all changes of the RAG Web Browser
 
+### 2024-10-07
+
+🚀 Features
+- Add a short description how to create a custom action
+
 ### 2024-09-24
 
 🚀 Features

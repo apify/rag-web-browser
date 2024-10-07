@@ -38,7 +38,7 @@
             "description": "The maximum time (in seconds) allowed for request. If the request exceeds this time, it will be marked as failed and only already finished results will be returned",
             "minimum": 1,
             "maximum": 600,
-            "default": 60
+            "default": 45
         },
         "proxyGroupSearch": {
             "title": "Search Proxy Group",
