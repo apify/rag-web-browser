@@ -182,7 +182,14 @@ For example, the following outputs (truncated for brevity) illustrate this behav
 ]
 ```
 
-## ֎  How to use RAG Web Browser in your GPT as a custom action?
+## 💡 How to use RAG Web Browser in OpenAI Assistant as a tool for web search?
+
+You can use the RAG Web Browser to provide up-to-date information from Google search results to your OpenAI Assistant.
+The assistant can use the RAG Web Browser as a tool and whenever it needs to fetch information from the web, it sends request a request to the RAG Web Browser based on the search query.
+
+For a complete example with images and detailed instructions, visit the [OpenAI Assistant integration](https://docs.apify.com/platform/integrations/openai-assistants#real-time-search-data-for-openai-assistant) page.
+
+## ֎ How to use RAG Web Browser in your GPT as a custom action?
 
 You can easily add the RAG Web Browser to your GPT by uploading its OpenAPI specification and creating a custom action.
 Follow the detailed guide in the article [Add custom actions to your GPTs with Apify Actors](https://blog.apify.com/add-custom-actions-to-your-gpts/).
