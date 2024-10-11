@@ -85,7 +85,7 @@ When running in the standby mode the RAG Web Browser accepts the following query
 | parameter                        | description                                                                                                                                            |
 |----------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `query`                          | Use regular search words or enter Google Search URLs. You can also apply advanced Google search techniques.                                            |
-| `maxResults`                     | The number of top organic search results to return and scrape text from (maximum is 50).                                                               |
+| `maxResults`                     | The number of top organic search results to return and scrape text from (maximum is 100).                                                              |
 | `outputFormats`                  | Select the desired output formats for the retrieved content (e.g., "text", "markdown", "html").                                                        |
 | `requestTimeoutSecs`             | The maximum time (in seconds) allowed for the request. If the request exceeds this time, it will be marked as failed.                                  |
 | `proxyGroupSearch`               | Select the proxy group for loading search results. Options: 'GOOGLE_SERP', 'SHADER'.                                                                   |

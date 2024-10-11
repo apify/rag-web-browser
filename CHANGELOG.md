@@ -1,5 +1,11 @@
 This changelog summarizes all changes of the RAG Web Browser
 
+### 2024-10-11
+
+🚀 Features
+- Increase the maximum number of results (`maxResults`) from 50 to 100
+- Explain better how to search a specific website using "llm site:apify.com"
+
 ### 2024-10-07
 
 🚀 Features
