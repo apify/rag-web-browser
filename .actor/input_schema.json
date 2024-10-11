@@ -7,7 +7,7 @@
         "query": {
             "title": "Search term(s)",
             "type": "string",
-            "description": "Use regular search words or enter Google Search URLs. You can also apply [advanced Google search techniques](https://blog.apify.com/how-to-scrape-google-like-a-pro/), such as <code>AI site:twitter.com</code> or <code>javascript OR python</code>",
+            "description": "You can Use regular search words or enter Google Search URLs. Additionally, you can also apply [advanced Google search techniques](https://blog.apify.com/how-to-scrape-google-like-a-pro/). For example:\n\n - Search for results from a particular website: <code>llm site:openai.com</code> (note: there should be no space between `site`, the colon, and the domain openai.com; also the `.com` is required).\n\n - Search for results related to <code>javascript OR python</code>",
             "prefill": "apify rag browser",
             "editor": "textarea",
             "pattern": "[^\\s]+"
@@ -18,7 +18,7 @@
             "description": "The number of top organic search results to return and scrape text from",
             "prefill": 3,
             "minimum": 1,
-            "maximum": 50
+            "maximum": 100
         },
         "outputFormats": {
             "title": "Output formats",
@@ -54,8 +54,8 @@
             "type": "integer",
             "description": "The maximum number of times the Google search crawler will retry the request on network, proxy or server errors. If the (n+1)-th request still fails, the crawler will mark this request as failed.",
             "minimum": 0,
-            "maximum": 3,
-            "default": 1
+            "maximum": 5,
+            "default": 3
         },
         "proxyConfiguration": {
             "title": "Crawler: Proxy configuration",
@@ -92,7 +92,7 @@
             "description": "Maximum number of browsers or clients running in parallel to avoid overloading target websites.",
             "minimum": 1,
             "maximum": 50,
-            "default": 10
+            "default": 20
         },
         "maxRequestRetries": {
             "title": "Maximum number of retries for Playwright content crawler",
