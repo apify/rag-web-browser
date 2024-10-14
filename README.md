@@ -17,31 +17,42 @@ to provide your LLM application with up-to-date context from the web.
 
 ## Usage
 
-The RAG Web Browser can be used in two ways: **as a standard Actor** for testing,
-or in the [**Standby mode**](https://docs.apify.com/platform/actors/running/standby) as an HTTP web server
-for fast response times in production applications.
+The RAG Web Browser can be used in two ways: **as a standard Actor** by passing it an input object with the settings,
+or in the **Standby mode** by sending it an HTTP request.
 
-### Standard Actor run
+### Normal Actor run
 
-When you run the Actor, you can pass it an input JSON object with settings, including the search phrase,
+You can run the Actor "normally", pass it an input JSON object with settings including the search phrase via API or manually,
 and it will store the results to the default dataset.
 This is useful for testing and evaluation, but might be too slow for production applications and RAG pipelines,
 because it takes some time to start a Docker container and the web browser.
+Also, one Actor run can only handle one query, and thus it's inefficient.
 
 ### Standby web server
 
+The Actor also supports the [**Standby mode**](https://docs.apify.com/platform/actors/running/standby),
+where it runs an HTTP web server that receives requests with the search phrases and responds with the extracted web content.
+This way is preferred for production application, because if the Actor is already running, it will
+return the results much faster. Additionally, in this mode the Actor can handle multiple requests
+in parallel, and thus utilizes the computing resources more efficiently.
 
-Then, you can send requests to the `/search` path along with your `query` and the number of results (`maxResults`) you want to retrieve.
+To use RAG Web Browser in the Standby mode, simply send an HTTP GET request to the following URL:
 
 ```
 https://rag-web-browser.apify.actor/search?token=APIFY_API_TOKEN&query=apify
 ```
 
-### 📧 Input options
+The response is a JSON object containing the resulting web content from the top pages in search results.
 
-In either way, the  running in the standby mode the RAG Web Browser accepts the following query parameters:
+To optimize the performance and cost of your application,
+see the [Standby mode settings](https://docs.apify.com/platform/actors/running/standby#how-do-i-customize-standby-configuration).
 
-| parameter                        | description                                                                                                                                            |
+
+#### Request
+
+The `/search` GET HTTP endpoint accepts the following query parameters:
+
+| Parameter                        | Description                                                                                                                                            |
 |----------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `query`                          | Use regular search words or enter Google Search URLs. You can also apply advanced Google search techniques.                                            |
 | `maxResults`                     | The number of top organic search results to return and scrape text from (maximum is 100).                                                              |
@@ -60,21 +71,9 @@ In either way, the  running in the standby mode the RAG Web Browser accepts the 
 | `debugMode`                      | If enabled, the Actor will store debugging information in the dataset's debug field.                                                                   |
 
 
+#### Response
 
-### 🔥 How to start the Actor in a Standby mode?
-
-You need know the Actor's standby URL and `APIFY_API_TOKEN` to start the Actor in Standby mode.
-
-```shell
-curl -X GET https://rag-web-browser.apify.actor?token=APIFY_API_TOKEN
-```
-
-Then, you can send requests to the `/search` path along with your `query` and the number of results (`maxResults`) you want to retrieve.
-```shell
-curl -X GET https://rag-web-browser.apify.actor/search?token=APIFY_API_TOKEN\&query=apify\&maxResults=1
-```
-
-Here’s an example of the server response (truncated for brevity):
+The `/search` GET HTTP endpoint responds with a JSON object, which looks as follows:
 
 ```json
 [
@@ -104,14 +103,6 @@ Here’s an example of the server response (truncated for brevity):
 ]
 ```
 
-The Standby mode has several configuration parameters, such as Max Requests per Run, Memory, and Idle Timeout.
-You can find the details in the [Standby Mode documentation](https://docs.apify.com/platform/actors/running/standby#how-do-i-customize-standby-configuration).
-
-**Note** Sending a search request to `/search` will also initiate Standby mode.
-You can use this endpoint for both purposes conveniently
-```shell
-curl -X GET https://rag-web-browser.apify.actor/search?token=APIFY_API_TOKEN?query=apify%20llm
-```
 
 ## ⏳ Performance optimization
 
