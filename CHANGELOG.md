@@ -3,6 +3,9 @@ This changelog summarizes all changes of the RAG Web Browser
 ### 2024-10-17
 
 🚀 Features
+- Handle errors when request is added to Playwright queue.
+  This will prevent the Cheerio crawler from repeating the same request multiple times.
+- Silence error: Could not parse CSS stylesheet as there is no way to fix it at our end
 - Set logLevel to INFO (debug level can be set using the `debugMode=true` input)
 
 ### 2024-10-11
