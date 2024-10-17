@@ -1,5 +1,10 @@
 This changelog summarizes all changes of the RAG Web Browser
 
+### 2024-10-17
+
+🚀 Features
+- Set logLevel to INFO (debug level can be set using the `debugMode=true` input)
+
 ### 2024-10-11
 
 🚀 Features
@@ -17,7 +22,6 @@ This changelog summarizes all changes of the RAG Web Browser
 - Updated README.md to include tips on improving latency
 - Set initialConcurrency to 5
 - Set minConcurrency to 3
-- Set logLevel to INFO
 
 ### 2024-09-20
 

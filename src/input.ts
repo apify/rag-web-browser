@@ -33,8 +33,7 @@ export async function processInput(originalInput: Partial<Input>) {
         removeCookieWarnings,
     } = input;
 
-    // Log level can be controlled by the debugMode. We'll set it to DEBUG for all users for better debugging.
-    log.setLevel(log.LEVELS.DEBUG);
+    log.setLevel(debugMode ? log.LEVELS.DEBUG : log.LEVELS.INFO);
 
     const proxySearch = await Actor.createProxyConfiguration({ groups: [proxyGroupSearch] });
     const cheerioCrawlerOptions: CheerioCrawlerOptions = {
