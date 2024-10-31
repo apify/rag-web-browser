@@ -44,32 +44,33 @@ https://rag-web-browser.apify.actor/search?token=APIFY_API_TOKEN&query=apify
 
 The response is a JSON object containing the resulting web content from the top pages in search results.
 
-To optimize the performance and cost of your application,
-see the [Standby mode settings](https://docs.apify.com/platform/actors/running/standby#how-do-i-customize-standby-configuration).
-
 
 #### Request
 
 The `/search` GET HTTP endpoint accepts the following query parameters:
 
-| Parameter                        | Description                                                                                                                                            |
-|----------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `query`                          | Use regular search words or enter Google Search URLs. You can also apply advanced Google search techniques.                                            |
-| `maxResults`                     | The number of top organic search results to return and scrape text from (maximum is 100).                                                              |
-| `outputFormats`                  | Select the desired output formats for the retrieved content (e.g., "text", "markdown", "html").                                                        |
-| `requestTimeoutSecs`             | The maximum time (in seconds) allowed for the request. If the request exceeds this time, it will be marked as failed.                                  |
-| `proxyGroupSearch`               | Select the proxy group for loading search results. Options: 'GOOGLE_SERP', 'SHADER'.                                                                   |
-| `maxRequestRetriesSearch`        | Maximum number of retry attempts on network, proxy, or server errors for Google search requests.                                                       |
-| `proxyConfiguration`             | Enables loading the websites from IP addresses in specific geographies and to circumvent blocking.                                                     |
-| `initialConcurrency`             | Initial number of Playwright browsers running in parallel. The system scales this value based on CPU and memory usage.                                 |
-| `minConcurrency`                 | Minimum number of Playwright browsers running in parallel. Useful for defining a base level of parallelism.                                            |
-| `maxConcurrency`                 | Maximum number of browsers or clients running in parallel to avoid overloading target websites.                                                        |
-| `maxRequestRetries`              | Maximum number of retry attempts on network, proxy, or server errors for the Playwright content crawler.                                               |
-| `requestTimeoutContentCrawlSecs` | Timeout (in seconds) for making requests for each search result, including fetching and processing its content.                                        |
-| `dynamicContentWaitSecs`         | Maximum time (in seconds) to wait for dynamic content to load. The crawler processes the page once this time elapses or when the network becomes idle. |
-| `removeCookieWarnings`           | If enabled, removes cookie consent dialogs to improve text extraction accuracy. Note that this will impact latency.                                    |
-| `debugMode`                      | If enabled, the Actor will store debugging information in the dataset's debug field.                                                                   |
+| Parameter                        | Default       | Description                                                                                                                                            |
+|----------------------------------|---------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `query`                          |               | Use regular search words or enter Google Search URLs. You can also apply advanced Google search techniques.                                            |
+| `maxResults`                     | `3`           | The number of top organic search results to return and scrape text from. Maximum is 100.                                                               |
+| `outputFormats`                  | `markdown`    | Select the desired output formats for the retrieved content (e.g., "text", "markdown", "html"). TODO: How to enter two?                                |
+| `requestTimeoutSecs`             | `30`          | The maximum time allowed for the request, in seconds. If the request exceeds this time, it will be marked as failed.                                   |
+| `proxyGroupSearch`               | `GOOGLE_SERP` | Select the proxy group for loading search results. Options: 'GOOGLE_SERP', 'SHADER'.                                                                   |
+| `maxRequestRetriesSearch`        | `1`           | Maximum number of retry attempts on network, proxy, or server errors for Google search requests.                                                       |
+| `proxyConfiguration`             |               | Enables loading the websites from IP addresses in specific geographies and to circumvent blocking. TODO: How is it passed?                             |
+| `initialConcurrency`             | TODO          | Initial number of Playwright browsers running in parallel. The system scales this value based on CPU and memory usage.                                 |
+| `minConcurrency`                 |               | Minimum number of Playwright browsers running in parallel. Useful for defining a base level of parallelism.                                            |
+| `maxConcurrency`                 |               | Maximum number of browsers or clients running in parallel to avoid overloading target websites.                                                        |
+| `maxRequestRetries`              |               | Maximum number of retry attempts on network, proxy, or server errors for the Playwright content crawler.                                               |
+| `requestTimeoutContentCrawlSecs` |               | Timeout (in seconds) for making requests for each search result, including fetching and processing its content.                                        |
+| `dynamicContentWaitSecs`         |               | Maximum time (in seconds) to wait for dynamic content to load. The crawler processes the page once this time elapses or when the network becomes idle. |
+| `removeCookieWarnings`           |               | If enabled, removes cookie consent dialogs to improve text extraction accuracy. Note that this will impact latency.                                    |
+| `debugMode`                      |               | If enabled, the Actor will store debugging information in the dataset's debug field.                                                                   |
 
+
+TODOs:
+- Select `initialConcurrency` automatically based on the Actor memory
+-
 
 #### Response
 
@@ -103,8 +104,21 @@ The `/search` GET HTTP endpoint responds with a JSON object, which looks as foll
 ]
 ```
 
+#### OpenAPI schema
 
-## ⏳ Performance optimization
+RAG Web Browser can be integrated to large language model (LLM) applications and RAG pipelines using function calling.
+Here's a full OpenAPI specification for the Actor web server in the Standby mode:
+
+```json
+TODO
+```
+
+#### ⏳ Performance and cost optimization
+
+
+To optimize the performance and cost of your application,
+see the [Standby mode settings](https://docs.apify.com/platform/actors/running/standby#how-do-i-customize-standby-configuration).
+
 
 The latency is proportional to the **memory allocated** to the Actor and **number of results requested**.
 
@@ -208,21 +222,34 @@ Here's a quick guide to adding the RAG Web Browser to your GPT as a custom actio
 
 
 
-## ⓘ Limitations
+## ⓘ Limitations and feedback
 
 The Actor defaults to Google Search in the United States and English language
-and so queries like "find the best restaurant nearby" will return search results from the US.
-If you need other regions or languages, please submit an issue to let us know.
+and so queries like "_best nearby restaurants_" will return search results from the US.
 
+If you need other regions or languages, or have some other feedback, please submit an issue on the
+Actor in Apify Console to let us know.
 
 ## 👷🏼 Development
 
-**Run STANDBY mode using apify-cli for development**
+The RAG Web Browser Actor has open source on [GitHub](https://github.com/apify/rag-web-browser),
+so that you can modify and develop it yourself. Here are the steps how to run it locally on your computer.
+
+Download the source code:
+
 ```bash
-APIFY_META_ORIGIN=STANDBY apify run -p
+git clone https://github.com/apify/rag-web-browser
+cd rag-web-browser
 ```
 
-**Install playwright dependencies**
+Install [Playwright](https://playwright.dev) with dependencies:
+
 ```bash
 npx playwright install --with-deps
+```
+
+And then you can run it locally using [Apify CLI](https://docs.apify.com/cli) as follows:
+
+```bash
+APIFY_META_ORIGIN=STANDBY apify run -p
 ```
