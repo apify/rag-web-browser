@@ -1,9 +1,9 @@
 # 🌐 RAG Web Browser
 
-This Actor provides a web browsing functionality for AI and LLM applications,
+This Actor provides web browsing functionality for AI and LLM applications,
 similar to Web browser in ChatGPT. It queries Google Search for a specific phrase,
 then crawls web pages from the top search results, cleans the HTML, and converts it to text or Markdown.
-The resulting text can be injected to prompts and retrieval augmented generation (RAG) pipelines,
+The resulting text can then be injected into prompts and retrieval augmented generation (RAG) pipelines,
 to provide your LLM application with up-to-date context from the web.
 
 ## Main features
@@ -14,6 +14,24 @@ to provide your LLM application with up-to-date context from the web.
 - 📝 Output formats include **Markdown**, plain text, and HTML
 - 🪟 It's **open source**, so you can review and modify it
 
+## Output
+
+A search for: `Apify's tools for LLMs` returns a list of objects with the following fields:
+
+```json
+[
+    {
+        "metadata.url": "https://python.langchain.com/docs/integrations/providers/apify/#utility",
+        "metadata.title": "Apify | 🦜️🔗 LangChain",
+        "text": "Apify | 🦜️🔗 LangChain | This notebook shows how to use the Apify integration ...."
+    },
+    {
+        "metadata.url": "https://microsoft.github.io/autogen/0.2/docs/notebooks/agentchat_webscraping_with_apify/",
+        "metadata.title": "Web Scraping using Apify Tools | AutoGen",
+        "text": "Web Scraping using Apify Tools | This notebook shows how to use Apify tools with AutoGen agents ...."
+    }
+]
+```
 
 ## Usage
 
@@ -26,7 +44,7 @@ You can run the Actor "normally", pass it an input JSON object with settings inc
 and it will store the results to the default dataset.
 This is useful for testing and evaluation, but might be too slow for production applications and RAG pipelines,
 because it takes some time to start a Docker container and the web browser.
-Also, one Actor run can only handle one query, and thus it's inefficient.
+Also, one Actor run can only handle one query, making it's inefficient.
 
 ### Standby web server
 
@@ -43,7 +61,6 @@ https://rag-web-browser.apify.actor/search?token=APIFY_API_TOKEN&query=apify
 ```
 
 The response is a JSON object containing the resulting web content from the top pages in search results.
-
 
 #### Request
 
@@ -70,7 +87,6 @@ The `/search` GET HTTP endpoint accepts the following query parameters:
 
 TODOs:
 - Select `initialConcurrency` automatically based on the Actor memory
--
 
 #### Response
 
@@ -107,26 +123,18 @@ The `/search` GET HTTP endpoint responds with a JSON object, which looks as foll
 #### OpenAPI schema
 
 RAG Web Browser can be integrated to large language model (LLM) applications and RAG pipelines using function calling.
-Here's a full OpenAPI specification for the Actor web server in the Standby mode:
-
-```json
-TODO
-```
+[Here's a full OpenAPI specification](https://raw.githubusercontent.com/apify/rag-web-browser/refs/heads/master/docs/standby-openapi.json) for the Actor web server in the Standby mode:
 
 #### ⏳ Performance and cost optimization
 
-
-To optimize the performance and cost of your application,
-see the [Standby mode settings](https://docs.apify.com/platform/actors/running/standby#how-do-i-customize-standby-configuration).
-
+To optimize the performance and cost of your application, see the [Standby mode settings](https://docs.apify.com/platform/actors/running/standby#how-do-i-customize-standby-configuration).
 
 The latency is proportional to the **memory allocated** to the Actor and **number of results requested**.
 
 Below is a typical latency breakdown for the RAG Web Browser with **initialConcurrency=3** and **maxResults** set to either 1 or 3.
 These settings allow for processing all search results in parallel.
 
-Please note the these results are only indicative and may vary based on the search term, the target websites,
-and network latency.
+Please note the these results are only indicative and may vary based on the search term, the target websites, and network latency.
 
 The numbers below are based on the following search terms: "apify", "Donald Trump", "boston".
 Results were averaged for the three queries.
@@ -219,8 +227,6 @@ Here's a quick guide to adding the RAG Web Browser to your GPT as a custom actio
    1. **Standby mode**: Copy the OpenAPI schema from the [OpenAPI standby mode](https://raw.githubusercontent.com/apify/rag-web-browser/refs/heads/master/docs/standby-openapi.json) json file.
 
 ![Apify-RAG-Web-Browser-custom-action](https://raw.githubusercontent.com/apify/rag-web-browser/refs/heads/master/docs/apify-gpt-custom-action.png)
-
-
 
 ## ⓘ Limitations and feedback
 
