@@ -72,13 +72,17 @@ This way is preferred for production application, because if the Actor is alread
 return the results much faster. Additionally, in this mode the Actor can handle multiple requests
 in parallel, and thus utilizes the computing resources more efficiently.
 
-To use RAG Web Browser in the Standby mode, simply send an HTTP GET request to the following URL:
-
+To use RAG Web Browser in the Standby mode, use the [Apify API Token](https://docs.apify.com/platform/integrations/api#api-token) and simply send an HTTP GET request to the following URL:
 ```
 https://rag-web-browser.apify.actor/search?token=APIFY_API_TOKEN&query=apify
 ```
-
 The response is a JSON object containing the resulting web content from the top pages in search results.
+Or if you want to retrieve text content from a specific URL, send an HTTP GET request to the following URL:
+```
+https://rag-web-browser.apify.actor/search?token=APIFY_API_TOKEN&query=https://docs.apify.com/platform
+```
+You might need to encode the URL in the query parameter in your use case.
+The response is a JSON object containing the text and Markdown content of that URL.
 
 #### Request
 
@@ -88,11 +92,11 @@ The `/search` GET HTTP endpoint accepts the following query parameters:
 |----------------------------------|---------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `query`                          |               | Use regular search words, URL, or enter Google Search URLs. You can also apply advanced Google search techniques.                                      |
 | `maxResults`                     | `3`           | The number of top organic search results to return and scrape text from. Maximum is 100.                                                               |
-| `outputFormats`                  | `markdown`    | Select the desired output formats for the retrieved content (e.g., "text", "markdown", "html"). TODO: How to enter two?                                |
+| `outputFormats`                  | `text`        | Select the desired output formats for the retrieved content (any combination of "text", "markdown", "html", e.g. outputFormats=text,markdown           |
 | `requestTimeoutSecs`             | `30`          | The maximum time allowed for the request, in seconds. If the request exceeds this time, it will be marked as failed.                                   |
 | `proxyGroupSearch`               | `GOOGLE_SERP` | Select the proxy group for loading search results. Options: 'GOOGLE_SERP', 'SHADER'.                                                                   |
 | `maxRequestRetriesSearch`        | `1`           | Maximum number of retry attempts on network, proxy, or server errors for Google search requests.                                                       |
-| `proxyConfiguration`             |               | Enables loading the websites from IP addresses in specific geographies and to circumvent blocking. TODO: How is it passed?                             |
+| `proxyConfiguration`             | TODO          | Enables loading the websites from IP addresses in specific geographies and to circumvent blocking.                                                     |
 | `initialConcurrency`             | TODO          | Initial number of Playwright browsers running in parallel. The system scales this value based on CPU and memory usage.                                 |
 | `minConcurrency`                 |               | Minimum number of Playwright browsers running in parallel. Useful for defining a base level of parallelism.                                            |
 | `maxConcurrency`                 |               | Maximum number of browsers or clients running in parallel to avoid overloading target websites.                                                        |
@@ -104,6 +108,7 @@ The `/search` GET HTTP endpoint accepts the following query parameters:
 
 
 TODOs:
+- Proxy configuration is not correctly working. We should split it into three parameters: useApifyProxy, apifyProxyGroups, apifyProxyCountry for convenience.
 - Select `initialConcurrency` automatically based on the Actor memory
 
 #### Response
