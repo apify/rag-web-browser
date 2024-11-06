@@ -1,12 +1,10 @@
 # 🌐 RAG Web Browser
 
-This Actor provides web browsing functionality for AI and LLM applications, acting
-as a cloud-based Web browser, similarly to Web browser in ChatGPT.
-It allows to search Google, scrape web pages, and extract text content.
-When you enter a search phrase it queries Google Search, then crawls web pages from the top search results, cleans the HTML, and converts it to text or Markdown
+This Actor provides web browsing functionality for AI and LLM applications, acting as a cloud-based Web browser, similarly to Web browsing feature in ChatGPT.
+It allows you to perform search Google, scrape web pages, and extract text content.
+When you enter a search phrase it queries Google Search, then crawls web pages from the top search results, cleans the HTML, and converts it to text or Markdown.
 If you enter a specific URL, the Actor retrieves content directly from that URL.
-The extracted text can then be injected into prompts and retrieval augmented generation (RAG) pipelines,
-to provide your LLM application with up-to-date context from the web.
+The extracted text can then be injected into prompts and retrieval augmented generation (RAG) pipelines, to provide your LLM application with up-to-date context from the web.
 
 ## Main features
 
@@ -43,6 +41,16 @@ If you enter a specific URL as a query `https://docs.apify.com/platform/integrat
 }
 ```
 
+## Query examples
+
+| Query                             | Description                                                                                                                         |
+|-----------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|
+| `apify rag`                       | Search for the term "apify rag" on Google then crawl web pages from the top results                                                 |
+| `apify AND llm`                   | Search for the term "apify" and "llm" on Google then crawl web pages from the top results                                           |
+| `web browser site:openai.com `    | Search for the term "web browser" on Google (limit the search to the domain "openai.com) then crawl web pages from the top results" |
+| `https://docs.apify.com/platform` | Directly extract text content from the URL                                                                                          |
+| `example.com`                     | Directly extract text content from `example.com`                                                                                    |
+
 ## Usage
 
 The RAG Web Browser can be used in two ways: **as a standard Actor** by passing it an input object with the settings,
@@ -78,7 +86,7 @@ The `/search` GET HTTP endpoint accepts the following query parameters:
 
 | Parameter                        | Default       | Description                                                                                                                                            |
 |----------------------------------|---------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `query`                          |               | Use regular search words or enter Google Search URLs. You can also apply advanced Google search techniques.                                            |
+| `query`                          |               | Use regular search words, URL, or enter Google Search URLs. You can also apply advanced Google search techniques.                                      |
 | `maxResults`                     | `3`           | The number of top organic search results to return and scrape text from. Maximum is 100.                                                               |
 | `outputFormats`                  | `markdown`    | Select the desired output formats for the retrieved content (e.g., "text", "markdown", "html"). TODO: How to enter two?                                |
 | `requestTimeoutSecs`             | `30`          | The maximum time allowed for the request, in seconds. If the request exceeds this time, it will be marked as failed.                                   |
