@@ -1,7 +1,13 @@
 import { Readability, isProbablyReaderable } from '@mozilla/readability';
-import { JSDOM } from 'jsdom';
+import { log } from 'crawlee';
+import { JSDOM, VirtualConsole } from 'jsdom';
 
 import type { PlaywrightScraperSettings } from '../types.js';
+
+const virtualConsole = new VirtualConsole();
+virtualConsole.on('error', (error) => {
+    log.error(`JSDOM error: ${error}`);
+});
 
 /**
  * Extracts readable text from the HTML using Mozilla's Readability (source: Website Content Crawler).
@@ -19,7 +25,9 @@ export async function readableText({
         fallbackToNone?: boolean;
     };
 }): Promise<string | undefined> {
-    const dom = new JSDOM(html, { url });
+    // Add virtualConsole to silence this Error: Could not parse CSS stylesheet at exports.createStylesheet
+    // There is some issue with the VirtualConsole as the error is not logged
+    const dom = new JSDOM(html, { url, virtualConsole });
 
     if (options?.fallbackToNone && !isProbablyReaderable(dom.window.document, { minScore: 100 })) {
         return html;

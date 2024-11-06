@@ -80,6 +80,8 @@ async function createAndStartSearchCrawler(
 
             // filter organic results to get only results with URL
             let results = organicResults.filter((result) => result.url !== undefined);
+            // remove results with URL starting with '/search?q=' (google return empty search results for images)
+            results = results.filter((result) => !result.url!.startsWith('/search?q='));
 
             // limit the number of search results to the maxResults
             results = results.slice(0, request.userData?.maxResults ?? results.length);
@@ -182,9 +184,13 @@ export const addPlaywrightCrawlRequest = async (
         log.error(`Playwright crawler not found: key ${playwrightCrawlerKey}`);
         return;
     }
-    await crawler.requestQueue!.addRequest(request);
-    // create an empty result in search request response
-    // do not use request.uniqueKey as responseId as it is not id of a search request
-    addEmptyResultToResponse(responseId, request);
-    log.info(`Added request to the playwright-content-crawler: ${request.url}`);
+    try {
+        await crawler.requestQueue!.addRequest(request);
+        // create an empty result in search request response
+        // do not use request.uniqueKey as responseId as it is not id of a search request
+        addEmptyResultToResponse(responseId, request);
+        log.info(`Added request to the playwright-content-crawler: ${request.url}`);
+    } catch (err) {
+        log.error(`Error adding request to playwright-content-crawler: ${request.url}, error: ${err}`);
+    }
 };
