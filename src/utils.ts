@@ -52,6 +52,12 @@ export function createSearchRequest(
     };
 }
 
+/**
+ * Create a request for Playwright crawler with the provided result, responseId and timeMeasures.
+ * @param result
+ * @param responseId
+ * @param timeMeasures
+ */
 export function createRequest(
     result: OrganicResult,
     responseId: string,
@@ -90,4 +96,14 @@ export function transformTimeMeasuresToRelative(timeMeasures: TimeMeasure[]): Ti
             };
         })
         .sort((a, b) => a.timeMs - b.timeMs);
+}
+
+export function interpretAsUrl(input: string): string | null {
+    try {
+        if (!input) return null;
+        const url = new URL(input);
+        return /^https?:/.test(url.protocol) ? url.toString() : null;
+    } catch {
+        return null;
+    }
 }

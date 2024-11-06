@@ -1,13 +1,21 @@
 import { Actor } from 'apify';
 import { log } from 'crawlee';
 import { createServer, IncomingMessage, ServerResponse } from 'http';
+import { v4 as uuidv4 } from 'uuid';
 
-import { addSearchRequest, createAndStartCrawlers, getPlaywrightCrawlerKey } from './crawlers.js';
+import { addPlaywrightCrawlRequest, addSearchRequest, createAndStartCrawlers, getPlaywrightCrawlerKey } from './crawlers.js';
 import { UserInputError } from './errors.js';
 import { checkInputsAreValid, processInput } from './input.js';
 import { addTimeoutToAllResponses, sendResponseError } from './responses.js';
 import { Input } from './types.js';
-import { parseParameters, checkForExtraParams, createSearchRequest, addTimeMeasureEvent } from './utils.js';
+import {
+    addTimeMeasureEvent,
+    checkForExtraParams,
+    createRequest,
+    createSearchRequest,
+    interpretAsUrl,
+    parseParameters,
+} from './utils.js';
 
 await Actor.init();
 
@@ -38,17 +46,28 @@ async function getSearch(request: IncomingMessage, response: ServerResponse) {
         const playwrightCrawlerKey = getPlaywrightCrawlerKey(playwrightCrawlerOptions, playwrightScraperSettings);
         await createAndStartCrawlers(cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings);
 
-        const req = createSearchRequest(
-            input.query,
-            input.maxResults,
-            playwrightCrawlerKey,
-            cheerioCrawlerOptions.proxyConfiguration,
-        );
+        const inputUrl = interpretAsUrl(input.query);
+        input.query = inputUrl ?? input.query;
+        // Create a request depending on whether the input is a URL or search query
+        const req = inputUrl
+            ? createRequest({ url: input.query }, uuidv4(), null)
+            : createSearchRequest(
+                input.query,
+                input.maxResults,
+                playwrightCrawlerKey,
+                cheerioCrawlerOptions.proxyConfiguration,
+            );
         addTimeMeasureEvent(req.userData!, 'request-received', requestReceivedTime);
-        await addSearchRequest(req, response, cheerioCrawlerOptions);
-        setTimeout(() => {
-            sendResponseError(req.uniqueKey!, 'Timed out');
-        }, input.requestTimeoutSecs * 1000);
+        if (inputUrl) {
+            // If the input query is a URL, we don't need to run the search crawler
+            log.info(`Skipping search crawler as ${input.query} is a valid URL`);
+            await addPlaywrightCrawlRequest(req, req.uniqueKey!, playwrightCrawlerKey);
+        } else {
+            await addSearchRequest(req, response, cheerioCrawlerOptions);
+            setTimeout(() => {
+                sendResponseError(req.uniqueKey!, 'Timed out');
+            }, input.requestTimeoutSecs * 1000);
+        }
     } catch (e) {
         const error = e as Error;
         const errorMessage = { errorMessage: error.message };
@@ -120,20 +139,31 @@ if (Actor.getEnv().metaOrigin === 'STANDBY') {
             false,
         );
 
-        const req = createSearchRequest(
-            input.query,
-            input.maxResults,
-            playwrightCrawlerKey,
-            cheerioCrawlerOptions.proxyConfiguration,
-        );
+        const inputUrl = interpretAsUrl(input.query);
+        input.query = inputUrl ?? input.query;
+        // Create a request depending on whether the input is a URL or search query
+        const req = inputUrl
+            ? createRequest({ url: input.query }, uuidv4(), null)
+            : createSearchRequest(
+                input.query,
+                input.maxResults,
+                playwrightCrawlerKey,
+                cheerioCrawlerOptions.proxyConfiguration,
+            );
         addTimeMeasureEvent(req.userData!, 'actor-started', startedTime);
-        await addSearchRequest(req, null, cheerioCrawlerOptions);
-        log.info(`Running search crawler with request: ${JSON.stringify(req)}`);
-        addTimeMeasureEvent(req.userData!, 'before-cheerio-run', startedTime);
-        await searchCrawler!.run();
+        if (inputUrl) {
+            // If the input query is a URL, we don't need to run the search crawler
+            log.info(`Skipping search crawler as ${input.query} is a valid URL`);
+            await addPlaywrightCrawlRequest(req, req.uniqueKey!, playwrightCrawlerKey);
+        } else {
+            await addSearchRequest(req, null, cheerioCrawlerOptions);
+            addTimeMeasureEvent(req.userData!, 'before-cheerio-run', startedTime);
+            log.info(`Running search crawler with request: ${JSON.stringify(req)}`);
+            await searchCrawler!.run();
+        }
 
-        log.info(`Running content crawler with request: ${JSON.stringify(req)}`);
         addTimeMeasureEvent(req.userData!, 'before-playwright-run', startedTime);
+        log.info(`Running content crawler with request: ${JSON.stringify(req)}`);
         await playwrightCrawler!.run();
     } catch (e) {
         const error = e as Error;
