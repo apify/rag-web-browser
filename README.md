@@ -49,7 +49,6 @@ If you enter a specific URL as a query `https://docs.apify.com/platform/integrat
 | `apify AND llm`                   | Search for the term "apify" and "llm" on Google then crawl web pages from the top results                                           |
 | `web browser site:openai.com `    | Search for the term "web browser" on Google (limit the search to the domain "openai.com) then crawl web pages from the top results" |
 | `https://docs.apify.com/platform` | Directly extract text content from the URL                                                                                          |
-| `example.com`                     | Directly extract text content from `example.com`                                                                                    |
 
 ## Usage
 

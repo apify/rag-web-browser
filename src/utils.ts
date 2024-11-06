@@ -5,20 +5,6 @@ import { v4 as uuidv4 } from 'uuid';
 import defaults from './defaults.json' with { type: 'json' };
 import { OrganicResult, TimeMeasure, UserData } from './types.js';
 
-const PROTOCOL_REGEX = /^(https?|ftp):\/\//;
-const DOMAIN_REGEX = /^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,6}(\/[a-zA-Z0-9._~:/?#[\]@!$&'()*+,;=%-]*)?$/;
-
-const URL_REGEX = new RegExp(
-    '^'
-    + '(https?:\\/\\/|ftp:\\/\\/)?' // Optional protocol (http://, https://, ftp://)
-    + '(([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}' // Domain name with TLD (e.g., example.com)
-    + '|'
-    + '(\\d{1,3}\\.){3}\\d{1,3})' // OR an IP address (e.g., 192.168.0.1)
-    + '(\\:\\d{1,5})?' // Optional port number (e.g., :8080)
-    + "(\\/[a-zA-Z0-9._~:\\/?#[\\]@!$&'()*+,;=%-]*)?" // Optional path and query parameters
-    + '$',
-);
-
 export function parseParameters(url: string): ParsedUrlQuery {
     return parse(url.slice(1));
 }
@@ -112,24 +98,11 @@ export function transformTimeMeasuresToRelative(timeMeasures: TimeMeasure[]): Ti
         .sort((a, b) => a.timeMs - b.timeMs);
 }
 
-export function isValidUrl(input: string): boolean {
-    return URL_REGEX.test(input);
-}
-
-/**
- * Convert a string to a proper URL.
- */
-export function toProperUrl(url: string) {
-    // If it starts with a valid protocol, return as is
-    if (PROTOCOL_REGEX.test(url)) {
-        return url;
+export function safeUrl(input: string): URL | null {
+    try {
+        if (!input) return null;
+        return new URL(input);
+    } catch (e) {
+        return null;
     }
-
-    // If it matches a domain pattern, prepend http or https
-    if (DOMAIN_REGEX.test(url)) {
-        return `https://${url}`;
-    }
-
-    // If it's neither a URL nor a domain, return it as is (likely a search term)
-    return url;
 }
