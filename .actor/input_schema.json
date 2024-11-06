@@ -1,13 +1,13 @@
 {
     "title": "RAG Web Browser",
-    "description": "RAG Web Browser for a retrieval augmented generation workflows. Retrieve and return website content from the top Google Search Results Pages",
+    "description": "RAG Web Browser for a retrieval augmented generation workflows. Retrieve and return website content from URL or the top Google Search Results Pages",
     "type": "object",
     "schemaVersion": 1,
     "properties": {
         "query": {
-            "title": "Search term(s)",
+            "title": "Search term(s) or a URL",
             "type": "string",
-            "description": "You can Use regular search words or enter Google Search URLs. Additionally, you can also apply [advanced Google search techniques](https://blog.apify.com/how-to-scrape-google-like-a-pro/). For example:\n\n - Search for results from a particular website: <code>llm site:openai.com</code> (note: there should be no space between `site`, the colon, and the domain openai.com; also the `.com` is required).\n\n - Search for results related to <code>javascript OR python</code>",
+            "description": "You can enter a URL directly or regular search words. You can also apply [advanced Google search techniques](https://blog.apify.com/how-to-scrape-google-like-a-pro/). Examples:\n\n- <code>apify llm</code> - Search for Apify's solutions related to Large Language Models\n\n- <code>https://docs.apify.com/platform/integrations/openai-assistants</code> - Retrieves text and Markdown content from specified URL\n\n- <code>llm site:openai.com</code> - Searches for LLM-related content exclusively at OpenAI' website (note: ensure there is no space between `site`, the colon, and the domain openai.com; also the `.com` is required).\n\n- <code>javascript OR python</code> - Find results related to either JavaScript or Python",
             "prefill": "apify rag browser",
             "editor": "textarea",
             "pattern": "[^\\s]+"

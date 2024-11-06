@@ -1,9 +1,11 @@
 # 🌐 RAG Web Browser
 
-This Actor provides web browsing functionality for AI and LLM applications,
-similar to Web browser in ChatGPT. It queries Google Search for a specific phrase,
-then crawls web pages from the top search results, cleans the HTML, and converts it to text or Markdown.
-The resulting text can then be injected into prompts and retrieval augmented generation (RAG) pipelines,
+This Actor provides web browsing functionality for AI and LLM applications, acting
+as a cloud-based Web browser, similarly to Web browser in ChatGPT.
+It allows to search Google, scrape web pages, and extract text content.
+When you enter a search phrase it queries Google Search, then crawls web pages from the top search results, cleans the HTML, and converts it to text or Markdown
+If you enter a specific URL, the Actor retrieves content directly from that URL.
+The extracted text can then be injected into prompts and retrieval augmented generation (RAG) pipelines,
 to provide your LLM application with up-to-date context from the web.
 
 ## Main features
@@ -31,6 +33,14 @@ A search for: `Apify's tools for LLMs` returns a list of objects with the follow
         "text": "Web Scraping using Apify Tools | This notebook shows how to use Apify tools with AutoGen agents ...."
     }
 ]
+```
+
+If you enter a specific URL as a query `https://docs.apify.com/platform/integrations/openai-assistants` the Actor directly returns the text content from that URL.
+
+```json
+{
+	"text": "OpenAI Assistants integration. Learn how to integrate Apify with OpenAI Assistants to provide real-time search data ...."
+}
 ```
 
 ## Usage

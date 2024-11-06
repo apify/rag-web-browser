@@ -5,6 +5,17 @@ import { v4 as uuidv4 } from 'uuid';
 import defaults from './defaults.json' with { type: 'json' };
 import { OrganicResult, TimeMeasure, UserData } from './types.js';
 
+const URL_REGEXP = new RegExp(
+    '^'
+    + '(https?:\\/\\/|ftp:\\/\\/)?' // Optional protocol (http://, https://, ftp://)
+    + '(([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}' // Domain name with TLD (e.g., example.com)
+    + '|'
+    + '(\\d{1,3}\\.){3}\\d{1,3})' // OR an IP address (e.g., 192.168.0.1)
+    + '(\\:\\d{1,5})?' // Optional port number (e.g., :8080)
+    + "(\\/[a-zA-Z0-9._~:\\/?#[\\]@!$&'()*+,;=%-]*)?" // Optional path and query parameters
+    + '$',
+);
+
 export function parseParameters(url: string): ParsedUrlQuery {
     return parse(url.slice(1));
 }
@@ -52,6 +63,12 @@ export function createSearchRequest(
     };
 }
 
+/**
+ * Create a request for Playwright crawler with the provided result, responseId and timeMeasures.
+ * @param result
+ * @param responseId
+ * @param timeMeasures
+ */
 export function createRequest(
     result: OrganicResult,
     responseId: string,
@@ -90,4 +107,8 @@ export function transformTimeMeasuresToRelative(timeMeasures: TimeMeasure[]): Ti
             };
         })
         .sort((a, b) => a.timeMs - b.timeMs);
+}
+
+export function isQueryUrl(url: string): boolean {
+    return URL_REGEXP.test(url);
 }

@@ -1,5 +1,12 @@
 This changelog summarizes all changes of the RAG Web Browser
 
+
+### 2024-11-08
+
+🚀 Features
+- Add functionality to extract content from a specific URL
+- Update README.md to include new functionality and provide examples
+
 ### 2024-10-11
 
 🚀 Features
