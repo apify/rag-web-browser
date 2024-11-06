@@ -101,8 +101,9 @@ export function transformTimeMeasuresToRelative(timeMeasures: TimeMeasure[]): Ti
 export function interpretAsUrl(input: string): string | null {
     try {
         if (!input) return null;
-        return new URL(input).toString();
-    } catch (e) {
+        const url = new URL(input);
+        return /^https?:/.test(url.protocol) ? url.toString() : null;
+    } catch {
         return null;
     }
 }
