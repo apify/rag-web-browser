@@ -13,8 +13,8 @@ import {
     checkForExtraParams,
     createRequest,
     createSearchRequest,
+    interpretAsUrl,
     parseParameters,
-    safeUrl,
 } from './utils.js';
 
 await Actor.init();
@@ -46,10 +46,10 @@ async function getSearch(request: IncomingMessage, response: ServerResponse) {
         const playwrightCrawlerKey = getPlaywrightCrawlerKey(playwrightCrawlerOptions, playwrightScraperSettings);
         await createAndStartCrawlers(cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings);
 
-        const url = safeUrl(input.query);
-        input.query = url ? url.toString() : input.query;
+        const inputValidUrl = interpretAsUrl(input.query);
+        input.query = inputValidUrl ?? input.query;
         // Create a request depending on whether the input is a URL or search query
-        const req = url
+        const req = inputValidUrl
             ? createRequest({ url: input.query }, uuidv4(), null)
             : createSearchRequest(
                 input.query,
@@ -58,7 +58,7 @@ async function getSearch(request: IncomingMessage, response: ServerResponse) {
                 cheerioCrawlerOptions.proxyConfiguration,
             );
         addTimeMeasureEvent(req.userData!, 'request-received', requestReceivedTime);
-        if (url) {
+        if (inputValidUrl) {
             // If the input query is a URL, we don't need to run the search crawler
             log.info(`Skipping search crawler as ${input.query} is a valid URL`);
             await addPlaywrightCrawlRequest(req, req.uniqueKey!, playwrightCrawlerKey);
@@ -139,10 +139,10 @@ if (Actor.getEnv().metaOrigin === 'STANDBY') {
             false,
         );
 
-        const url = safeUrl(input.query);
-        input.query = url ? url.toString() : input.query;
+        const inputValidUrl = interpretAsUrl(input.query);
+        input.query = inputValidUrl ?? input.query;
         // Create a request depending on whether the input is a URL or search query
-        const req = url
+        const req = inputValidUrl
             ? createRequest({ url: input.query }, uuidv4(), null)
             : createSearchRequest(
                 input.query,
@@ -151,7 +151,7 @@ if (Actor.getEnv().metaOrigin === 'STANDBY') {
                 cheerioCrawlerOptions.proxyConfiguration,
             );
         addTimeMeasureEvent(req.userData!, 'actor-started', startedTime);
-        if (url) {
+        if (inputValidUrl) {
             // If the input query is a URL, we don't need to run the search crawler
             log.info(`Skipping search crawler as ${input.query} is a valid URL`);
             await addPlaywrightCrawlRequest(req, req.uniqueKey!, playwrightCrawlerKey);

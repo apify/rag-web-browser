@@ -98,10 +98,10 @@ export function transformTimeMeasuresToRelative(timeMeasures: TimeMeasure[]): Ti
         .sort((a, b) => a.timeMs - b.timeMs);
 }
 
-export function safeUrl(input: string): URL | null {
+export function interpretAsUrl(input: string): string | null {
     try {
         if (!input) return null;
-        return new URL(input);
+        return new URL(input).toString();
     } catch (e) {
         return null;
     }
