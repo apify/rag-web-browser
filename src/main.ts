@@ -60,7 +60,7 @@ async function getSearch(request: IncomingMessage, response: ServerResponse) {
         addTimeMeasureEvent(req.userData!, 'request-received', requestReceivedTime);
         if (url) {
             // If the input query is a URL, we don't need to run the search crawler
-            log.info(`Input: ${input.query} is a URL, skipping search crawler`);
+            log.info(`Skipping search crawler as ${input.query} is a valid URL`);
             await addPlaywrightCrawlRequest(req, req.uniqueKey!, playwrightCrawlerKey);
         } else {
             await addSearchRequest(req, response, cheerioCrawlerOptions);
@@ -153,7 +153,7 @@ if (Actor.getEnv().metaOrigin === 'STANDBY') {
         addTimeMeasureEvent(req.userData!, 'actor-started', startedTime);
         if (url) {
             // If the input query is a URL, we don't need to run the search crawler
-            log.info(`Input: ${input.query} is a URL, skipping search crawler`);
+            log.info(`Skipping search crawler as ${input.query} is a valid URL`);
             await addPlaywrightCrawlRequest(req, req.uniqueKey!, playwrightCrawlerKey);
         } else {
             await addSearchRequest(req, null, cheerioCrawlerOptions);
