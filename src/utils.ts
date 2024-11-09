@@ -102,7 +102,8 @@ export function interpretAsUrl(input: string): string | null {
     try {
         if (!input) return null;
         const url = new URL(input);
-        return /^https?:/.test(url.protocol) ? url.toString() : null;
+        // Only HTTP/HTTPS URLs are supported
+        return /^https?:/i.test(url.protocol) ? url.toString() : null;
     } catch {
         return null;
     }

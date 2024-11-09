@@ -153,17 +153,17 @@ if (Actor.getEnv().metaOrigin === 'STANDBY') {
         addTimeMeasureEvent(req.userData!, 'actor-started', startedTime);
         if (inputUrl) {
             // If the input query is a URL, we don't need to run the search crawler
-            log.info(`Skipping search crawler as ${input.query} is a valid URL`);
+            log.info(`Skipping Google Search query because "${input.query}" is a valid URL`);
             await addPlaywrightCrawlRequest(req, req.uniqueKey!, playwrightCrawlerKey);
         } else {
             await addSearchRequest(req, null, cheerioCrawlerOptions);
             addTimeMeasureEvent(req.userData!, 'before-cheerio-run', startedTime);
-            log.info(`Running search crawler with request: ${JSON.stringify(req)}`);
+            log.info(`Running Google Search crawler with request: ${JSON.stringify(req)}`);
             await searchCrawler!.run();
         }
 
         addTimeMeasureEvent(req.userData!, 'before-playwright-run', startedTime);
-        log.info(`Running content crawler with request: ${JSON.stringify(req)}`);
+        log.info(`Running target page crawler with request: ${JSON.stringify(req)}`);
         await playwrightCrawler!.run();
     } catch (e) {
         const error = e as Error;
