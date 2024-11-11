@@ -7,7 +7,7 @@
         "query": {
             "title": "Search term or URL",
             "type": "string",
-            "description": "Enter Google Search keywords or a URL to a specific web page. Note that the keywords might include the [advanced search operators](https://blog.apify.com/how-to-scrape-google-like-a-pro/). Examples:\n\n- <code>san francisco weather</code>\n- <code>https://www.cnn.com</code>\n- <code>function calling site:openai.com</code>",
+            "description": "Enter Google Search keywords or a URL to a specific web page. The keywords might include the [advanced search operators](https://blog.apify.com/how-to-scrape-google-like-a-pro/). Examples:\n\n- <code>san francisco weather</code>\n- <code>https://www.cnn.com</code>\n- <code>function calling site:openai.com</code>",
             "prefill": "san francisco weather",
             "editor": "textfield",
             "pattern": "[^\\s]+"
@@ -16,7 +16,7 @@
             "title": "Maximum results",
             "type": "integer",
             "description": "The maximum number of top organic Google Search results whose web pages will be extracted. If `query` is a URL, then this field is ignored and the Actor only fetches the specific web page.",
-            "prefill": 3,
+            "default": 3,
             "minimum": 1,
             "maximum": 100
         },
@@ -25,7 +25,7 @@
             "type": "array",
             "description": "Select one or more formats to which the target web pages will be extracted and saved in the resulting dataset.",
             "editor": "select",
-            "default": ["text"],
+            "default": ["markdown"],
             "items": {
                 "type": "string",
                 "enum": ["text", "markdown", "html"],
@@ -35,7 +35,7 @@
         "requestTimeoutSecs": {
             "title": "Request timeout",
             "type": "integer",
-            "description": "The maximum time in seconds available for one request, including querying Google Search and scraping the target web pages. For example, OpenAI allows only [45 seconds](https://platform.openai.com/docs/actions/production#timeouts) for custom actions. If a target page loading and extraction exceeds this timeout, the corresponding page will be skipped in results to ensure at least some results are returned within the timeout. If no page is extracted within the timeout, the whole request fails.",
+            "description": "The maximum time in seconds available for the request, including querying Google Search and scraping the target web pages. For example, OpenAI allows only [45 seconds](https://platform.openai.com/docs/actions/production#timeouts) for custom actions. If a target page loading and extraction exceeds this timeout, the corresponding page will be skipped in results to ensure at least some results are returned within the timeout. If no page is extracted within the timeout, the whole request fails.",
             "minimum": 1,
             "maximum": 300,
             "default": 40,
@@ -53,7 +53,7 @@
         "maxRequestRetriesSearch": {
             "title": "Google SERP maximum retries",
             "type": "integer",
-            "description": "The maximum number of times the Actor will retry fetching the Google Seach results on error. If the last attempt fails, the entire request fails.",
+            "description": "The maximum number of times the Actor will retry fetching the Google Search results on error. If the last attempt fails, the entire request fails.",
             "minimum": 0,
             "maximum": 5,
             "default": 2
@@ -85,20 +85,20 @@
             "description": "The minimum number of web browsers running in parallel.",
             "minimum": 1,
             "maximum": 50,
-            "default": 3
+            "default": 1
         },
         "maxConcurrency": {
             "title": "Maximum browsing concurrency",
             "type": "integer",
             "description": "The maximum number of web browsers running in parallel.",
             "minimum": 1,
-            "maximum": 50,
-            "default": 20
+            "maximum": 100,
+            "default": 50
         },
         "maxRequestRetries": {
             "title": "Target page max retries",
             "type": "integer",
-            "description": "The maximum number of retry attempts on network, proxy, or server errors. If the (n+1)-th request fails, it will be marked as failed.",
+            "description": "The maximum number of times the Actor will retry loading the target web page on error. If the last attempt fails, the page will be skipped in the results.",
             "minimum": 0,
             "maximum": 3,
             "default": 1
@@ -106,7 +106,7 @@
         "requestTimeoutContentCrawlSecs": {
             "title": "Target page scraping timeout",
             "type": "integer",
-            "description": "The maximum time in seconds for loading and extractiong the target web page content. The value should be smaller than the `requestTimeoutSecs` setting to have any effect.",
+            "description": "The maximum time in seconds for loading and extracting the target web page content. The value should be smaller than the `requestTimeoutSecs` setting to have any effect.",
             "minimum": 1,
             "maximum": 60,
             "default": 30,

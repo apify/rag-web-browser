@@ -9,8 +9,8 @@
     "storages": {
         "dataset": {
             "actorSpecification": 1,
-            "title": "RAG Web browser",
-            "description": "Too see all scraped properties, export the whole dataset or select All fields instead of Overview",
+            "title": "RAG Web Browser",
+            "description": "Too see all scraped properties, export the whole dataset or select All fields instead of Overview.",
             "views": {
                 "overview": {
                     "title": "Overview",
@@ -31,7 +31,7 @@
                                 "format": "text"
                             },
                             "metadata.title": {
-                                "label": "Page Title",
+                                "label": "Page title",
                                 "format": "text"
                             },
                             "text": {
@@ -42,7 +42,7 @@
                     }
                 },
                 "googleSearchResults": {
-                    "title": "Google Search Results",
+                    "title": "Search results",
                     "description": "Title, Description and URL of the Google Search Results",
                     "transformation": {
                         "fields": [
