@@ -41,7 +41,7 @@
             "default": 40,
             "unit": "seconds"
         },
-        "proxyGroupSearch": {
+        "serpProxyGroup": {
             "title": "Google SERP proxy group",
             "type": "string",
             "description": "Enables overriding the default Apify Proxy group used for fetching Google Search results.",
@@ -50,7 +50,7 @@
             "enum": ["GOOGLE_SERP", "SHADER"],
             "sectionCaption": "Google Search scraping settings"
         },
-        "maxRequestRetriesSearch": {
+        "serpMaxRetries": {
             "title": "Google SERP maximum retries",
             "type": "integer",
             "description": "The maximum number of times the Actor will retry fetching the Google Search results on error. If the last attempt fails, the entire request fails.",

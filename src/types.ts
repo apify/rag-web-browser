@@ -13,8 +13,8 @@ export type Input = {
     countryCode: string;
     languageCode: string;
     maxResults: number;
-    proxyGroupSearch: 'GOOGLE_SERP' | 'SHADER';
-    maxRequestRetriesSearch: number;
+    serpProxyGroup: 'GOOGLE_SERP' | 'SHADER';
+    serpMaxRetries: number;
     query: string;
 
     // content crawler parameters

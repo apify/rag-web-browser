@@ -55,15 +55,15 @@
                     "display": {
                         "component": "table",
                         "properties": {
-                            "googleSearchResult.description": {
+                            "searchResult.description": {
                                 "label": "Description",
                                 "format": "text"
                             },
-                            "googleSearchResult.title": {
+                            "searchResult.title": {
                                 "label": "Title",
                                 "format": "text"
                             },
-                            "googleSearchResult.url": {
+                            "searchResult.url": {
                                 "label": "URL",
                                 "format": "text"
                             }

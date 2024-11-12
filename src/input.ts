@@ -25,20 +25,20 @@ export async function processInput(originalInput: Partial<Input>) {
         minConcurrency,
         maxConcurrency,
         maxRequestRetries,
-        maxRequestRetriesSearch,
+        serpMaxRetries,
         outputFormats,
         proxyConfiguration,
-        proxyGroupSearch,
+        serpProxyGroup,
         readableTextCharThreshold,
         removeCookieWarnings,
     } = input;
 
     log.setLevel(debugMode ? log.LEVELS.DEBUG : log.LEVELS.INFO);
 
-    const proxySearch = await Actor.createProxyConfiguration({ groups: [proxyGroupSearch] });
+    const proxySearch = await Actor.createProxyConfiguration({ groups: [serpProxyGroup] });
     const cheerioCrawlerOptions: CheerioCrawlerOptions = {
         keepAlive,
-        maxRequestRetries: maxRequestRetriesSearch,
+        maxRequestRetries: serpMaxRetries,
         proxyConfiguration: proxySearch,
         autoscaledPoolOptions: { desiredConcurrency: 1 },
     };
