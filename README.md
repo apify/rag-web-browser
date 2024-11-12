@@ -75,7 +75,7 @@ You can find the details in the [Standby Mode documentation](https://docs.apify.
 **Note** Sending a search request to `/search` will also initiate Standby mode.
 You can use this endpoint for both purposes conveniently
 ```shell
-curl -X GET https://rag-web-browser.apify.actor/search?token=APIFY_API_TOKEN?query=apify%20llm
+curl -X GET https://rag-web-browser.apify.actor/search?token=APIFY_API_TOKEN&query=apify%20llm
 ```
 
 ### 📧 API parameters
@@ -148,8 +148,8 @@ You can set the `requestTimeoutSecs` parameter to define how long the Actor shou
 If the timeout is exceeded, the Actor will return whatever results were scraped up to that point.
 
 For example, the following outputs (truncated for brevity) illustrate this behavior:
-- The first result from http://github.com/apify was scraped fully.
-- The second result from http://apify.com was partially scraped due to the timeout. As a result, only the `googleSearchResult` is returned, and in this case, the `googleSearchResult.description` was copied into the `text` field.
+- The first result from https://github.com/apify was scraped fully.
+- The second result from https://apify.com was partially scraped due to the timeout. As a result, only the `googleSearchResult` is returned, and in this case, the `googleSearchResult.description` was copied into the `text` field.
 
 ```json
 [
