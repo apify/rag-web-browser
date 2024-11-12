@@ -41,16 +41,16 @@
                         }
                     }
                 },
-                "googleSearchResults": {
+                "searchResults": {
                     "title": "Search results",
                     "description": "Title, Description and URL of the Google Search Results",
                     "transformation": {
                         "fields": [
-                            "googleSearchResult.description",
-                            "googleSearchResult.title",
-                            "googleSearchResult.url"
+                            "searchResult.description",
+                            "searchResult.title",
+                            "searchResult.url"
                         ],
-                        "flatten": ["googleSearchResult"]
+                        "flatten": ["searchResult"]
                     },
                     "display": {
                         "component": "table",

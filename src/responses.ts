@@ -46,7 +46,7 @@ export const addEmptyResultToResponse = (responseId: string, request: RequestOpt
     const result: Partial<Output> = {
         crawl: { createdAt: new Date(), requestStatus: ContentCrawlerStatus.PENDING, uniqueKey: request.uniqueKey! },
         metadata: { url: request.url },
-        googleSearchResult: request.userData?.googleSearchResult,
+        searchResult: request.userData?.searchResult,
     };
     res.resultsMap.set(request.uniqueKey!, result as Output);
 };
@@ -93,8 +93,6 @@ const checkAllResultsHandled = (responseId: string) => {
 /**
  * Send response with error status code. If the response contains some handled requests,
  * return 200 status otherwise 500.
- *
- * Also, copy title and description from Google search result to the response.
  */
 export const sendResponseError = (responseId: string, message: string) => {
     const res = getResponse(responseId);
@@ -108,8 +106,8 @@ export const sendResponseError = (responseId: string, message: string) => {
             r.crawl.httpStatusCode = 500;
             r.crawl.httpStatusMessage = message;
             r.crawl.requestStatus = ContentCrawlerStatus.FAILED;
-            r.metadata.title = r.googleSearchResult?.title;
-            r.text = r.googleSearchResult?.description || '';
+            r.metadata.title = '';
+            r.text = '';
         } else if (requestStatus === ContentCrawlerStatus.HANDLED) {
             returnStatusCode = 200;
         }

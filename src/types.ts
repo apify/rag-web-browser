@@ -65,7 +65,7 @@ export type UserData = {
     responseId?: string;
     startedAt?: Date;
     timeMeasures?: TimeMeasure[];
-    googleSearchResult?: OrganicResult;
+    searchResult?: OrganicResult;
     playwrightCrawlerKey?: string;
 };
 
@@ -92,7 +92,7 @@ export type Output = {
         requestStatus: string;
         uniqueKey: string;
     };
-    googleSearchResult: OrganicResult;
+    searchResult: OrganicResult;
     metadata: {
         author?: string | null;
         description?: string | null;

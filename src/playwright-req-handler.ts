@@ -90,9 +90,9 @@ export async function requestHandlerPlaywright(
                 requestStatus: ContentCrawlerStatus.FAILED,
             },
             metadata: { url: request.url },
-            googleSearchResult: request.userData.googleSearchResult!,
+            searchResult: request.userData.searchResult!,
             query: request.userData.query,
-            text: request.userData.googleSearchResult?.description || '',
+            text: '',
         };
         log.info(`Adding result to the Apify dataset, url: ${request.url}`);
         await context.pushData(resultSkipped);
@@ -119,7 +119,7 @@ export async function requestHandlerPlaywright(
             uniqueKey: request.uniqueKey,
             requestStatus: ContentCrawlerStatus.HANDLED,
         },
-        googleSearchResult: request.userData.googleSearchResult!,
+        searchResult: request.userData.searchResult!,
         metadata: {
             author: $('meta[name=author]').first().attr('content') ?? null,
             title: $('title').first().text(),
@@ -162,12 +162,12 @@ export async function failedRequestHandlerPlaywright(request: Request, err: Erro
                 uniqueKey: request.uniqueKey,
                 requestStatus: ContentCrawlerStatus.FAILED,
             },
-            googleSearchResult: request.userData.googleSearchResult!,
+            searchResult: request.userData.searchResult!,
             metadata: {
                 url: request.url,
-                title: request.userData.googleSearchResult?.title,
+                title: '',
             },
-            text: request.userData.googleSearchResult?.description || '',
+            text: '',
         };
         log.info(`Adding result to the Apify dataset, url: ${request.url}`);
         await Actor.pushData(resultErr);

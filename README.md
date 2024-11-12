@@ -121,7 +121,7 @@ The `/search` GET HTTP endpoint responds with a JSON array, which looks as follo
       "uniqueKey": "3e8452bb-c703-44af-9590-bd5257902378",
       "requestStatus": "handled"
     },
-    "googleSearchResult": {
+    "searchResult": {
       "url": "https://apify.com/",
       "title": "Apify: Full-stack web scraping and data extraction platform",
       "description": "Cloud platform for web scraping, browser automation, and data for AI...."
@@ -186,7 +186,7 @@ If the timeout is exceeded, the Actor will return whatever results were scraped 
 
 For example, the following outputs (truncated for brevity) illustrate this behavior:
 - The first result from http://github.com/apify was scraped fully.
-- The second result from http://apify.com was partially scraped due to the timeout. As a result, only the `googleSearchResult` is returned, and in this case, the `googleSearchResult.description` was copied into the `text` field.
+- The second result from http://apify.com was partially scraped due to the timeout. As a result, only the `searchResult` is returned.
 
 ```json
 [
@@ -196,7 +196,7 @@ For example, the following outputs (truncated for brevity) illustrate this behav
       "httpStatusMessage": "OK",
       "requestStatus": "handled"
     },
-    "googleSearchResult": {
+    "searchResult": {
       "description": "Apify command-line interface helps you create, develop, build and run Apify actors, and manage the Apify cloud platform.",
       "title": "Apify",
       "url": "https://github.com/apify"
@@ -209,12 +209,12 @@ For example, the following outputs (truncated for brevity) illustrate this behav
       "httpStatusMessage": "Timed out",
       "requestStatus": "failed"
     },
-    "googleSearchResult": {
+    "searchResult": {
       "description": "Cloud platform for web scraping, browser automation, and data for AI.",
       "title": "Apify: Full-stack web scraping and data extraction platform",
       "url": "https://apify.com/"
     },
-    "text": "Cloud platform for web scraping, browser automation, and data for AI."
+    "text": ""
   }
 ]
 ```

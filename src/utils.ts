@@ -68,7 +68,7 @@ export function createRequest(
         uniqueKey: uuidv4(),
         userData: {
             responseId,
-            googleSearchResult: result,
+            searchResult: result,
             timeMeasures: timeMeasures ? [...timeMeasures] : [],
         },
     };
