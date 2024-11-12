@@ -3,6 +3,7 @@ import { log } from 'crawlee';
 import { createServer, IncomingMessage, ServerResponse } from 'http';
 import { v4 as uuidv4 } from 'uuid';
 
+import { PLAYWRIGHT_REQUEST_TIMEOUT_NORMAL_MODE_SECS } from './const.js';
 import { addPlaywrightCrawlRequest, addSearchRequest, createAndStartCrawlers, getPlaywrightCrawlerKey } from './crawlers.js';
 import { UserInputError } from './errors.js';
 import { checkInputsAreValid, processInput } from './input.js';
@@ -127,16 +128,9 @@ if (Actor.getEnv().metaOrigin === 'STANDBY') {
         const startedTime = Date.now();
         await checkInputsAreValid(input);
 
-        // TODO: Implement this??
-        // const actorTimeoutAt = process.env.ACTOR_TIMEOUT_AT ? parseInt(process.env.ACTOR_TIMEOUT_AT, 10) : null;
-        // input.requestTimeoutSecs = actorTimeoutAt
-        //     ? Math.floor((actorTimeoutAt - Date.now()) / 1000)
-        //     : input.requestTimeoutSecs;
-
         cheerioCrawlerOptions.keepAlive = false;
         playwrightCrawlerOptions.keepAlive = false;
-        // Set the Playwright timeout to be 2 second less than the Actor timeout to provide time to save partial results
-        // playwrightCrawlerOptions.requestHandlerTimeoutSecs = input.requestTimeoutSecs - 2;
+        playwrightCrawlerOptions.requestHandlerTimeoutSecs = PLAYWRIGHT_REQUEST_TIMEOUT_NORMAL_MODE_SECS;
 
         // playwrightCrawlerKey is used to identify the crawler that should process the search results
         const playwrightCrawlerKey = getPlaywrightCrawlerKey(playwrightCrawlerOptions, playwrightScraperSettings);

@@ -9,6 +9,8 @@ import { addTimeMeasureEvent, transformTimeMeasuresToRelative } from './utils.js
 import { processHtml } from './website-content-crawler/html-processing.js';
 import { htmlToMarkdown } from './website-content-crawler/markdown.js';
 
+const ACTOR_TIMEOUT_AT = process.env.ACTOR_TIMEOUT_AT ? parseInt(process.env.ACTOR_TIMEOUT_AT, 10) : null;
+
 /**
  * Waits for the `time` to pass, but breaks early if the page is loaded (source: Website Content Crawler).
  */
@@ -21,11 +23,26 @@ async function waitForPlaywright({ page }: PlaywrightCrawlingContext, time: numb
 }
 
 /**
+ * Decide whether to wait based on the remaining time left for the Actor to run.
+ * Always waits if the Actor is in the STANDBY_MODE.
+ */
+export function hasTimeLeftToTimeout(time: number) {
+    if (process.env.STANDBY_MODE) return true;
+    if (!ACTOR_TIMEOUT_AT) return true;
+
+    const timeLeft = ACTOR_TIMEOUT_AT - Date.now();
+    if (timeLeft > time) return true;
+
+    log.debug('Not enough time left to wait for dynamic content. Skipping');
+    return false;
+}
+
+/**
  * Waits for the `time`, but checks the content length every half second and breaks early if it hasn't changed
  * in last 2 seconds (source: Website Content Crawler).
  */
 export async function waitForDynamicContent(context: PlaywrightCrawlingContext, time: number) {
-    if (context.page) {
+    if (context.page && hasTimeLeftToTimeout(time)) {
         await waitForPlaywright(context, time);
     }
 }
