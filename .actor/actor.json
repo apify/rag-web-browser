@@ -14,7 +14,7 @@
             "views": {
                 "overview": {
                     "title": "Overview",
-                    "description": "Selected fields from the dataset",
+                    "description": "An view showing just basic properties for simplicity.",
                     "transformation": {
                         "fields": [
                             "metadata.url",
@@ -41,9 +41,9 @@
                         }
                     }
                 },
-                "googleSearchResults": {
+                "searchResults": {
                     "title": "Search results",
-                    "description": "Title, Description and URL of the Google Search Results",
+                    "description": "A view showing just the Google Search results, without the page content.",
                     "transformation": {
                         "fields": [
                             "googleSearchResult.description",
