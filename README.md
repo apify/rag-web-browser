@@ -18,18 +18,20 @@ The extracted text can then be injected into prompts and retrieval augmented gen
 
 For a search query like `web browser site:openai.com`, the Actor will return an array with a content of top results from Google Search:
 
-<!-- TODO: "metadata" must be a subobject -->
-
-```jsonc
+```json
 [
     {
-        "metadata.url": "https://python.langchain.com/docs/integrations/providers/apify/#utility",
-        "metadata.title": "Apify | 🦜️🔗 LangChain",
-        "text": "Apify | 🦜️🔗 LangChain | This notebook shows how to use the Apify integration ...."
+        "metadata": {
+           "url": "https://python.langchain.com/docs/integrations/providers/apify/#utility",
+           "title": "Apify | 🦜️🔗 LangChain"
+        },
+        "text": "Apify | 🦜️🔗 LangChain | This notebook shows how to use the Apify integration ..."
     },
     {
-        "metadata.url": "https://microsoft.github.io/autogen/0.2/docs/notebooks/agentchat_webscraping_with_apify/",
-        "metadata.title": "Web Scraping using Apify Tools | AutoGen",
+        "metadata": {
+            "url": "https://microsoft.github.io/autogen/0.2/docs/notebooks/agentchat_webscraping_with_apify/",
+            "title": "Web Scraping using Apify Tools | AutoGen"
+        },
         "text": "Web Scraping using Apify Tools | This notebook shows how to use Apify tools with AutoGen agents ...."
     }
 ]
@@ -40,10 +42,16 @@ the web page content directly.
 
 <!-- TODO: This must be an array like above -->
 
-```jsonc
-{
-	"text": "OpenAI Assistants integration. Learn how to integrate Apify with OpenAI Assistants to provide real-time search data ...."
-}
+```json
+[
+  {
+    "metadata": {
+      "url": "https://docs.apify.com/platform/integrations/openai-assistants",
+      "title": "OpenAI Assistants integration | Platform | Apify Documentation"
+  },
+    "text": "OpenAI Assistants integration. Learn how to integrate Apify with OpenAI Assistants to provide real-time search data ..."
+  }
+]
 ```
 
 ## Usage
