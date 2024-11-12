@@ -142,7 +142,7 @@ RAG Web Browser has been designed for easy integration to LLM applications, GPTs
 
 ### OpenAPI schema
 
-Here you can find the [OpenAPI schema](https://raw.githubusercontent.com/apify/rag-web-browser/refs/heads/master/docs/standby-openapi.json)
+Here you can find the [OpenAPI schema](https://raw.githubusercontent.com/apify/rag-web-browser/refs/heads/master/docs/standby-openapi-3.1.0.json)
 for the Standby web server. Note that the OpenAPI definition contains
 all available query parameters, but only `query` is required.
 You can remove all the others parameters from the definition if their default value is right for your application,
