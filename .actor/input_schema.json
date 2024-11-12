@@ -77,7 +77,8 @@
             "description": "The initial number of web browsers running in parallel. The system automatically scales the number based on the CPU and memory usage, in the range specified by `minConcurrency` and `maxConcurrency`. If the initial value is `0`, the Actor picks the number automatically based on the available memory.",
             "minimum": 0,
             "maximum": 50,
-            "default": 4
+            "default": 4,
+            "editor": "hidden"
         },
         "minConcurrency": {
             "title": "Minimum browsing concurrency",
@@ -85,7 +86,8 @@
             "description": "The minimum number of web browsers running in parallel.",
             "minimum": 1,
             "maximum": 50,
-            "default": 1
+            "default": 1,
+            "editor": "hidden"
         },
         "maxConcurrency": {
             "title": "Maximum browsing concurrency",
@@ -93,7 +95,8 @@
             "description": "The maximum number of web browsers running in parallel.",
             "minimum": 1,
             "maximum": 100,
-            "default": 50
+            "default": 50,
+            "editor": "hidden"
         },
         "maxRequestRetries": {
             "title": "Target page max retries",
