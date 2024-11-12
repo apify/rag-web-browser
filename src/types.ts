@@ -27,7 +27,6 @@ export type Input = {
     proxyConfiguration: ProxyConfigurationOptions;
     readableTextCharThreshold: number;
     removeCookieWarnings: boolean;
-    requestTimeoutContentCrawlSecs: number;
 };
 
 export type OrganicResult = {

@@ -48,7 +48,7 @@ export async function processInput(originalInput: Partial<Input>) {
         keepAlive,
         maxRequestRetries,
         proxyConfiguration: proxy,
-        requestHandlerTimeoutSecs: input.requestTimeoutContentCrawlSecs,
+        requestHandlerTimeoutSecs: input.requestTimeoutSecs,
         launchContext: {
             launcher: firefox,
         },

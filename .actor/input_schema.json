@@ -106,15 +106,6 @@
             "maximum": 3,
             "default": 1
         },
-        "requestTimeoutContentCrawlSecs": {
-            "title": "Target page scraping timeout",
-            "type": "integer",
-            "description": "The maximum time in seconds for loading and extracting the target web page content. The value should be smaller than the `requestTimeoutSecs` setting to have any effect.",
-            "minimum": 1,
-            "maximum": 60,
-            "default": 30,
-            "unit": "seconds"
-        },
         "dynamicContentWaitSecs": {
             "title": "Target page dynamic content timeout",
             "type": "integer",

@@ -64,10 +64,10 @@ async function getSearch(request: IncomingMessage, response: ServerResponse) {
             await addPlaywrightCrawlRequest(req, req.uniqueKey!, playwrightCrawlerKey);
         } else {
             await addSearchRequest(req, response, cheerioCrawlerOptions);
-            setTimeout(() => {
-                sendResponseError(req.uniqueKey!, 'Timed out');
-            }, input.requestTimeoutSecs * 1000);
         }
+        setTimeout(() => {
+            sendResponseError(req.uniqueKey!, 'Timed out');
+        }, input.requestTimeoutSecs * 1000);
     } catch (e) {
         const error = e as Error;
         const errorMessage = { errorMessage: error.message };
@@ -127,8 +127,16 @@ if (Actor.getEnv().metaOrigin === 'STANDBY') {
         const startedTime = Date.now();
         await checkInputsAreValid(input);
 
+        // TODO: Implement this??
+        // const actorTimeoutAt = process.env.ACTOR_TIMEOUT_AT ? parseInt(process.env.ACTOR_TIMEOUT_AT, 10) : null;
+        // input.requestTimeoutSecs = actorTimeoutAt
+        //     ? Math.floor((actorTimeoutAt - Date.now()) / 1000)
+        //     : input.requestTimeoutSecs;
+
         cheerioCrawlerOptions.keepAlive = false;
         playwrightCrawlerOptions.keepAlive = false;
+        // Set the Playwright timeout to be 2 second less than the Actor timeout to provide time to save partial results
+        // playwrightCrawlerOptions.requestHandlerTimeoutSecs = input.requestTimeoutSecs - 2;
 
         // playwrightCrawlerKey is used to identify the crawler that should process the search results
         const playwrightCrawlerKey = getPlaywrightCrawlerKey(playwrightCrawlerOptions, playwrightScraperSettings);
