@@ -1,6 +1,6 @@
 import type { ProxyConfigurationOptions } from 'apify';
 
-type OutputFormats = 'text' | 'markdown' | 'html';
+export type OutputFormats = 'text' | 'markdown' | 'html';
 
 export type Input = {
     debugMode: boolean;

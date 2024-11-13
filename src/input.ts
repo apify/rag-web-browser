@@ -2,20 +2,18 @@ import { Actor } from 'apify';
 import { BrowserName, CheerioCrawlerOptions, log, PlaywrightCrawlerOptions } from 'crawlee';
 import { firefox } from 'playwright';
 
-import defaults from './defaults.json' with { type: 'json' };
+import { defaults } from './const.js';
 import { UserInputError } from './errors.js';
-import type { Input, PlaywrightScraperSettings } from './types.js';
+import type { Input, PlaywrightScraperSettings, OutputFormats } from './types.js';
 
 /**
  * Processes the input and returns the settings for the crawler (adapted from: Website Content Crawler).
  */
 
 export async function processInput(originalInput: Partial<Input>) {
-    const input: Input = { ...(defaults as unknown as Input), ...originalInput };
+    const input = { ...defaults, ...originalInput } as Input;
 
-    if (input.dynamicContentWaitSecs >= input.requestTimeoutSecs) {
-        input.dynamicContentWaitSecs = Math.round(input.requestTimeoutSecs / 2);
-    }
+    validateAndFillInput(input);
 
     const {
         debugMode,
@@ -79,11 +77,40 @@ export async function processInput(originalInput: Partial<Input>) {
     return { input, cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings };
 }
 
-export async function checkInputsAreValid(input: Partial<Input>) {
+export function validateAndFillInput(input: Input) {
+    const validateRange = (
+        value: number | undefined,
+        min: number,
+        max: number,
+        defaultValue: number,
+        fieldName: string,
+    ) => {
+        if (value === undefined || value < min) {
+            log.warning(`The "${fieldName}" parameter must be at least ${min}. Using default value ${defaultValue}.`);
+            return defaultValue;
+        } if (value > max) {
+            log.warning(`The "${fieldName}" parameter is limited to ${max}. Using default max value ${max}.`);
+            return max;
+        }
+        return value;
+    };
     if (!input.query) {
         throw new UserInputError('The "query" parameter must be provided and non-empty');
     }
-    if (input.maxResults !== undefined && input.maxResults <= 0) {
-        throw new UserInputError('The "maxResults" parameter must be greater than 0');
+
+    input.maxResults = validateRange(input.maxResults, 1, defaults.maxResultsMax, defaults.maxResults, 'maxResults');
+    input.requestTimeoutSecs = validateRange(input.requestTimeoutSecs, 1, defaults.requestTimeoutSecsMax, defaults.requestTimeoutSecs, 'requestTimeoutSecs');
+    input.serpMaxRetries = validateRange(input.serpMaxRetries, 0, defaults.serpMaxRetriesMax, defaults.serpMaxRetries, 'serpMaxRetries');
+    input.maxRequestRetries = validateRange(input.maxRequestRetries, 0, defaults.maxRequestRetriesMax, defaults.maxRequestRetries, 'maxRequestRetries');
+
+    if (!input.outputFormats || input.outputFormats.length === 0) {
+        input.outputFormats = defaults.outputFormats as OutputFormats[];
+        log.warning(`The "outputFormats" parameter must be a non-empty array. Using default value ${defaults.outputFormats}.`);
+    }
+    if (input.serpProxyGroup !== 'GOOGLE_SERP' && input.serpProxyGroup !== 'SHADER') {
+        throw new UserInputError('The "serpProxyGroup" parameter must be either "GOOGLE_SERP" or "SHADER"');
+    }
+    if (input.dynamicContentWaitSecs >= input.requestTimeoutSecs) {
+        input.dynamicContentWaitSecs = Math.round(input.requestTimeoutSecs / 2);
     }
 }

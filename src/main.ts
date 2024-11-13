@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { PLAYWRIGHT_REQUEST_TIMEOUT_NORMAL_MODE_SECS } from './const.js';
 import { addPlaywrightCrawlRequest, addSearchRequest, createAndStartCrawlers, getPlaywrightCrawlerKey } from './crawlers.js';
 import { UserInputError } from './errors.js';
-import { checkInputsAreValid, processInput } from './input.js';
+import { processInput } from './input.js';
 import { addTimeoutToAllResponses, sendResponseError } from './responses.js';
 import { Input } from './types.js';
 import {
@@ -40,8 +40,6 @@ async function getSearch(request: IncomingMessage, response: ServerResponse) {
             playwrightCrawlerOptions,
             playwrightScraperSettings,
         } = await processInput(params as Partial<Input>);
-
-        await checkInputsAreValid(input);
 
         // playwrightCrawlerKey is used to identify the crawler that should process the search results
         const playwrightCrawlerKey = getPlaywrightCrawlerKey(playwrightCrawlerOptions, playwrightScraperSettings);
@@ -126,8 +124,6 @@ if (Actor.getEnv().metaOrigin === 'STANDBY') {
     log.info('Actor is running in the NORMAL mode');
     try {
         const startedTime = Date.now();
-        await checkInputsAreValid(input);
-
         cheerioCrawlerOptions.keepAlive = false;
         playwrightCrawlerOptions.keepAlive = false;
         playwrightCrawlerOptions.requestHandlerTimeoutSecs = PLAYWRIGHT_REQUEST_TIMEOUT_NORMAL_MODE_SECS;
