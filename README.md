@@ -149,20 +149,19 @@ RAG Web Browser has been designed for easy integration to LLM applications, GPTs
 Here you can find the [OpenAPI schema](https://raw.githubusercontent.com/apify/rag-web-browser/refs/heads/master/docs/standby-openapi-3.1.0.json)
 for the Standby web server. Note that the OpenAPI definition contains
 all available query parameters, but only `query` is required.
-You can remove all the others parameters from the definition if the default value is right for your application,
-in order to reduce the number of LLM tokens and lower the risk of hallucinations.
+You can remove all the others parameters from the definition if their default value is right for your application,
+in order to reduce the number of LLM tokens necessary and to reduce the risk of hallucinations.
 
+### OpenAI Assistants
 
-## 💡 How to use RAG Web Browser in OpenAI Assistant as a tool for web search?
+While ChatGPT and GPTs supports web browsing natively, [OpenAI Assistants](https://platform.openai.com/docs/assistants/overview) do not.
+With RAG Web Browser, you can easily add the web search and browsing capability to your custom AI assistant and chatbots.
 
-You can use the RAG Web Browser to provide up-to-date information from Google search results to your OpenAI Assistant.
-The assistant can use the RAG Web Browser as a tool and whenever it needs to fetch information from the web, it sends request a request to the RAG Web Browser based on the search query.
+For detailed instructions and a step-by-step guide, see the [OpenAI Assistants integration](https://docs.apify.com/platform/integrations/openai-assistants#real-time-search-data-for-openai-assistant) in Apify documentation.
 
-For a complete example with images and detailed instructions, visit the [OpenAI Assistant integration](https://docs.apify.com/platform/integrations/openai-assistants#real-time-search-data-for-openai-assistant) page.
+### OpenAI GPTs
 
-## ֎ How to use RAG Web Browser in your GPT as a custom action?
-
-You can easily add the RAG Web Browser to your GPT by uploading its OpenAPI specification and creating a custom action.
+You can easily add the RAG Web Browser to your GPT by creating a custom action using the [OpenAPI schema](#openapi-schema).
 Follow the detailed guide in the article [Add custom actions to your GPTs with Apify Actors](https://blog.apify.com/add-custom-actions-to-your-gpts/).
 
 Here's a quick guide to adding the RAG Web Browser to your GPT as a custom action:
@@ -181,12 +180,15 @@ Here's a quick guide to adding the RAG Web Browser to your GPT as a custom actio
 
 ## ✃ How to set up request timeout?
 
+<!-- TODO: Explain the best effort basis, e.g. skip dynamic loading, skip results etc. -->
+
+
 You can set the `requestTimeoutSecs` parameter to define how long the Actor should spend on making the search request and crawling.
 If the timeout is exceeded, the Actor will return whatever results were scraped up to that point.
 
 For example, the following outputs (truncated for brevity) illustrate this behavior:
-- The first result from http://github.com/apify was scraped fully.
-- The second result from http://apify.com was partially scraped due to the timeout. As a result, only the `searchResult` is returned.
+- The first result from https://github.com/apify was scraped fully.
+- The second result from https://apify.com was partially scraped due to the timeout. As a result, only the `googleSearchResult` is returned, and in this case, the `googleSearchResult.description` was copied into the `text` field.
 
 ```json
 [
