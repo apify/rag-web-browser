@@ -73,7 +73,7 @@
                         }
                     },
                     {
-                        "name": "proxyGroupSearch",
+                        "name": "serpProxyGroup",
                         "in": "query",
                         "description": "Proxy group for loading search results.",
                         "required": false,
@@ -87,7 +87,7 @@
                         }
                     },
                     {
-                        "name": "maxRequestRetriesSearch",
+                        "name": "serpMaxRetries",
                         "in": "query",
                         "description": "Maximum retries for Google search requests on errors.",
                         "required": false,

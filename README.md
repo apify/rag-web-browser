@@ -18,18 +18,20 @@ The extracted text can then be injected into prompts and retrieval augmented gen
 
 For a search query like `web browser site:openai.com`, the Actor will return an array with a content of top results from Google Search:
 
-<!-- TODO: "metadata" must be a subobject -->
-
-```jsonc
+```json
 [
     {
-        "metadata.url": "https://python.langchain.com/docs/integrations/providers/apify/#utility",
-        "metadata.title": "Apify | 🦜️🔗 LangChain",
-        "text": "Apify | 🦜️🔗 LangChain | This notebook shows how to use the Apify integration ...."
+        "metadata": {
+           "url": "https://python.langchain.com/docs/integrations/providers/apify/#utility",
+           "title": "Apify | 🦜️🔗 LangChain"
+        },
+        "text": "Apify | 🦜️🔗 LangChain | This notebook shows how to use the Apify integration ..."
     },
     {
-        "metadata.url": "https://microsoft.github.io/autogen/0.2/docs/notebooks/agentchat_webscraping_with_apify/",
-        "metadata.title": "Web Scraping using Apify Tools | AutoGen",
+        "metadata": {
+            "url": "https://microsoft.github.io/autogen/0.2/docs/notebooks/agentchat_webscraping_with_apify/",
+            "title": "Web Scraping using Apify Tools | AutoGen"
+        },
         "text": "Web Scraping using Apify Tools | This notebook shows how to use Apify tools with AutoGen agents ...."
     }
 ]
@@ -40,10 +42,16 @@ the web page content directly.
 
 <!-- TODO: This must be an array like above -->
 
-```jsonc
-{
-	"text": "OpenAI Assistants integration. Learn how to integrate Apify with OpenAI Assistants to provide real-time search data ...."
-}
+```json
+[
+  {
+    "metadata": {
+      "url": "https://docs.apify.com/platform/integrations/openai-assistants",
+      "title": "OpenAI Assistants integration | Platform | Apify Documentation"
+  },
+    "text": "OpenAI Assistants integration. Learn how to integrate Apify with OpenAI Assistants to provide real-time search data ..."
+  }
+]
 ```
 
 ## Usage
@@ -90,11 +98,8 @@ The `/search` GET HTTP endpoint accepts the following query parameters:
 | `maxResults`                     | number  | `3`           | The maximum number of top organic Google Search results whose web pages will be extracted. If `query` is a URL, then this parameter is ignored and the Actor only fetches the specific web page.                                                                                                                                                                                                                                                                                                                |
 | `outputFormats`                  | string  | `markdown`    | Select one or more formats to which the target web pages will be extracted. Use comma to separate multiple values (e.g. `text,markdown`)                                                                                                                                                                                                                                                                                                                                                                        |
 | `requestTimeoutSecs`             | number  | `30`          | The maximum time in seconds available for the request, including querying Google Search and scraping the target web pages. For example, OpenAI allows only [45 seconds](https://platform.openai.com/docs/actions/production#timeouts) for custom actions. If a target page loading and extraction exceeds this timeout, the corresponding page will be skipped in results to ensure at least some results are returned within the timeout. If no page is extracted within the timeout, the whole request fails. |
-| `proxyGroupSearch`               | string  | `GOOGLE_SERP` | Enables overriding the default Apify Proxy group used for fetching Google Search results.                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `maxRequestRetriesSearch`        | number  | `1`           | The maximum number of times the Actor will retry fetching the Google Search results on error. If the last attempt fails, the entire request fails.                                                                                                                                                                                                                                                                                                                                                              |
-| `initialConcurrency`             | number  | `0`           | The initial number of web browsers running in parallel. The system automatically scales the number based on the CPU and memory usage. If the value is `0`, the Actor picks the number automatically based on the available memory.                                                                                                                                                                                                                                                                              |
-| `minConcurrency`                 | number  | `1`           | The minimum number of web browsers running in parallel.                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `maxConcurrency`                 | number  | `50`          | The maximum number of web browsers running in parallel.                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `serpProxyGroup`                 | string  | `GOOGLE_SERP` | Enables overriding the default Apify Proxy group used for fetching Google Search results.                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `serpMaxRetries`                 | number  | `1`           | The maximum number of times the Actor will retry fetching the Google Search results on error. If the last attempt fails, the entire request fails.                                                                                                                                                                                                                                                                                                                                                              |
 | `maxRequestRetries`              | number  | `1`           | The maximum number of times the Actor will retry loading the target web page on error. If the last attempt fails, the page will be skipped in the results.                                                                                                                                                                                                                                                                                                                                                      |
 | `requestTimeoutContentCrawlSecs` | number  | `30`          | The maximum time in seconds for loading and extracting the target web page content. The value should be smaller than the `requestTimeoutSecs` setting to have any effect.                                                                                                                                                                                                                                                                                                                                       |
 | `dynamicContentWaitSecs`         | number  | `10`          | The maximum time in seconds to wait for dynamic page content to load. The Actor considers the web page as fully loaded once this time elapses or when the network becomes idle.                                                                                                                                                                                                                                                                                                                                 |
@@ -102,7 +107,6 @@ The `/search` GET HTTP endpoint accepts the following query parameters:
 | `debugMode`                      | boolean | `false`       | If enabled, the Actor will store debugging information in the dataset's debug field.                                                                                                                                                                                                                                                                                                                                                                                                                            |
 
 <!-- TODO: add proxyConfiguration, remove requestTimeoutContentCrawlSecs -->
-
 
 #### Response
 
@@ -117,7 +121,7 @@ The `/search` GET HTTP endpoint responds with a JSON array, which looks as follo
       "uniqueKey": "3e8452bb-c703-44af-9590-bd5257902378",
       "requestStatus": "handled"
     },
-    "googleSearchResult": {
+    "searchResult": {
       "url": "https://apify.com/",
       "title": "Apify: Full-stack web scraping and data extraction platform",
       "description": "Cloud platform for web scraping, browser automation, and data for AI...."
@@ -194,7 +198,7 @@ For example, the following outputs (truncated for brevity) illustrate this behav
       "httpStatusMessage": "OK",
       "requestStatus": "handled"
     },
-    "googleSearchResult": {
+    "searchResult": {
       "description": "Apify command-line interface helps you create, develop, build and run Apify actors, and manage the Apify cloud platform.",
       "title": "Apify",
       "url": "https://github.com/apify"
@@ -207,12 +211,12 @@ For example, the following outputs (truncated for brevity) illustrate this behav
       "httpStatusMessage": "Timed out",
       "requestStatus": "failed"
     },
-    "googleSearchResult": {
+    "searchResult": {
       "description": "Cloud platform for web scraping, browser automation, and data for AI.",
       "title": "Apify: Full-stack web scraping and data extraction platform",
       "url": "https://apify.com/"
     },
-    "text": "Cloud platform for web scraping, browser automation, and data for AI."
+    "text": ""
   }
 ]
 ```
@@ -225,7 +229,7 @@ To optimize the performance and cost of your application, see the [Standby mode 
 
 The latency is proportional to the **memory allocated** to the Actor and **number of results requested**.
 
-Below is a typical latency breakdown for the RAG Web Browser with **initialConcurrency=3** and **maxResults** set to either 1 or 3.
+Below is a typical latency breakdown for the RAG Web Browser with **maxResults** set to either 1 or 3.
 These settings allow for processing all search results in parallel.
 
 Please note the these results are only indicative and may vary based on the search term, the target websites, and network latency.
@@ -243,14 +247,10 @@ Results were averaged for the three queries.
 Based on your requirements, if low latency is a priority, consider running the Actor with 4GB or 8GB of memory.
 However, if you're looking for a cost-effective solution, you can run the Actor with 2GB of memory, but you may experience higher latency and might need to set a longer timeout.
 
-If you need to gather more results, you can increase the memory and adjust the `initialConcurrency` parameter accordingly.
-
-
 ### 🎢 How to optimize the RAG Web Browser for low latency?
 
 For low latency, it's recommended to run the RAG Web Browser with 8 GB of memory. Additionally, adjust these settings to further optimize performance:
 
-- **Initial Concurrency**: This controls the number of Playwright browsers running in parallel. If you only need a few results (e.g., 3, 5, or 10), set the initial concurrency to match this number to ensure content is processed simultaneously.
 - **Dynamic Content Wait Secs**: Set this to 0 if you don't need to wait for dynamic content. This can significantly reduce latency.
 - **Remove Cookie Warnings**: If the websites you're scraping don't have cookie warnings, set this to false to slightly improve latency.
 - **Debug Mode**: Enable this to store debugging information if you need to measure the Actor's latency.

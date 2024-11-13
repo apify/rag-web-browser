@@ -2,7 +2,7 @@ import { RequestOptions, log, ProxyConfiguration } from 'crawlee';
 import { parse, ParsedUrlQuery } from 'querystring';
 import { v4 as uuidv4 } from 'uuid';
 
-import defaults from './defaults.json' with { type: 'json' };
+import { defaults } from './const.js';
 import { OrganicResult, TimeMeasure, UserData } from './types.js';
 
 export function parseParameters(url: string): ParsedUrlQuery {
@@ -13,8 +13,10 @@ export function parseParameters(url: string): ParsedUrlQuery {
  * Check whether the query parameters are valid (do not support extra parameters)
  */
 export function checkForExtraParams(params: ParsedUrlQuery) {
+    const keys = Object.keys(defaults);
+    keys.push('token', '?token'); // token is a special parameter
     for (const key of Object.keys(params)) {
-        if (!defaults.hasOwnProperty(key)) {
+        if (!keys.includes(key)) {
             log.warning(`Unknown parameter: ${key}. Supported parameters: ${Object.keys(defaults).join(', ')}`);
             delete params[key];
         }
@@ -68,7 +70,7 @@ export function createRequest(
         uniqueKey: uuidv4(),
         userData: {
             responseId,
-            googleSearchResult: result,
+            searchResult: result,
             timeMeasures: timeMeasures ? [...timeMeasures] : [],
         },
     };

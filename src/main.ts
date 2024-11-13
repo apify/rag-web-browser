@@ -3,9 +3,10 @@ import { log } from 'crawlee';
 import { createServer, IncomingMessage, ServerResponse } from 'http';
 import { v4 as uuidv4 } from 'uuid';
 
+import { PLAYWRIGHT_REQUEST_TIMEOUT_NORMAL_MODE_SECS } from './const.js';
 import { addPlaywrightCrawlRequest, addSearchRequest, createAndStartCrawlers, getPlaywrightCrawlerKey } from './crawlers.js';
 import { UserInputError } from './errors.js';
-import { checkInputsAreValid, processInput } from './input.js';
+import { processInput } from './input.js';
 import { addTimeoutToAllResponses, sendResponseError } from './responses.js';
 import { Input } from './types.js';
 import {
@@ -40,8 +41,6 @@ async function getSearch(request: IncomingMessage, response: ServerResponse) {
             playwrightScraperSettings,
         } = await processInput(params as Partial<Input>);
 
-        await checkInputsAreValid(input);
-
         // playwrightCrawlerKey is used to identify the crawler that should process the search results
         const playwrightCrawlerKey = getPlaywrightCrawlerKey(playwrightCrawlerOptions, playwrightScraperSettings);
         await createAndStartCrawlers(cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings);
@@ -64,10 +63,10 @@ async function getSearch(request: IncomingMessage, response: ServerResponse) {
             await addPlaywrightCrawlRequest(req, req.uniqueKey!, playwrightCrawlerKey);
         } else {
             await addSearchRequest(req, response, cheerioCrawlerOptions);
-            setTimeout(() => {
-                sendResponseError(req.uniqueKey!, 'Timed out');
-            }, input.requestTimeoutSecs * 1000);
         }
+        setTimeout(() => {
+            sendResponseError(req.uniqueKey!, 'Timed out');
+        }, input.requestTimeoutSecs * 1000);
     } catch (e) {
         const error = e as Error;
         const errorMessage = { errorMessage: error.message };
@@ -112,8 +111,7 @@ log.info(`Loaded input: ${JSON.stringify(input)},
 `);
 
 if (Actor.getEnv().metaOrigin === 'STANDBY') {
-    log.info('Actor is running in STANDBY mode with default parameters. '
-        + 'Changing these parameters on the fly is not supported at the moment.');
+    log.info('Actor is running in STANDBY mode');
 
     const port = Actor.isAtHome() ? process.env.ACTOR_STANDBY_PORT : 3000;
     server.listen(port, async () => {
@@ -125,10 +123,9 @@ if (Actor.getEnv().metaOrigin === 'STANDBY') {
     log.info('Actor is running in the NORMAL mode');
     try {
         const startedTime = Date.now();
-        await checkInputsAreValid(input);
-
         cheerioCrawlerOptions.keepAlive = false;
         playwrightCrawlerOptions.keepAlive = false;
+        playwrightCrawlerOptions.requestHandlerTimeoutSecs = PLAYWRIGHT_REQUEST_TIMEOUT_NORMAL_MODE_SECS;
 
         // playwrightCrawlerKey is used to identify the crawler that should process the search results
         const playwrightCrawlerKey = getPlaywrightCrawlerKey(playwrightCrawlerOptions, playwrightScraperSettings);
