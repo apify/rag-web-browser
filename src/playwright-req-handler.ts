@@ -128,8 +128,8 @@ export async function requestHandlerPlaywright(
             languageCode: $html.first().attr('lang') ?? null,
             url: request.url,
         },
-        text,
         query: request.userData.query,
+        text: settings.outputFormats.includes('text') ? text : null,
         markdown: settings.outputFormats.includes('markdown') ? htmlToMarkdown(processedHtml) : null,
         html: settings.outputFormats.includes('html') ? processedHtml : null,
     };

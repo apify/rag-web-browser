@@ -79,7 +79,7 @@ export interface PlaywrightScraperSettings {
 }
 
 export type Output = {
-    text: string;
+    text?: string | null;
     html?: string | null;
     markdown?: string | null;
     query?: string;
