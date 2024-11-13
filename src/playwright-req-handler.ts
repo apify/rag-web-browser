@@ -141,7 +141,6 @@ export async function requestHandlerPlaywright(
     log.info(`Adding result to the Apify dataset, url: ${request.url}`);
     await context.pushData(result);
 
-    log.info(`Adding result to response: ${request.userData.responseId}, request.uniqueKey: ${request.uniqueKey}`);
     // Get responseId from the request.userData, which corresponds to the original search request
     if (responseId) {
         addResultToResponse(responseId, request.uniqueKey, result);
