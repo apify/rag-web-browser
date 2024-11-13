@@ -13,8 +13,10 @@ export function parseParameters(url: string): ParsedUrlQuery {
  * Check whether the query parameters are valid (do not support extra parameters)
  */
 export function checkForExtraParams(params: ParsedUrlQuery) {
+    const keys = Object.keys(defaults);
+    keys.push('token', '?token'); // token is a special parameter
     for (const key of Object.keys(params)) {
-        if (!Object.keys(defaults).includes(key)) {
+        if (!keys.includes(key)) {
             log.warning(`Unknown parameter: ${key}. Supported parameters: ${Object.keys(defaults).join(', ')}`);
             delete params[key];
         }

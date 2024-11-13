@@ -106,6 +106,8 @@ export function validateAndFillInput(input: Input) {
     if (!input.outputFormats || input.outputFormats.length === 0) {
         input.outputFormats = defaults.outputFormats as OutputFormats[];
         log.warning(`The "outputFormats" parameter must be a non-empty array. Using default value ${defaults.outputFormats}.`);
+    } else if (input.outputFormats.some((format) => !['text', 'markdown', 'html'].includes(format))) {
+        throw new UserInputError('The "outputFormats" parameter must contain only "text", "markdown" or "html"');
     }
     if (input.serpProxyGroup !== 'GOOGLE_SERP' && input.serpProxyGroup !== 'SHADER') {
         throw new UserInputError('The "serpProxyGroup" parameter must be either "GOOGLE_SERP" or "SHADER"');
