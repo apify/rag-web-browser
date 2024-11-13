@@ -2,7 +2,7 @@ import { RequestOptions, log, ProxyConfiguration } from 'crawlee';
 import { parse, ParsedUrlQuery } from 'querystring';
 import { v4 as uuidv4 } from 'uuid';
 
-import defaults from './defaults.json' with { type: 'json' };
+import { defaults } from './const.js';
 import { OrganicResult, TimeMeasure, UserData } from './types.js';
 
 export function parseParameters(url: string): ParsedUrlQuery {
@@ -13,8 +13,10 @@ export function parseParameters(url: string): ParsedUrlQuery {
  * Check whether the query parameters are valid (do not support extra parameters)
  */
 export function checkForExtraParams(params: ParsedUrlQuery) {
+    const keys = Object.keys(defaults);
+    keys.push('token', '?token'); // token is a special parameter
     for (const key of Object.keys(params)) {
-        if (!defaults.hasOwnProperty(key)) {
+        if (!keys.includes(key)) {
             log.warning(`Unknown parameter: ${key}. Supported parameters: ${Object.keys(defaults).join(', ')}`);
             delete params[key];
         }
@@ -52,6 +54,12 @@ export function createSearchRequest(
     };
 }
 
+/**
+ * Create a request for Playwright crawler with the provided result, responseId and timeMeasures.
+ * @param result
+ * @param responseId
+ * @param timeMeasures
+ */
 export function createRequest(
     result: OrganicResult,
     responseId: string,
@@ -62,7 +70,7 @@ export function createRequest(
         uniqueKey: uuidv4(),
         userData: {
             responseId,
-            googleSearchResult: result,
+            searchResult: result,
             timeMeasures: timeMeasures ? [...timeMeasures] : [],
         },
     };
@@ -90,4 +98,15 @@ export function transformTimeMeasuresToRelative(timeMeasures: TimeMeasure[]): Ti
             };
         })
         .sort((a, b) => a.timeMs - b.timeMs);
+}
+
+export function interpretAsUrl(input: string): string | null {
+    try {
+        if (!input) return null;
+        const url = new URL(input);
+        // Only HTTP/HTTPS URLs are supported
+        return /^https?:/i.test(url.protocol) ? url.toString() : null;
+    } catch {
+        return null;
+    }
 }

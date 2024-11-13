@@ -42,7 +42,7 @@ const extractResultsFromSelectors = ($: CheerioAPI, selectors: string[]) => {
 const parseResult = ($: CheerioAPI, el: Element) => {
     $(el).find('div.action-menu').remove();
 
-    const descriptionSelector = '.VwiC3b span';
+    const descriptionSelector = '.VwiC3b';
     const searchResult: OrganicResult = {
         description: ($(el).find(descriptionSelector).text() || '').trim(),
         title: $(el).find('h3').first().text() || '',

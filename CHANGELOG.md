@@ -1,5 +1,22 @@
 This changelog summarizes all changes of the RAG Web Browser
 
+### 2024-11-13
+
+🚀 Features
+- Improve README.md and simplify configuration
+- Add an AWS Lambda function
+- Hide variables initialConcurrency, minConcurrency, and maxConcurrency in the Actor input and remove them from README.md
+- Remove requestTimeoutContentCrawlSecs and use only requestTimeoutSecs
+- Ensure there is enough time left to wait for dynamic content before the Actor timeout (normal mode)
+- Rename googleSearchResults to searchResults and searchProxyGroup to serpProxyGroup
+- Implement input validation
+
+### 2024-11-08
+
+🚀 Features
+- Add functionality to extract content from a specific URL
+- Update README.md to include new functionality and provide examples
+
 ### 2024-10-17
 
 🚀 Features

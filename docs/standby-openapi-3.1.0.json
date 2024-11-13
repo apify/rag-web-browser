@@ -1,5 +1,5 @@
 {
-    "openapi": "3.1.0",
+    "openapi": "3.0.0",
     "info": {
         "title": "RAG Web Browser",
         "description": "Web browser for OpenAI Assistants API and RAG pipelines, similar to a web browser in ChatGPT. It queries Google Search, scrapes the top N pages from the results, and returns their cleaned content as Markdown for further processing by an LLM.",
@@ -15,7 +15,8 @@
             "get": {
                 "operationId": "apify_rag-web-browser",
                 "x-openai-isConsequential": false,
-                "summary": "Web browser for OpenAI Assistants API and RAG pipelines, similar to a web browser in ChatGPT. It queries Google Search, scrapes the top N pages from the results, and returns their cleaned content as Markdown for further processing by an LLM.",
+                "summary": "Web browser for OpenAI Assistants API and RAG pipelines",
+                "description": "Web browser for OpenAI Assistants API and RAG pipelines, similar to a web browser in ChatGPT. It queries Google Search, scrapes the top N pages from the results, and returns their cleaned content as Markdown for further processing by an LLM.",
                 "parameters": [
                     {
                         "name": "query",
@@ -35,7 +36,7 @@
                         "schema": {
                             "type": "integer",
                             "minimum": 1,
-                            "maximum": 50
+                            "maximum": 100
                         }
                     },
                     {
@@ -52,10 +53,7 @@
                                     "markdown",
                                     "html"
                                 ]
-                            },
-                            "default": [
-                                "text"
-                            ]
+                            }
                         },
                         "style": "form",
                         "explode": false
@@ -73,7 +71,7 @@
                         }
                     },
                     {
-                        "name": "proxyGroupSearch",
+                        "name": "serpProxyGroup",
                         "in": "query",
                         "description": "Proxy group for loading search results.",
                         "required": false,
@@ -87,7 +85,7 @@
                         }
                     },
                     {
-                        "name": "maxRequestRetriesSearch",
+                        "name": "serpMaxRetries",
                         "in": "query",
                         "description": "Maximum retries for Google search requests on errors.",
                         "required": false,

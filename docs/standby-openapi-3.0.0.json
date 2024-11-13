@@ -1,0 +1,200 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "RAG Web Browser",
+        "description": "Web browser for OpenAI Assistants API and RAG pipelines, similar to a web browser in ChatGPT. It queries Google Search, scrapes the top N pages from the results, and returns their cleaned content as Markdown for further processing by an LLM.",
+        "version": "v1"
+    },
+    "servers": [
+        {
+            "url": "https://rag-web-browser.apify.actor"
+        }
+    ],
+    "paths": {
+        "/search": {
+            "get": {
+                "operationId": "apify_rag-web-browser",
+                "x-openai-isConsequential": false,
+                "summary": "Web browser for OpenAI Assistants API and RAG pipelines, similar to a web browser in ChatGPT. It queries Google Search, scrapes the top N pages from the results, and returns their cleaned content as Markdown for further processing by an LLM.",
+                "parameters": [
+                    {
+                        "name": "query",
+                        "in": "query",
+                        "description": "Use regular search words or enter Google Search URLs. You can also apply advanced Google search techniques, such as AI site:twitter.com or javascript OR python",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[^\\s]+"
+                        }
+                    },
+                    {
+                        "name": "maxResults",
+                        "in": "query",
+                        "description": "The number of top organic search results to return and scrape text from",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100
+                        }
+                    },
+                    {
+                        "name": "outputFormats",
+                        "in": "query",
+                        "description": "Select the desired output formats for the retrieved content",
+                        "required": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "text",
+                                    "markdown",
+                                    "html"
+                                ]
+                            },
+                            "default": [
+                                "text"
+                            ]
+                        },
+                        "style": "form",
+                        "explode": false
+                    },
+                    {
+                        "name": "requestTimeoutSecs",
+                        "in": "query",
+                        "description": "The maximum time (in seconds) allowed for request. If the request exceeds this time, it will be marked as failed and only already finished results will be returned",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 600,
+                            "default": 45
+                        }
+                    },
+                    {
+                        "name": "serpProxyGroup",
+                        "in": "query",
+                        "description": "Proxy group for loading search results.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "GOOGLE_SERP",
+                                "SHADER"
+                            ],
+                            "default": "GOOGLE_SERP"
+                        }
+                    },
+                    {
+                        "name": "serpMaxRetries",
+                        "in": "query",
+                        "description": "Maximum retries for Google search requests on errors.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 3,
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "initialConcurrency",
+                        "in": "query",
+                        "description": "Initial number of browsers running in parallel.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 50,
+                            "default": 5
+                        }
+                    },
+                    {
+                        "name": "minConcurrency",
+                        "in": "query",
+                        "description": "Minimum number of browsers running in parallel.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 50,
+                            "default": 3
+                        }
+                    },
+                    {
+                        "name": "maxConcurrency",
+                        "in": "query",
+                        "description": "Maximum number of browsers running in parallel.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 50,
+                            "default": 10
+                        }
+                    },
+                    {
+                        "name": "maxRequestRetries",
+                        "in": "query",
+                        "description": "Maximum retries for Playwright content crawler.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 3,
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "requestTimeoutContentCrawlSecs",
+                        "in": "query",
+                        "description": "Timeout for content crawling (seconds).",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 60,
+                            "default": 30
+                        }
+                    },
+                    {
+                        "name": "dynamicContentWaitSecs",
+                        "in": "query",
+                        "description": "Time to wait for dynamic content to load (seconds).",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    },
+                    {
+                        "name": "removeCookieWarnings",
+                        "in": "query",
+                        "description": "Removes cookie consent dialogs to improve text extraction.",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": true
+                        }
+                    },
+                    {
+                        "name": "debugMode",
+                        "in": "query",
+                        "description": "Stores debugging information in dataset if enabled.",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        }
+    }
+}

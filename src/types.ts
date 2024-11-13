@@ -1,6 +1,6 @@
 import type { ProxyConfigurationOptions } from 'apify';
 
-type OutputFormats = 'text' | 'markdown' | 'html';
+export type OutputFormats = 'text' | 'markdown' | 'html';
 
 export type Input = {
     debugMode: boolean;
@@ -13,8 +13,8 @@ export type Input = {
     countryCode: string;
     languageCode: string;
     maxResults: number;
-    proxyGroupSearch: 'GOOGLE_SERP' | 'SHADER';
-    maxRequestRetriesSearch: number;
+    serpProxyGroup: 'GOOGLE_SERP' | 'SHADER';
+    serpMaxRetries: number;
     query: string;
 
     // content crawler parameters
@@ -27,7 +27,6 @@ export type Input = {
     proxyConfiguration: ProxyConfigurationOptions;
     readableTextCharThreshold: number;
     removeCookieWarnings: boolean;
-    requestTimeoutContentCrawlSecs: number;
 };
 
 export type OrganicResult = {
@@ -66,7 +65,7 @@ export type UserData = {
     responseId?: string;
     startedAt?: Date;
     timeMeasures?: TimeMeasure[];
-    googleSearchResult?: OrganicResult;
+    searchResult?: OrganicResult;
     playwrightCrawlerKey?: string;
 };
 
@@ -80,7 +79,7 @@ export interface PlaywrightScraperSettings {
 }
 
 export type Output = {
-    text: string;
+    text?: string | null;
     html?: string | null;
     markdown?: string | null;
     query?: string;
@@ -93,7 +92,7 @@ export type Output = {
         requestStatus: string;
         uniqueKey: string;
     };
-    googleSearchResult: OrganicResult;
+    searchResult: OrganicResult;
     metadata: {
         author?: string | null;
         description?: string | null;

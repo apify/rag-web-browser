@@ -9,17 +9,17 @@
     "storages": {
         "dataset": {
             "actorSpecification": 1,
-            "title": "RAG Web browser",
-            "description": "Too see all scraped properties, export the whole dataset or select All fields instead of Overview",
+            "title": "RAG Web Browser",
+            "description": "Too see all scraped properties, export the whole dataset or select All fields instead of Overview.",
             "views": {
                 "overview": {
                     "title": "Overview",
-                    "description": "Selected fields from the dataset",
+                    "description": "An view showing just basic properties for simplicity.",
                     "transformation": {
                         "fields": [
                             "metadata.url",
                             "metadata.title",
-                            "text"
+                            "markdown"
                         ],
                         "flatten": ["metadata"]
                     },
@@ -31,39 +31,39 @@
                                 "format": "text"
                             },
                             "metadata.title": {
-                                "label": "Page Title",
+                                "label": "Page title",
                                 "format": "text"
                             },
                             "text": {
-                                "label": "Extracted text",
+                                "label": "Extracted markdown",
                                 "format": "text"
                             }
                         }
                     }
                 },
-                "googleSearchResults": {
-                    "title": "Google Search Results",
-                    "description": "Title, Description and URL of the Google Search Results",
+                "searchResults": {
+                    "title": "Search results",
+                    "description": "A view showing just the Google Search results, without the page content.",
                     "transformation": {
                         "fields": [
-                            "googleSearchResult.description",
-                            "googleSearchResult.title",
-                            "googleSearchResult.url"
+                            "searchResult.description",
+                            "searchResult.title",
+                            "searchResult.url"
                         ],
-                        "flatten": ["googleSearchResult"]
+                        "flatten": ["searchResult"]
                     },
                     "display": {
                         "component": "table",
                         "properties": {
-                            "googleSearchResult.description": {
+                            "searchResult.description": {
                                 "label": "Description",
                                 "format": "text"
                             },
-                            "googleSearchResult.title": {
+                            "searchResult.title": {
                                 "label": "Title",
                                 "format": "text"
                             },
-                            "googleSearchResult.url": {
+                            "searchResult.url": {
                                 "label": "URL",
                                 "format": "text"
                             }
