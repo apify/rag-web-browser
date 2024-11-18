@@ -171,7 +171,7 @@ Here's a quick guide to adding the RAG Web Browser to your GPT as a custom actio
 1. Under the **Actions** section, click **Create new action**.
 1. In the Action settings, set **Authentication** to **API key** and choose Bearer as **Auth Type**.
 1. In the **schema** field, paste the OpenAPI specification for the RAG Web Browser.
-    1. **Normal mode**: Copy the OpenAPI schema from the [RAG-Web-Browser Actor](https://console.apify.com/actors/3ox4R101TgZz67sLr/input) under the API -> OpenAPI specification.
+    1. **Normal mode**: Copy the OpenAPI schema from the [RAG Web Browser Actor](https://console.apify.com/actors/3ox4R101TgZz67sLr/input) under the API -> OpenAPI specification.
     1. **Standby mode**: Copy the OpenAPI schema from the [OpenAPI standby mode](https://raw.githubusercontent.com/apify/rag-web-browser/refs/heads/master/docs/standby-openapi.json) json file.
 
 ![Apify-RAG-Web-Browser-custom-action](https://raw.githubusercontent.com/apify/rag-web-browser/refs/heads/master/docs/apify-gpt-custom-action.png)
