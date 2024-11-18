@@ -91,10 +91,10 @@ const server = createServer(async (req, res) => {
             res.end(JSON.stringify({ errorMessage: 'Bad request' }));
         }
     } else {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.writeHead(404, { 'Content-Type': 'application/json' });
         res.end(
             JSON.stringify({
-                message: 'RAG-Web-Browser is running in standby mode, sent GET request to "/search?query=apify"',
+                message: 'There is nothing on this HTTP endpoint. Send a GET request to /search?query=hello+world instead.',
             }),
         );
     }
@@ -111,16 +111,16 @@ log.info(`Loaded input: ${JSON.stringify(input)},
 `);
 
 if (Actor.getEnv().metaOrigin === 'STANDBY') {
-    log.info('Actor is running in STANDBY mode');
+    log.info('Actor is running in the STANDBY mode.');
 
     const port = Actor.isAtHome() ? process.env.ACTOR_STANDBY_PORT : 3000;
     server.listen(port, async () => {
         // Pre-create default crawlers
-        log.info(`RAG-Web-Browser is listening for user requests`);
+        log.info(`The Actor web server is listening for user requests at ${process.env.ACTOR_STANDBY_URL}.`);
         await createAndStartCrawlers(cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings);
     });
 } else {
-    log.info('Actor is running in the NORMAL mode');
+    log.info('Actor is running in the NORMAL mode.');
     try {
         const startedTime = Date.now();
         cheerioCrawlerOptions.keepAlive = false;
@@ -150,7 +150,7 @@ if (Actor.getEnv().metaOrigin === 'STANDBY') {
         addTimeMeasureEvent(req.userData!, 'actor-started', startedTime);
         if (inputUrl) {
             // If the input query is a URL, we don't need to run the search crawler
-            log.info(`Skipping Google Search query because "${input.query}" is a valid URL`);
+            log.info(`Skipping Google Search query because "${input.query}" is a valid URL.`);
             await addPlaywrightCrawlRequest(req, req.uniqueKey!, playwrightCrawlerKey);
         } else {
             await addSearchRequest(req, null, cheerioCrawlerOptions);
