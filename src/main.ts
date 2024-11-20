@@ -59,7 +59,7 @@ async function getSearch(request: IncomingMessage, response: ServerResponse) {
         addTimeMeasureEvent(req.userData!, 'request-received', requestReceivedTime);
         if (inputUrl) {
             // If the input query is a URL, we don't need to run the search crawler
-            log.info(`Skipping search crawler as ${input.query} is a valid URL`);
+            log.info(`Skipping Google Search query as ${input.query} is a valid URL`);
             await addPlaywrightCrawlRequest(req, req.uniqueKey!, playwrightCrawlerKey);
         } else {
             await addSearchRequest(req, response, cheerioCrawlerOptions);
