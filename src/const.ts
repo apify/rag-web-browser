@@ -6,6 +6,8 @@ export enum ContentCrawlerStatus {
 
 export const PLAYWRIGHT_REQUEST_TIMEOUT_NORMAL_MODE_SECS = 60;
 
+// TODO: It would be better to simply use input_schema.json rather then hard-coding these values,
+//  to ensure the values in NORMAL mode and STANDBY are consistent
 export const defaults = {
     debugMode: false,
     dynamicContentWaitSecs: 10,
@@ -19,7 +21,7 @@ export const defaults = {
     minConcurrency: 3,
     outputFormats: ['markdown'],
     proxyConfiguration: { useApifyProxy: true },
-    query: 'apify llm',
+    query: 'apify llm', // TODO: There should be no default for this field
     readableTextCharThreshold: 100,
     removeCookieWarnings: true,
     requestTimeoutSecs: 40,

@@ -7,7 +7,7 @@
         "query": {
             "title": "Search term or URL",
             "type": "string",
-            "description": "Enter Google Search keywords or a URL to a specific web page. The keywords might include the [advanced search operators](https://blog.apify.com/how-to-scrape-google-like-a-pro/). Examples:\n\n- <code>san francisco weather</code>\n- <code>https://www.cnn.com</code>\n- <code>function calling site:openai.com</code>",
+            "description": "Enter Google Search keywords or a URL of a specific web page. The keywords might include the [advanced search operators](https://blog.apify.com/how-to-scrape-google-like-a-pro/). Examples:\n\n- <code>san francisco weather</code>\n- <code>https://www.cnn.com</code>\n- <code>function calling site:openai.com</code>",
             "prefill": "san francisco weather",
             "editor": "textfield",
             "pattern": "[^\\s]+"
@@ -42,7 +42,7 @@
             "unit": "seconds"
         },
         "serpProxyGroup": {
-            "title": "Google SERP proxy group",
+            "title": "SERP proxy group",
             "type": "string",
             "description": "Enables overriding the default Apify Proxy group used for fetching Google Search results.",
             "editor": "select",
@@ -51,7 +51,7 @@
             "sectionCaption": "Google Search scraping settings"
         },
         "serpMaxRetries": {
-            "title": "Google SERP maximum retries",
+            "title": "SERP max retries",
             "type": "integer",
             "description": "The maximum number of times the Actor will retry fetching the Google Search results on error. If the last attempt fails, the entire request fails.",
             "minimum": 0,
