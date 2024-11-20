@@ -1,5 +1,7 @@
 # 🌐 RAG Web Browser
 
+[![Website Content Crawler Actor](https://apify.com/actor-badge?actor=apify/rag-web-browser)](https://apify.com/apify/rag-web-browser)
+
 This Actor provides web browsing functionality for AI and LLM applications,
 similar to the [web browsing](https://openai.com/index/introducing-chatgpt-search/) feature in ChatGPT.
 It accepts a search phrase or a URL, queries Google Search, then crawls web pages from the top search results, cleans the HTML, converts it to text or Markdown,
