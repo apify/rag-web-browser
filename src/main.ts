@@ -94,7 +94,7 @@ const server = createServer(async (req, res) => {
         res.writeHead(404, { 'Content-Type': 'application/json' });
         res.end(
             JSON.stringify({
-                message: 'There is nothing on this HTTP endpoint. Send a GET request to /search?query=hello+world instead.',
+                message: `There is nothing at this HTTP endpoint. Send a GET request to ${process.env.ACTOR_STANDBY_URL}/search?query=hello+world instead`,
             }),
         );
     }
