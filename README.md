@@ -18,7 +18,9 @@ The extracted text can then be injected into prompts and retrieval augmented gen
 
 ## Example
 
-For a search query like `web browser site:openai.com`, the Actor will return an array with a content of top results from Google Search, which looks like this:
+For a search query like `web browser site:platform.openai.com`, the Actor will return an array with a content of top results from Google Search, which looks like this:
+
+<!-- TODO: Fix this example -->
 
 ```json
 [
@@ -39,21 +41,24 @@ For a search query like `web browser site:openai.com`, the Actor will return an 
 ]
 ```
 
-If you enter a specific URL such as `https://docs.apify.com/platform/integrations/openai-assistants`, the Actor will extract
-the web page content directly.
-
-<!-- TODO: This must be an array like above -->
+If you enter a specific URL such as `https://openai.com/index/introducing-chatgpt-search/`, the Actor will extract
+the web page content directly like this:
 
 ```json
-[
-  {
+[{
+    "crawl": {
+        "httpStatusCode": 200,
+        "httpStatusMessage": "OK",
+        "loadedAt": "2024-11-21T14:04:28.090Z"
+    },
     "metadata": {
-      "url": "https://docs.apify.com/platform/integrations/openai-assistants",
-      "title": "OpenAI Assistants integration | Platform | Apify Documentation"
-  },
-    "text": "OpenAI Assistants integration. Learn how to integrate Apify with OpenAI Assistants to provide real-time search data ..."
-  }
-]
+        "url": "https://openai.com/index/introducing-chatgpt-search/",
+        "title": "Introducing ChatGPT search | OpenAI",
+        "description": "Get fast, timely answers with links to relevant web sources",
+        "languageCode": "en-US"
+    },
+    "markdown": "# Introducing ChatGPT search | OpenAI\n\nGet fast, timely answers with links to relevant web sources.\n\nChatGPT can now search the web in a much better way than before. ..."
+}]
 ```
 
 ## Usage
@@ -63,34 +68,33 @@ or in the **Standby mode** by sending it an HTTP request.
 
 ### Normal Actor run
 
-You can run the Actor "normally" via API or manually, pass it an input JSON object with settings including the search phrase or URL,
-and it will store the results to the default dataset.
-This is useful for testing and evaluation, but might be too slow for production applications and RAG pipelines,
-because it takes some time to start a Docker container and the web browser.
-Also, one Actor run can only handle one query, which isn't very inefficient.
+You can run the Actor "normally" via the API, schedule, integrations, or manually in Console.
+On start, you pass it an input JSON object with settings including the search phrase or URL,
+and the Actor will store the results to the default dataset.
+This mode is useful for testing and evaluation, but might be too slow for production applications and RAG pipelines,
+because it takes some time to start the Actor's Docker container and a web browser.
+Also, one Actor run can only handle one query, which isn't efficient.
 
 ### Standby web server
 
 The Actor also supports the [**Standby mode**](https://docs.apify.com/platform/actors/running/standby),
 where it runs an HTTP web server that receives requests with the search phrases and responds with the extracted web content.
-This way is preferred for production applications, because if the Actor is already running, it will
+This mode is preferred for production applications, because if the Actor is already running, it will
 return the results much faster. Additionally, in the Standby mode the Actor can handle multiple requests
 in parallel, and thus utilizes the computing resources more efficiently.
 
 To use RAG Web Browser in the Standby mode, simply send an HTTP GET request to the following URL:
 
 ```
-https://rag-web-browser.apify.actor/search?token=<APIFY_API_TOKEN>&query=<QUERY>
+https://rag-web-browser.apify.actor/search?token=<APIFY_API_TOKEN>&query=hello+world
 ```
 
-where `<APIFY_API_TOKEN>` is your [Apify API token](https://console.apify.com/settings/integrations) and `<QUERY>`
-is the search query or a single web page URL.
+where `<APIFY_API_TOKEN>` is your [Apify API token](https://console.apify.com/settings/integrations).
 Note that you can also pass the API token using the `Authorization` HTTP header with Basic authentication for increased security.
 
-The response is a JSON array with objects containing the web content from the found web pages.
+The response is a JSON array with objects containing the web content from the found web pages, as shown above.
 
-
-#### Request
+#### Query parameters
 
 The `/search` GET HTTP endpoint accepts the following query parameters:
 
@@ -103,44 +107,12 @@ The `/search` GET HTTP endpoint accepts the following query parameters:
 | `serpProxyGroup`                 | string  | `GOOGLE_SERP` | Enables overriding the default Apify Proxy group used for fetching Google Search results.                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | `serpMaxRetries`                 | number  | `1`           | The maximum number of times the Actor will retry fetching the Google Search results on error. If the last attempt fails, the entire request fails.                                                                                                                                                                                                                                                                                                                                                              |
 | `maxRequestRetries`              | number  | `1`           | The maximum number of times the Actor will retry loading the target web page on error. If the last attempt fails, the page will be skipped in the results.                                                                                                                                                                                                                                                                                                                                                      |
-| `requestTimeoutContentCrawlSecs` | number  | `30`          | The maximum time in seconds for loading and extracting the target web page content. The value should be smaller than the `requestTimeoutSecs` setting to have any effect.                                                                                                                                                                                                                                                                                                                                       |
 | `dynamicContentWaitSecs`         | number  | `10`          | The maximum time in seconds to wait for dynamic page content to load. The Actor considers the web page as fully loaded once this time elapses or when the network becomes idle.                                                                                                                                                                                                                                                                                                                                 |
-| `removeCookieWarnings`           | boolean | `true`        | If enabled, removes cookie consent dialogs to improve text extraction accuracy. Note that this will impact latency.                                                                                                                                                                                                                                                                                                                                                                                             |
+| `removeCookieWarnings`           | boolean | `true`        | If enabled, removes cookie consent dialogs to improve text extraction accuracy. This might increase latency.                                                                                                                                                                                                                                                                                                                                                                                                  |
 | `debugMode`                      | boolean | `false`       | If enabled, the Actor will store debugging information in the dataset's debug field.                                                                                                                                                                                                                                                                                                                                                                                                                            |
 
 <!-- TODO: add proxyConfiguration, remove requestTimeoutContentCrawlSecs -->
 
-#### Response
-
-The `/search` GET HTTP endpoint responds with a JSON array, which looks as follows:
-
-```json
-[
-  {
-    "crawl": {
-      "httpStatusCode": 200,
-      "loadedAt": "2024-09-02T08:44:41.750Z",
-      "uniqueKey": "3e8452bb-c703-44af-9590-bd5257902378",
-      "requestStatus": "handled"
-    },
-    "searchResult": {
-      "url": "https://apify.com/",
-      "title": "Apify: Full-stack web scraping and data extraction platform",
-      "description": "Cloud platform for web scraping, browser automation, and data for AI...."
-    },
-    "metadata": {
-      "author": null,
-      "title": "Apify: Full-stack web scraping and data extraction platform",
-      "description": "Cloud platform for web scraping, browser automation, and data for AI....",
-      "keywords": "web scraper,web crawler,scraping,data extraction,API",
-      "languageCode": "en",
-      "url": "https://apify.com/"
-    },
-    "text": "Full-stack web scraping and data extraction platform...",
-    "markdown": "# Full-stack web scraping and data extraction platform..."
-  }
-]
-```
 
 ## Integration with LLMs
 
@@ -182,7 +154,7 @@ Here's a quick guide to adding the RAG Web Browser to your GPT as a custom actio
 
 ## ✃ How to set up request timeout?
 
-<!-- TODO: Explain the best effort basis, e.g. skip dynamic loading, skip results etc. -->
+<!-- TODO: Explain the best effort basis, e.g. skip dynamic loading, skip results etc. use of tasks -->
 
 
 You can set the `requestTimeoutSecs` parameter to define how long the Actor should spend on making the search request and crawling.

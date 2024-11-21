@@ -147,18 +147,6 @@
                         }
                     },
                     {
-                        "name": "requestTimeoutContentCrawlSecs",
-                        "in": "query",
-                        "description": "Timeout for content crawling (seconds).",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "minimum": 1,
-                            "maximum": 60,
-                            "default": 30
-                        }
-                    },
-                    {
                         "name": "dynamicContentWaitSecs",
                         "in": "query",
                         "description": "Time to wait for dynamic content to load (seconds).",
