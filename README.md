@@ -29,12 +29,18 @@ For a search query like `web browser site:platform.openai.com`, the Actor will r
            "url": "https://python.langchain.com/docs/integrations/providers/apify/#utility",
            "title": "Apify | 🦜️🔗 LangChain"
         },
+        "searchResult": {
+            ...
+        },
         "markdown": "Apify | 🦜️🔗 LangChain | This notebook shows how to use the Apify integration ..."
     },
     {
         "metadata": {
             "url": "https://microsoft.github.io/autogen/0.2/docs/notebooks/agentchat_webscraping_with_apify/",
             "title": "Web Scraping using Apify Tools | AutoGen"
+        },
+        "searchResult": {
+            ...
         },
         "markdown": "Web Scraping using Apify Tools | This notebook shows how to use Apify tools with AutoGen agents ...."
     }
@@ -51,6 +57,7 @@ the web page content directly like this:
         "httpStatusMessage": "OK",
         "loadedAt": "2024-11-21T14:04:28.090Z"
     },
+    "searchResult": null,
     "metadata": {
         "url": "https://openai.com/index/introducing-chatgpt-search/",
         "title": "Introducing ChatGPT search | OpenAI",
@@ -68,9 +75,9 @@ or in the **Standby mode** by sending it an HTTP request.
 
 ### Normal Actor run
 
-You can run the Actor "normally" via the API, schedule, integrations, or manually in Console.
-On start, you pass it an input JSON object with settings including the search phrase or URL,
-and the Actor will store the results to the default dataset.
+You can run the Actor "normally" via the Apify API, schedule, integrations, or manually in Console.
+On start, you pass the Actor an input JSON object with settings including the search phrase or URL,
+and it stores the results to the default dataset.
 This mode is useful for testing and evaluation, but might be too slow for production applications and RAG pipelines,
 because it takes some time to start the Actor's Docker container and a web browser.
 Also, one Actor run can only handle one query, which isn't efficient.
@@ -92,7 +99,7 @@ https://rag-web-browser.apify.actor/search?token=<APIFY_API_TOKEN>&query=hello+w
 where `<APIFY_API_TOKEN>` is your [Apify API token](https://console.apify.com/settings/integrations).
 Note that you can also pass the API token using the `Authorization` HTTP header with Basic authentication for increased security.
 
-The response is a JSON array with objects containing the web content from the found web pages, as shown above.
+The response is a JSON array with objects containing the web content from the found web pages, as shown in the example [above](#example).
 
 #### Query parameters
 
@@ -111,91 +118,86 @@ The `/search` GET HTTP endpoint accepts the following query parameters:
 | `removeCookieWarnings`           | boolean | `true`        | If enabled, removes cookie consent dialogs to improve text extraction accuracy. This might increase latency.                                                                                                                                                                                                                                                                                                                                                                                                  |
 | `debugMode`                      | boolean | `false`       | If enabled, the Actor will store debugging information in the dataset's debug field.                                                                                                                                                                                                                                                                                                                                                                                                                            |
 
-<!-- TODO: add proxyConfiguration, remove requestTimeoutContentCrawlSecs -->
+<!-- TODO: we should probably add proxyConfiguration -->
 
 
 ## Integration with LLMs
 
-RAG Web Browser has been designed for easy integration to LLM applications, GPTs, assistants, and RAG pipelines using function calling.
+RAG Web Browser has been designed for easy integration with LLM applications, GPTs, OpenAI Assistants, and RAG pipelines using function calling.
 
 ### OpenAPI schema
 
-Here you can find the [OpenAPI schema](https://raw.githubusercontent.com/apify/rag-web-browser/refs/heads/master/docs/standby-openapi-3.1.0.json)
+Here you can find the [OpenAPI 3.1.0 schema](https://raw.githubusercontent.com/apify/rag-web-browser/refs/heads/master/docs/standby-openapi-3.1.0.json)
+or [OpenAPI 3.0.0 schema](https://raw.githubusercontent.com/apify/rag-web-browser/refs/heads/master/docs/standby-openapi-3.0.0.json)
 for the Standby web server. Note that the OpenAPI definition contains
 all available query parameters, but only `query` is required.
 You can remove all the others parameters from the definition if their default value is right for your application,
-in order to reduce the number of LLM tokens necessary and to reduce the risk of hallucinations.
+in order to reduce the number of LLM tokens necessary and to reduce the risk of hallucinations in function calling.
 
 ### OpenAI Assistants
 
-While ChatGPT and GPTs supports web browsing natively, [OpenAI Assistants](https://platform.openai.com/docs/assistants/overview) do not.
+While OpenAI's ChatGPT and GPTs support web browsing natively, [Assistants](https://platform.openai.com/docs/assistants/overview) currently don't.
 With RAG Web Browser, you can easily add the web search and browsing capability to your custom AI assistant and chatbots.
-
-For detailed instructions and a step-by-step guide, see the [OpenAI Assistants integration](https://docs.apify.com/platform/integrations/openai-assistants#real-time-search-data-for-openai-assistant) in Apify documentation.
+For detailed instructions,
+see the [OpenAI Assistants integration](https://docs.apify.com/platform/integrations/openai-assistants#real-time-search-data-for-openai-assistant) in Apify documentation.
 
 ### OpenAI GPTs
 
-You can easily add the RAG Web Browser to your GPT by creating a custom action using the [OpenAPI schema](#openapi-schema).
-Follow the detailed guide in the article [Add custom actions to your GPTs with Apify Actors](https://blog.apify.com/add-custom-actions-to-your-gpts/).
+You can easily add the RAG Web Browser to your GPTs by creating a custom action. Here's a quick guide:
 
-Here's a quick guide to adding the RAG Web Browser to your GPT as a custom action:
-
-1. Click on **Explore GPTs** in the left sidebar, then select **+ Create** in the top right corner.
-1. Complete all required details in the form.
-1. Under the **Actions** section, click **Create new action**.
-1. In the Action settings, set **Authentication** to **API key** and choose Bearer as **Auth Type**.
-1. In the **schema** field, paste the OpenAPI specification for the RAG Web Browser.
-    1. **Normal mode**: Copy the OpenAPI schema from the [RAG Web Browser Actor](https://console.apify.com/actors/3ox4R101TgZz67sLr/input) under the API -> OpenAPI specification.
-    1. **Standby mode**: Copy the OpenAPI schema from the [OpenAPI standby mode](https://raw.githubusercontent.com/apify/rag-web-browser/refs/heads/master/docs/standby-openapi.json) json file.
+1. Go to [**My GPTs**](https://chatgpt.com/gpts/mine) on ChatGPT website and click **+ Create a GPT**.
+2. Complete all required details in the form.
+3. Under the **Actions** section, click **Create new action**.
+4. In the Action settings, set **Authentication** to **API key** and choose Bearer as **Auth Type**.
+5. In the **schema** field, paste the [OpenAPI 3.1.0 schema](https://raw.githubusercontent.com/apify/rag-web-browser/refs/heads/master/docs/standby-openapi-3.1.0.json)
+   of the Standby web server HTTP API.
 
 ![Apify-RAG-Web-Browser-custom-action](https://raw.githubusercontent.com/apify/rag-web-browser/refs/heads/master/docs/apify-gpt-custom-action.png)
 
+Learn more about [adding custom actions to your GPTs with Apify Actors](https://blog.apify.com/add-custom-actions-to-your-gpts/) on Apify Blog.
 
 
-## ✃ How to set up request timeout?
+## ⏳ Performance and cost optimization
 
-<!-- TODO: Explain the best effort basis, e.g. skip dynamic loading, skip results etc. use of tasks -->
+To get the most value from RAG Web Browsers in your LLM applications,
+always use the Actor via the [Standby web server](#standby-web-server) as described above,
+and see the tips in the following sections.
 
+### ✃ Request timeout
 
-You can set the `requestTimeoutSecs` parameter to define how long the Actor should spend on making the search request and crawling.
-If the timeout is exceeded, the Actor will return whatever results were scraped up to that point.
+Many user-facing RAG applications impose a time limit on external functions to provide a good user experience.
+For example, OpenAI Assistants and GPTs have a limit of [45 seconds](https://platform.openai.com/docs/actions/production#timeouts) for custom actions.
 
-For example, the following outputs (truncated for brevity) illustrate this behavior:
-- The first result from https://github.com/apify was scraped fully.
-- The second result from https://apify.com was partially scraped due to the timeout. As a result, only the `googleSearchResult` is returned, and in this case, the `googleSearchResult.description` was copied into the `text` field.
+To ensure the web search and content extraction is done within the required timeout,
+you can set the `requestTimeoutSecs` query parameter.
+If this timeout is exceeded, **the Actor makes the best effort to return results it has scraped up to that point**
+in order to provide your LLM application with at least some context.
 
-```json
-[
-  {
-    "crawl": {
-      "httpStatusCode": 200,
-      "httpStatusMessage": "OK",
-      "requestStatus": "handled"
-    },
-    "searchResult": {
-      "description": "Apify command-line interface helps you create, develop, build and run Apify actors, and manage the Apify cloud platform.",
-      "title": "Apify",
-      "url": "https://github.com/apify"
-    },
-    "text": "Apify · Crawlee — A web scraping and browser automation library for Python"
-  },
-  {
-    "crawl": {
-      "httpStatusCode": 500,
-      "httpStatusMessage": "Timed out",
-      "requestStatus": "failed"
-    },
-    "searchResult": {
-      "description": "Cloud platform for web scraping, browser automation, and data for AI.",
-      "title": "Apify: Full-stack web scraping and data extraction platform",
-      "url": "https://apify.com/"
-    },
-    "text": ""
-  }
-]
-```
+Here are specific situations that might occur when the timeout is reached:
+
+- The **Google Search query failed** => the HTTP request fails with a 5xx error.
+- The requested `query` is **a single URL that failed to load** => the HTTP request fails with a 5xx error.
+- The requested `query` is a search term, but **one of target web pages failed to load** => the response contains at least
+  the `searchResult` for the specific page contains a URL, title, and description.
+- One of the target pages **hasn't loaded dynamic content ** (within the `dynamicContentWaitSecs` deadline)
+  => the Actor extracts content from the currently loaded HTML
 
 
+### 🎢 Reducing latency
+
+For low-latency applications, it's recommended to run the RAG Web Browser with at least 8 GB of memory.
+Additionally, you can adjust the following query parameters to reduce the time to results:
+
+- `maxResults`: The lower the number of search results to scrape, the faster the response time. Just note that the LLM application might not have sufficient context for the prompt.
+- `dynamicContentWaitSecs`: Set this to `0` if you don't need to wait for dynamic web content. This can significantly reduce latency.
+- `removeCookieWarnings`: If the websites you're scraping don't have cookie warnings, set this to `false` to slightly improve latency.
+- `debugMode`: If set to `true`, the Actor will store latency data to results so that you can see where it takes time.
+
+
+
+Concurrency
+
+Tasks
 
 ## ⏳ Performance and cost optimization
 
@@ -221,28 +223,19 @@ Results were averaged for the three queries.
 Based on your requirements, if low latency is a priority, consider running the Actor with 4GB or 8GB of memory.
 However, if you're looking for a cost-effective solution, you can run the Actor with 2GB of memory, but you may experience higher latency and might need to set a longer timeout.
 
-### 🎢 How to optimize the RAG Web Browser for low latency?
-
-For low latency, it's recommended to run the RAG Web Browser with 8 GB of memory. Additionally, adjust these settings to further optimize performance:
-
-- **Dynamic Content Wait Secs**: Set this to 0 if you don't need to wait for dynamic content. This can significantly reduce latency.
-- **Remove Cookie Warnings**: If the websites you're scraping don't have cookie warnings, set this to false to slightly improve latency.
-- **Debug Mode**: Enable this to store debugging information if you need to measure the Actor's latency.
-
-If you require a response within a certain timeframe, use the `requestTimeoutSecs` parameter to define the maximum duration the Actor should spend on making search requests and crawling.
-
 
 ## ⓘ Limitations and feedback
 
-The Actor defaults to Google Search in the United States and English language
+The Actor uses [Google Search](https://www.google.com/) in the United States with English language,
 and so queries like "_best nearby restaurants_" will return search results from the US.
 
-If you need other regions or languages, or have some other feedback, please submit an issue on the
-Actor in Apify Console to let us know.
+If you need other regions or languages, or have some other feedback,
+please [submit an issue](https://console.apify.com/actors/3ox4R101TgZz67sLr/issues) in Apify Console to let us know.
+
 
 ## 👷🏼 Development
 
-The RAG Web Browser Actor has open source on [GitHub](https://github.com/apify/rag-web-browser),
+The RAG Web Browser Actor has open source available on [GitHub](https://github.com/apify/rag-web-browser),
 so that you can modify and develop it yourself. Here are the steps how to run it locally on your computer.
 
 Download the source code:
