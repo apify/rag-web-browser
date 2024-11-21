@@ -1,6 +1,5 @@
 import { RequestOptions, log, ProxyConfiguration } from 'crawlee';
 import { parse, ParsedUrlQuery } from 'querystring';
-import { v4 as uuidv4 } from 'uuid';
 
 import { defaults } from './const.js';
 import { OrganicResult, TimeMeasure, UserData } from './types.js';
@@ -21,6 +20,15 @@ export function checkForExtraParams(params: ParsedUrlQuery) {
             delete params[key];
         }
     }
+}
+
+export function randomId() {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    for (let counter = 0; counter < 10; counter++) {
+        result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return result;
 }
 
 /**
@@ -49,7 +57,7 @@ export function createSearchRequest(
     const urlSearch = `${protocol}://www.google.com/search?q=${query}&num=${n}`;
     return {
         url: urlSearch,
-        uniqueKey: uuidv4(),
+        uniqueKey: randomId(),
         userData: { maxResults, timeMeasures: [], query, playwrightCrawlerKey },
     };
 }

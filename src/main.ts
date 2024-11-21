@@ -1,7 +1,6 @@
 import { Actor } from 'apify';
 import { log } from 'crawlee';
 import { createServer, IncomingMessage, ServerResponse } from 'http';
-import { v4 as uuidv4 } from 'uuid';
 
 import { PLAYWRIGHT_REQUEST_TIMEOUT_NORMAL_MODE_SECS } from './const.js';
 import { addPlaywrightCrawlRequest, addSearchRequest, createAndStartCrawlers, getPlaywrightCrawlerKey } from './crawlers.js';
@@ -16,6 +15,7 @@ import {
     createSearchRequest,
     interpretAsUrl,
     parseParameters,
+    randomId,
 } from './utils.js';
 
 await Actor.init();
@@ -49,7 +49,7 @@ async function getSearch(request: IncomingMessage, response: ServerResponse) {
         input.query = inputUrl ?? input.query;
         // Create a request depending on whether the input is a URL or search query
         const req = inputUrl
-            ? createRequest({ url: input.query }, uuidv4(), null)
+            ? createRequest({ url: input.query }, randomId(), null)
             : createSearchRequest(
                 input.query,
                 input.maxResults,
