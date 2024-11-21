@@ -44,9 +44,9 @@ export const addEmptyResultToResponse = (responseId: string, request: RequestOpt
     if (!res) return;
 
     const result: Partial<Output> = {
-        crawl: { createdAt: new Date(), requestStatus: ContentCrawlerStatus.PENDING, uniqueKey: request.uniqueKey! },
-        metadata: { url: request.url },
         searchResult: request.userData?.searchResult,
+        metadata: { url: request.url },
+        crawl: { createdAt: new Date(), requestStatus: ContentCrawlerStatus.PENDING, uniqueKey: request.uniqueKey! },
     };
     res.resultsMap.set(request.uniqueKey!, result as Output);
 };
@@ -138,7 +138,7 @@ export const sendResponseIfFinished = (responseId: string) => {
 /**
  * Add timeout to all responses when actor is migrating (source: SuperScraper).
  */
-export const addTimeoutToAllResponses = (timeoutInSeconds: number = 60) => {
+export const addTimeoutToAllResponses = (timeoutSeconds: number = 60) => {
     const migrationErrorMessage = {
         errorMessage: `Actor had to migrate to another server. Please, retry your request.`,
     };
@@ -148,6 +148,6 @@ export const addTimeoutToAllResponses = (timeoutInSeconds: number = 60) => {
     for (const key of responseKeys) {
         setTimeout(() => {
             sendResponseError(key, JSON.stringify(migrationErrorMessage));
-        }, timeoutInSeconds * 1000);
+        }, timeoutSeconds * 1000);
     }
 };

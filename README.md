@@ -18,7 +18,7 @@ The extracted text can then be injected into prompts and retrieval augmented gen
 
 ## Example
 
-For a search query like `web browser site:openai.com`, the Actor will return an array with a content of top results from Google Search:
+For a search query like `web browser site:openai.com`, the Actor will return an array with a content of top results from Google Search, which looks like this:
 
 ```json
 [
@@ -27,14 +27,14 @@ For a search query like `web browser site:openai.com`, the Actor will return an 
            "url": "https://python.langchain.com/docs/integrations/providers/apify/#utility",
            "title": "Apify | 🦜️🔗 LangChain"
         },
-        "text": "Apify | 🦜️🔗 LangChain | This notebook shows how to use the Apify integration ..."
+        "markdown": "Apify | 🦜️🔗 LangChain | This notebook shows how to use the Apify integration ..."
     },
     {
         "metadata": {
             "url": "https://microsoft.github.io/autogen/0.2/docs/notebooks/agentchat_webscraping_with_apify/",
             "title": "Web Scraping using Apify Tools | AutoGen"
         },
-        "text": "Web Scraping using Apify Tools | This notebook shows how to use Apify tools with AutoGen agents ...."
+        "markdown": "Web Scraping using Apify Tools | This notebook shows how to use Apify tools with AutoGen agents ...."
     }
 ]
 ```
