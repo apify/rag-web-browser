@@ -1,6 +1,6 @@
 {
     "title": "RAG Web Browser",
-    "description": "Here you can test RAG Web Browser and its settings. Just enter the search terms or URL and click *Start* to see the results. In production applications, call the Actor via Standby HTTP server for fast response times.",
+    "description": "Here you can test RAG Web Browser and its settings. Just enter the search terms or URL and click *▶ Start* to get results. **In production applications, call the Actor via Standby HTTP server for fast response times.**",
     "type": "object",
     "schemaVersion": 1,
     "properties": {
@@ -125,5 +125,6 @@
             "description": "If enabled, the Actor will store debugging information into the resulting dataset under the `debug` field.",
             "default": false
         }
-    }
+    },
+    "required": ["query"]
 }
