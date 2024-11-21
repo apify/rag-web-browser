@@ -44,8 +44,8 @@ const parseResult = ($: CheerioAPI, el: Element) => {
 
     const descriptionSelector = '.VwiC3b';
     const searchResult: OrganicResult = {
-        description: ($(el).find(descriptionSelector).text() || '').trim(),
         title: $(el).find('h3').first().text() || '',
+        description: ($(el).find(descriptionSelector).text() || '').trim(),
         url: $(el).find('a').first().attr('href') || '',
     };
 
