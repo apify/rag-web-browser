@@ -20,7 +20,7 @@ The extracted text can then be injected into prompts and retrieval augmented gen
 
 For a search query like `web browser site:platform.openai.com`, the Actor will return an array with a content of top results from Google Search, which looks like this:
 
-<!-- TODO: Fix this example -->
+<!-- TODO: Replace this example with some real one, let's use all fields as they are returned -->
 
 ```json
 [
@@ -30,7 +30,9 @@ For a search query like `web browser site:platform.openai.com`, the Actor will r
            "title": "Apify | 🦜️🔗 LangChain"
         },
         "searchResult": {
-            ...
+            "description": "Crawlee—A web scraping and browser automation library for Python to build reliable crawlers. ...",
+            "title": "Apify",
+            "url": "https://github.com/apify"
         },
         "markdown": "Apify | 🦜️🔗 LangChain | This notebook shows how to use the Apify integration ..."
     },
@@ -40,7 +42,9 @@ For a search query like `web browser site:platform.openai.com`, the Actor will r
             "title": "Web Scraping using Apify Tools | AutoGen"
         },
         "searchResult": {
-            ...
+            "description": "Crawlee—A web scraping and browser automation library for Python to build reliable crawlers. ...",
+            "title": "Apify",
+            "url": "https://github.com/apify"
         },
         "markdown": "Web Scraping using Apify Tools | This notebook shows how to use Apify tools with AutoGen agents ...."
     }
