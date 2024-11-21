@@ -15,13 +15,13 @@
             "get": {
                 "operationId": "apify_rag-web-browser",
                 "x-openai-isConsequential": false,
-                "summary": "Web browser for OpenAI Assistants API and RAG pipelines",
-                "description": "Web browser for OpenAI Assistants API and RAG pipelines, similar to a web browser in ChatGPT. It queries Google Search, scrapes the top N pages from the results, and returns their cleaned content as Markdown for further processing by an LLM.",
+                "summary": "Web browser and page content extractor",
+                "description": "Web browser for OpenAI Assistants API and RAG pipelines, similar to a web browser in ChatGPT. It queries Google Search, scrapes the top N pages from the results, and returns their cleaned content as Markdown for further processing.",
                 "parameters": [
                     {
                         "name": "query",
                         "in": "query",
-                        "description": "Use regular search words or enter Google Search URLs. You can also apply advanced Google search techniques, such as AI site:twitter.com or javascript OR python",
+                        "description": "Enter Google Search keywords or a URL to a specific web page. The keywords might include the Google's advanced search operators, e.g. site:example.com",
                         "required": true,
                         "schema": {
                             "type": "string",
@@ -31,7 +31,7 @@
                     {
                         "name": "maxResults",
                         "in": "query",
-                        "description": "The number of top organic search results to return and scrape text from",
+                        "description": "The maximum number of top organic Google Search results whose web pages will be extracted. If `query` is a URL, then this parameter is ignored and the Actor only fetches the specific web page.",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -94,42 +94,6 @@
                             "minimum": 0,
                             "maximum": 3,
                             "default": 1
-                        }
-                    },
-                    {
-                        "name": "initialConcurrency",
-                        "in": "query",
-                        "description": "Initial number of browsers running in parallel.",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 50,
-                            "default": 5
-                        }
-                    },
-                    {
-                        "name": "minConcurrency",
-                        "in": "query",
-                        "description": "Minimum number of browsers running in parallel.",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "minimum": 1,
-                            "maximum": 50,
-                            "default": 3
-                        }
-                    },
-                    {
-                        "name": "maxConcurrency",
-                        "in": "query",
-                        "description": "Maximum number of browsers running in parallel.",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "minimum": 1,
-                            "maximum": 50,
-                            "default": 10
                         }
                     },
                     {
