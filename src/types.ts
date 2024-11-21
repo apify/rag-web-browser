@@ -98,7 +98,6 @@ export type Output = {
         url: string;
         description?: string | null;
         author?: string | null;
-        keywords?: string | null;
         languageCode?: string | null;
     };
 };

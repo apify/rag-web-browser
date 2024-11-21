@@ -124,7 +124,6 @@ export async function requestHandlerPlaywright(
             author: $('meta[name=author]').first().attr('content') ?? null,
             title: $('title').first().text(),
             description: $('meta[name=description]').first().attr('content') ?? null,
-            keywords: $('meta[name=keywords]').first().attr('content') ?? null,
             languageCode: $html.first().attr('lang') ?? null,
             url: request.url,
         },
