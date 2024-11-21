@@ -68,7 +68,7 @@ the web page content directly like this:
 }]
 ```
 
-## Usage
+## ⚙️ Usage
 
 The RAG Web Browser can be used in two ways: **as a standard Actor** by passing it an input object with the settings,
 or in the **Standby mode** by sending it an HTTP request.
@@ -121,7 +121,7 @@ The `/search` GET HTTP endpoint accepts the following query parameters:
 <!-- TODO: we should probably add proxyConfiguration -->
 
 
-## Integration with LLMs
+## 🔌 Integration with LLMs
 
 RAG Web Browser has been designed for easy integration with LLM applications, GPTs, OpenAI Assistants, and RAG pipelines using function calling.
 
@@ -163,7 +163,7 @@ To get the most value from RAG Web Browsers in your LLM applications,
 always use the Actor via the [Standby web server](#standby-web-server) as described above,
 and see the tips in the following sections.
 
-### ✃ Request timeout
+### Request timeout
 
 Many user-facing RAG applications impose a time limit on external functions to provide a good user experience.
 For example, OpenAI Assistants and GPTs have a limit of [45 seconds](https://platform.openai.com/docs/actions/production#timeouts) for custom actions.
@@ -183,7 +183,7 @@ Here are specific situations that might occur when the timeout is reached:
   => the Actor extracts content from the currently loaded HTML
 
 
-### ⏳ Reducing response time
+### Reducing response time
 
 For low-latency applications, it's recommended to run the RAG Web Browser in Standby mode
 with the default settings, i.e. with 8 GB of memory and maximum of 24 requests per run.
@@ -197,7 +197,7 @@ Additionally, you can adjust the following query parameters to reduce the respon
 - `debugMode`: If set to `true`, the Actor will store latency data to results so that you can see where it takes time.
 
 
-### 💰 Cost vs. throughput
+### Cost vs. throughput
 
 When running the RAG Web Browser in Standby web server, the Actor can process a number of requests in parallel.
 This number is determined by the following [Standby mode](https://docs.apify.com/platform/actors/running/standby) settings:
@@ -216,7 +216,7 @@ and override these settings. Just note that requests might take longer and so yo
 increase `requestTimeoutSecs` accordigly.
 
 
-### ⏳Latency benchmark
+### Benchmark
 
 Below is a typical latency breakdown for RAG Web Browser with **maxResults** set to either `1` or `3`, and various memory settings.
 These settings allow for processing all search results in parallel.
