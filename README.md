@@ -157,7 +157,7 @@ You can easily add the RAG Web Browser to your GPTs by creating a custom action.
 Learn more about [adding custom actions to your GPTs with Apify Actors](https://blog.apify.com/add-custom-actions-to-your-gpts/) on Apify Blog.
 
 
-## ⏳ Performance and cost optimization
+## ⏳ Performance optimization
 
 To get the most value from RAG Web Browsers in your LLM applications,
 always use the Actor via the [Standby web server](#standby-web-server) as described above,
@@ -168,60 +168,69 @@ and see the tips in the following sections.
 Many user-facing RAG applications impose a time limit on external functions to provide a good user experience.
 For example, OpenAI Assistants and GPTs have a limit of [45 seconds](https://platform.openai.com/docs/actions/production#timeouts) for custom actions.
 
-To ensure the web search and content extraction is done within the required timeout,
+To ensure the web search and content extraction is completed within the required timeout,
 you can set the `requestTimeoutSecs` query parameter.
 If this timeout is exceeded, **the Actor makes the best effort to return results it has scraped up to that point**
 in order to provide your LLM application with at least some context.
 
 Here are specific situations that might occur when the timeout is reached:
 
-- The **Google Search query failed** => the HTTP request fails with a 5xx error.
-- The requested `query` is **a single URL that failed to load** => the HTTP request fails with a 5xx error.
-- The requested `query` is a search term, but **one of target web pages failed to load** => the response contains at least
+- The Google Search query failed => the HTTP request fails with a 5xx error.
+- The requested `query` is a single URL that failed to load => the HTTP request fails with a 5xx error.
+- The requested `query` is a search term, but one of target web pages failed to load => the response contains at least
   the `searchResult` for the specific page contains a URL, title, and description.
-- One of the target pages **hasn't loaded dynamic content ** (within the `dynamicContentWaitSecs` deadline)
+- One of the target pages hasn't loaded dynamic content (within the `dynamicContentWaitSecs` deadline)
   => the Actor extracts content from the currently loaded HTML
 
 
-### 🎢 Reducing latency
+### ⏳ Reducing response time
 
-For low-latency applications, it's recommended to run the RAG Web Browser with at least 8 GB of memory.
-Additionally, you can adjust the following query parameters to reduce the time to results:
+For low-latency applications, it's recommended to run the RAG Web Browser in Standby mode
+with the default settings, i.e. with 8 GB of memory and maximum of 24 requests per run.
+Note that on the first request, the Actor takes a little time to respond (cold start).
+
+Additionally, you can adjust the following query parameters to reduce the response time:
 
 - `maxResults`: The lower the number of search results to scrape, the faster the response time. Just note that the LLM application might not have sufficient context for the prompt.
-- `dynamicContentWaitSecs`: Set this to `0` if you don't need to wait for dynamic web content. This can significantly reduce latency.
-- `removeCookieWarnings`: If the websites you're scraping don't have cookie warnings, set this to `false` to slightly improve latency.
+- `dynamicContentWaitSecs`: The lower the value, the faster the response time. However, the important web content might not be loaded yet, which will reduce the accuracy of your LLM application.
+- `removeCookieWarnings`: If the websites you're scraping don't have cookie warnings or if their presence can be tolerated, set this to `false` to slightly improve latency.
 - `debugMode`: If set to `true`, the Actor will store latency data to results so that you can see where it takes time.
 
 
+### 💰 Cost vs. throughput
 
-Concurrency
+When running the RAG Web Browser in Standby web server, the Actor can process a number of requests in parallel.
+This number is determined by the following [Standby mode](https://docs.apify.com/platform/actors/running/standby) settings:
 
-Tasks
+- **Max requests per run** and **Desired requests per run** - Determine how many requests can be sent by the system to one Actor run.
+- **Memory** - Determines how much memory and CPU resources the Actor run has available, and this how many web pages it can open and process in parallel.
 
-## ⏳ Performance and cost optimization
+Additionally, the Actor manages its internal pool of web browsers to handle the requests.
+If the Actor memory or CPU is at capacity, the pool automatically scales down, and requests
+above the capacity are delayed.
 
-To optimize the performance and cost of your application, see the [Standby mode settings](https://docs.apify.com/platform/actors/running/standby#how-do-i-customize-standby-configuration).
+By default, these Standby mode settings are optimized for quick response time:
+8 GB of memory and maximum of 24 requests per run gives approximately ~340 MB per web page.
+If you prefer to optimize the Actor for the cost, you can **Create task** for the Actor in Apify Console
+and override these settings. Just note that requests might take longer and so you should
+increase `requestTimeoutSecs` accordigly.
 
-The latency is proportional to the **memory allocated** to the Actor and **number of results requested**.
 
-Below is a typical latency breakdown for the RAG Web Browser with **maxResults** set to either 1 or 3.
+### ⏳Latency benchmark
+
+Below is a typical latency breakdown for RAG Web Browser with **maxResults** set to either `1` or `3`, and various memory settings.
 These settings allow for processing all search results in parallel.
-
-Please note the these results are only indicative and may vary based on the search term, the target websites, and network latency.
-
 The numbers below are based on the following search terms: "apify", "Donald Trump", "boston".
 Results were averaged for the three queries.
 
-| Memory (GB) | Max Results | Latency (s) |
-|-------------|-------------|-------------|
-| 4           | 1           | 22          |
-| 4           | 3           | 31          |
-| 8           | 1           | 16          |
-| 8           | 3           | 17          |
+| Memory (GB) | Max results | Latency (sec) |
+|-------------|-------------|---------------|
+| 4           | 1           | 22            |
+| 4           | 3           | 31            |
+| 8           | 1           | 16            |
+| 8           | 3           | 17            |
 
-Based on your requirements, if low latency is a priority, consider running the Actor with 4GB or 8GB of memory.
-However, if you're looking for a cost-effective solution, you can run the Actor with 2GB of memory, but you may experience higher latency and might need to set a longer timeout.
+Please note the these results are only indicative and may vary based on the search term, target websites, and network latency.
 
 
 ## ⓘ Limitations and feedback
