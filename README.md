@@ -236,6 +236,11 @@ Results were averaged for the three queries.
 
 Please note the these results are only indicative and may vary based on the search term, target websites, and network latency.
 
+## 💰 Pricing
+
+The RAG Web Browser is free of charge, and you only pay for the Apify platform consumption when it runs.
+The main driver of the price is the Actor compute units (CUs), which are proportional to the amount of Actor run memory
+and run time (1 CU = 1 GB memory x 1 hour).
 
 ## ⓘ Limitations and feedback
 
