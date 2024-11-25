@@ -1,6 +1,6 @@
 {
     "title": "RAG Web Browser",
-    "description": "Here you can test RAG Web Browser and its settings. Just enter the search terms or URL and click *▶ Start* to get results. **In production applications, call the Actor via Standby HTTP server for fast response times.**",
+    "description": "Here you can test RAG Web Browser and its settings. Just enter the search terms or URL and click *Start ▶* to get results. **In production applications, call the Actor via Standby HTTP server for fast response times.**",
     "type": "object",
     "schemaVersion": 1,
     "properties": {
@@ -8,7 +8,7 @@
             "title": "Search term or URL",
             "type": "string",
             "description": "Enter Google Search keywords or a URL of a specific web page. The keywords might include the [advanced search operators](https://blog.apify.com/how-to-scrape-google-like-a-pro/). Examples:\n\n- <code>san francisco weather</code>\n- <code>https://www.cnn.com</code>\n- <code>function calling site:openai.com</code>",
-            "prefill": "san francisco weather",
+            "prefill": "fast web browser in RAG pipelines",
             "editor": "textfield",
             "pattern": "[^\\s]+"
         },

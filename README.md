@@ -18,35 +18,30 @@ The extracted text can then be injected into prompts and retrieval augmented gen
 
 ## Example
 
-For a search query like `web browser site:platform.openai.com`, the Actor will return an array with a content of top results from Google Search, which looks like this:
-
-<!-- TODO: Replace this example with some real one, let's use all fields as they are returned -->
+For a search query like `fast web browser in RAG pipelines`, the Actor will return an array with a content of top results from Google Search, which looks like this:
 
 ```json
 [
     {
-        "metadata": {
-           "url": "https://python.langchain.com/docs/integrations/providers/apify/#utility",
-           "title": "Apify | 🦜️🔗 LangChain"
+        "crawl": {
+            "httpStatusCode": 200,
+            "httpStatusMessage": "OK",
+            "loadedAt": "2024-11-25T21:23:58.336Z",
+            "uniqueKey": "eM0RDxDQ3q",
+            "requestStatus": "handled"
         },
         "searchResult": {
-            "description": "Crawlee—A web scraping and browser automation library for Python to build reliable crawlers. ...",
-            "title": "Apify",
-            "url": "https://github.com/apify"
+            "title": "apify/rag-web-browser",
+            "description": "Sep 2, 2024 — The RAG Web Browser is designed for Large Language Model (LLM) applications or LLM agents to provide up-to-date ....",
+            "url": "https://github.com/apify/rag-web-browser"
         },
-        "markdown": "Apify | 🦜️🔗 LangChain | This notebook shows how to use the Apify integration ..."
-    },
-    {
         "metadata": {
-            "url": "https://microsoft.github.io/autogen/0.2/docs/notebooks/agentchat_webscraping_with_apify/",
-            "title": "Web Scraping using Apify Tools | AutoGen"
+            "title": "GitHub - apify/rag-web-browser: RAG Web Browser is an Apify Actor to feed your LLM applications ...",
+            "description": "RAG Web Browser is an Apify Actor to feed your LLM applications ...",
+            "languageCode": "en",
+            "url": "https://github.com/apify/rag-web-browser"
         },
-        "searchResult": {
-            "description": "Crawlee—A web scraping and browser automation library for Python to build reliable crawlers. ...",
-            "title": "Apify",
-            "url": "https://github.com/apify"
-        },
-        "markdown": "Web Scraping using Apify Tools | This notebook shows how to use Apify tools with AutoGen agents ...."
+        "markdown": "# apify/rag-web-browser: RAG Web Browser is an Apify Actor ..."
     }
 ]
 ```
