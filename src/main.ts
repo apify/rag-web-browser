@@ -100,8 +100,10 @@ const server = createServer(async (req, res) => {
     }
 });
 
+const standbyMode = Actor.getEnv().metaOrigin === 'STANDBY';
 const { input, cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings } = await processInput(
     (await Actor.getInput<Partial<Input>>()) ?? ({} as Input),
+    standbyMode,
 );
 
 log.info(`Loaded input: ${JSON.stringify(input)},
@@ -110,7 +112,7 @@ log.info(`Loaded input: ${JSON.stringify(input)},
     playwrightScraperSettings ${JSON.stringify(playwrightScraperSettings)}
 `);
 
-if (Actor.getEnv().metaOrigin === 'STANDBY') {
+if (standbyMode) {
     log.info('Actor is running in the STANDBY mode.');
 
     const port = Actor.isAtHome() ? process.env.ACTOR_STANDBY_PORT : 3000;

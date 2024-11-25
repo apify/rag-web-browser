@@ -10,10 +10,10 @@ import type { Input, PlaywrightScraperSettings, OutputFormats } from './types.js
  * Processes the input and returns the settings for the crawler (adapted from: Website Content Crawler).
  */
 
-export async function processInput(originalInput: Partial<Input>) {
+export async function processInput(originalInput: Partial<Input>, standbyInit: boolean = false) {
     const input = { ...defaults, ...originalInput } as Input;
 
-    validateAndFillInput(input);
+    validateAndFillInput(input, standbyInit);
 
     const {
         debugMode,
@@ -77,7 +77,12 @@ export async function processInput(originalInput: Partial<Input>) {
     return { input, cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings };
 }
 
-export function validateAndFillInput(input: Input) {
+/**
+ * Validates the input and fills in the default values where necessary.
+ * Do not validate query parameter when standbyInit is true.
+ * This is a bit ugly, but it's necessary to avoid throwing an error when the query is not provided in standby mode.
+ */
+export function validateAndFillInput(input: Input, standbyInit: boolean) {
     const validateRange = (
         value: number | undefined,
         min: number,
@@ -97,7 +102,7 @@ export function validateAndFillInput(input: Input) {
         }
         return value;
     };
-    if (!input.query) {
+    if (!input.query && !standbyInit) {
         throw new UserInputError('The `query` parameter must be provided and non-empty.');
     }
 
