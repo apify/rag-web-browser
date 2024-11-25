@@ -75,7 +75,7 @@ export function createRequest(
 ): RequestOptions<UserData> {
     return {
         url: result.url!,
-        uniqueKey: uuidv4(),
+        uniqueKey: randomId(),
         userData: {
             responseId,
             searchResult: result,

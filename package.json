@@ -9,9 +9,9 @@
 	"dependencies": {
 		"@crawlee/memory-storage": "^3.11.1",
 		"@mozilla/readability": "^0.5.0",
-		"apify": "^3.2.3",
+		"apify": "^3.2.6",
 		"cheerio": "^1.0.0",
-		"crawlee": "^3.11.1",
+		"crawlee": "^3.12.0",
 		"joplin-turndown-plugin-gfm": "^1.0.12",
 		"jsdom": "^24.1.1",
 		"playwright": "^1.47.0",

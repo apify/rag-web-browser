@@ -140,7 +140,7 @@ if (Actor.getEnv().metaOrigin === 'STANDBY') {
         input.query = inputUrl ?? input.query;
         // Create a request depending on whether the input is a URL or search query
         const req = inputUrl
-            ? createRequest({ url: input.query }, uuidv4(), null)
+            ? createRequest({ url: input.query }, randomId(), null)
             : createSearchRequest(
                 input.query,
                 input.maxResults,

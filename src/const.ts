@@ -21,7 +21,7 @@ export const defaults = {
     minConcurrency: 3,
     outputFormats: ['markdown'],
     proxyConfiguration: { useApifyProxy: true },
-    query: 'apify llm', // TODO: There should be no default for this field
+    query: null,
     readableTextCharThreshold: 100,
     removeCookieWarnings: true,
     requestTimeoutSecs: 40,

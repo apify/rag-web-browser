@@ -88,17 +88,17 @@ export function validateAndFillInput(input: Input) {
         if (value === undefined) {
             log.warning(`The \`${fieldName}\` parameter must be defined. Using the default value ${defaultValue} instead.`);
             return defaultValue;
-        } else if (value < min) {
+        } if (value < min) {
             log.warning(`The \`${fieldName}\` parameter must be at least ${min}, but was ${fieldName}. Using ${min} instead.`);
             return min;
-        } else if (value > max) {
+        } if (value > max) {
             log.warning(`The \`${fieldName}\` parameter must be at most ${max}, but was ${fieldName}. Using ${max} instead.`);
             return max;
         }
         return value;
     };
     if (!input.query) {
-        throw new UserInputError("The `query` parameter must be provided and non-empty.");
+        throw new UserInputError('The `query` parameter must be provided and non-empty.');
     }
 
     input.maxResults = validateRange(input.maxResults, 1, defaults.maxResultsMax, defaults.maxResults, 'maxResults');
@@ -110,7 +110,7 @@ export function validateAndFillInput(input: Input) {
         input.outputFormats = defaults.outputFormats as OutputFormats[];
         log.warning(`The \`outputFormats\` parameter must be a non-empty array. Using default value \`${defaults.outputFormats}\`.`);
     } else if (input.outputFormats.some((format) => !['text', 'markdown', 'html'].includes(format))) {
-        throw new UserInputError("The `outputFormats` array may only contain `text`, `markdown`, or `html`.");
+        throw new UserInputError('The `outputFormats` array may only contain `text`, `markdown`, or `html`.');
     }
     if (input.serpProxyGroup !== 'GOOGLE_SERP' && input.serpProxyGroup !== 'SHADER') {
         throw new UserInputError('The `serpProxyGroup` parameter must be either `GOOGLE_SERP` or `SHADER`.');
