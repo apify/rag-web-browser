@@ -84,21 +84,20 @@ export type Output = {
     markdown?: string | null;
     query?: string;
     crawl: {
-        debug?: unknown;
         createdAt?: Date;
         httpStatusCode?: number | null;
         httpStatusMessage?: string | null;
         loadedAt?: Date;
         requestStatus: string;
         uniqueKey: string;
+        debug?: unknown;
     };
     searchResult: OrganicResult;
     metadata: {
-        author?: string | null;
-        description?: string | null;
-        keywords?: string | null;
-        languageCode?: string | null;
         title?: string | null;
         url: string;
+        description?: string | null;
+        author?: string | null;
+        languageCode?: string | null;
     };
 };

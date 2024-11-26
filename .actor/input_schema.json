@@ -1,14 +1,14 @@
 {
     "title": "RAG Web Browser",
-    "description": "Here you can test the Actor and its various settings. Enter the search terms or URL below and click *Start* to see the results. For production applications, we recommend using the Standby mode and calling the Actor via HTTP server for faster response times.",
+    "description": "Here you can test RAG Web Browser and its settings. Just enter the search terms or URL and click *Start ▶* to get results. **In production applications, call the Actor via Standby HTTP server for fast response times.**",
     "type": "object",
     "schemaVersion": 1,
     "properties": {
         "query": {
             "title": "Search term or URL",
             "type": "string",
-            "description": "Enter Google Search keywords or a URL to a specific web page. The keywords might include the [advanced search operators](https://blog.apify.com/how-to-scrape-google-like-a-pro/). Examples:\n\n- <code>san francisco weather</code>\n- <code>https://www.cnn.com</code>\n- <code>function calling site:openai.com</code>",
-            "prefill": "san francisco weather",
+            "description": "Enter Google Search keywords or a URL of a specific web page. The keywords might include the [advanced search operators](https://blog.apify.com/how-to-scrape-google-like-a-pro/). Examples:\n\n- <code>san francisco weather</code>\n- <code>https://www.cnn.com</code>\n- <code>function calling site:openai.com</code>",
+            "prefill": "fast web browser in RAG pipelines",
             "editor": "textfield",
             "pattern": "[^\\s]+"
         },
@@ -42,7 +42,7 @@
             "unit": "seconds"
         },
         "serpProxyGroup": {
-            "title": "Google SERP proxy group",
+            "title": "SERP proxy group",
             "type": "string",
             "description": "Enables overriding the default Apify Proxy group used for fetching Google Search results.",
             "editor": "select",
@@ -51,7 +51,7 @@
             "sectionCaption": "Google Search scraping settings"
         },
         "serpMaxRetries": {
-            "title": "Google SERP maximum retries",
+            "title": "SERP max retries",
             "type": "integer",
             "description": "The maximum number of times the Actor will retry fetching the Google Search results on error. If the last attempt fails, the entire request fails.",
             "minimum": 0,
@@ -125,5 +125,6 @@
             "description": "If enabled, the Actor will store debugging information into the resulting dataset under the `debug` field.",
             "default": false
         }
-    }
+    },
+    "required": ["query"]
 }

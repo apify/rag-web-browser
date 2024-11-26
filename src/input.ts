@@ -10,10 +10,10 @@ import type { Input, PlaywrightScraperSettings, OutputFormats } from './types.js
  * Processes the input and returns the settings for the crawler (adapted from: Website Content Crawler).
  */
 
-export async function processInput(originalInput: Partial<Input>) {
+export async function processInput(originalInput: Partial<Input>, standbyInit: boolean = false) {
     const input = { ...defaults, ...originalInput } as Input;
 
-    validateAndFillInput(input);
+    validateAndFillInput(input, standbyInit);
 
     const {
         debugMode,
@@ -77,7 +77,12 @@ export async function processInput(originalInput: Partial<Input>) {
     return { input, cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings };
 }
 
-export function validateAndFillInput(input: Input) {
+/**
+ * Validates the input and fills in the default values where necessary.
+ * Do not validate query parameter when standbyInit is true.
+ * This is a bit ugly, but it's necessary to avoid throwing an error when the query is not provided in standby mode.
+ */
+export function validateAndFillInput(input: Input, standbyInit: boolean) {
     const validateRange = (
         value: number | undefined,
         min: number,
@@ -85,17 +90,20 @@ export function validateAndFillInput(input: Input) {
         defaultValue: number,
         fieldName: string,
     ) => {
-        if (value === undefined || value < min) {
-            log.warning(`The "${fieldName}" parameter must be at least ${min}. Using default value ${defaultValue}.`);
+        if (value === undefined) {
+            log.warning(`The \`${fieldName}\` parameter must be defined. Using the default value ${defaultValue} instead.`);
             return defaultValue;
+        } if (value < min) {
+            log.warning(`The \`${fieldName}\` parameter must be at least ${min}, but was ${fieldName}. Using ${min} instead.`);
+            return min;
         } if (value > max) {
-            log.warning(`The "${fieldName}" parameter is limited to ${max}. Using default max value ${max}.`);
+            log.warning(`The \`${fieldName}\` parameter must be at most ${max}, but was ${fieldName}. Using ${max} instead.`);
             return max;
         }
         return value;
     };
-    if (!input.query) {
-        throw new UserInputError('The "query" parameter must be provided and non-empty');
+    if (!input.query && !standbyInit) {
+        throw new UserInputError('The `query` parameter must be provided and non-empty.');
     }
 
     input.maxResults = validateRange(input.maxResults, 1, defaults.maxResultsMax, defaults.maxResults, 'maxResults');
@@ -105,12 +113,12 @@ export function validateAndFillInput(input: Input) {
 
     if (!input.outputFormats || input.outputFormats.length === 0) {
         input.outputFormats = defaults.outputFormats as OutputFormats[];
-        log.warning(`The "outputFormats" parameter must be a non-empty array. Using default value ${defaults.outputFormats}.`);
+        log.warning(`The \`outputFormats\` parameter must be a non-empty array. Using default value \`${defaults.outputFormats}\`.`);
     } else if (input.outputFormats.some((format) => !['text', 'markdown', 'html'].includes(format))) {
-        throw new UserInputError('The "outputFormats" parameter must contain only "text", "markdown" or "html"');
+        throw new UserInputError('The `outputFormats` array may only contain `text`, `markdown`, or `html`.');
     }
     if (input.serpProxyGroup !== 'GOOGLE_SERP' && input.serpProxyGroup !== 'SHADER') {
-        throw new UserInputError('The "serpProxyGroup" parameter must be either "GOOGLE_SERP" or "SHADER"');
+        throw new UserInputError('The `serpProxyGroup` parameter must be either `GOOGLE_SERP` or `SHADER`.');
     }
     if (input.dynamicContentWaitSecs >= input.requestTimeoutSecs) {
         input.dynamicContentWaitSecs = Math.round(input.requestTimeoutSecs / 2);

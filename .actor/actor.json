@@ -2,7 +2,7 @@
     "actorSpecification": 1,
     "name": "rag-web-browser",
     "title": "RAG Web browser",
-    "description": "Web browser for a retrieval augmented generation workflows. Retrieve and return website content from the top Google Search Results Pages",
+    "description": "Web browser for OpenAI Assistants API and RAG pipelines, similar to a web browser in ChatGPT. It queries Google Search, scrapes the top N pages from the results, and returns their cleaned content as Markdown for further processing by an LLM.",
     "version": "0.1",
     "input": "./input_schema.json",
     "dockerfile": "./Dockerfile",
@@ -16,12 +16,12 @@
                     "title": "Overview",
                     "description": "An view showing just basic properties for simplicity.",
                     "transformation": {
+                        "flatten": ["metadata"],
                         "fields": [
                             "metadata.url",
                             "metadata.title",
                             "markdown"
-                        ],
-                        "flatten": ["metadata"]
+                        ]
                     },
                     "display": {
                         "component": "table",
@@ -35,7 +35,7 @@
                                 "format": "text"
                             },
                             "text": {
-                                "label": "Extracted markdown",
+                                "label": "Extracted Markdown",
                                 "format": "text"
                             }
                         }
@@ -45,12 +45,12 @@
                     "title": "Search results",
                     "description": "A view showing just the Google Search results, without the page content.",
                     "transformation": {
+                        "flatten": ["searchResult"],
                         "fields": [
-                            "searchResult.description",
                             "searchResult.title",
+                            "searchResult.description",
                             "searchResult.url"
-                        ],
-                        "flatten": ["searchResult"]
+                        ]
                     },
                     "display": {
                         "component": "table",

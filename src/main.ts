@@ -1,7 +1,6 @@
 import { Actor } from 'apify';
 import { log } from 'crawlee';
 import { createServer, IncomingMessage, ServerResponse } from 'http';
-import { v4 as uuidv4 } from 'uuid';
 
 import { PLAYWRIGHT_REQUEST_TIMEOUT_NORMAL_MODE_SECS } from './const.js';
 import { addPlaywrightCrawlRequest, addSearchRequest, createAndStartCrawlers, getPlaywrightCrawlerKey } from './crawlers.js';
@@ -16,6 +15,7 @@ import {
     createSearchRequest,
     interpretAsUrl,
     parseParameters,
+    randomId,
 } from './utils.js';
 
 await Actor.init();
@@ -49,7 +49,7 @@ async function getSearch(request: IncomingMessage, response: ServerResponse) {
         input.query = inputUrl ?? input.query;
         // Create a request depending on whether the input is a URL or search query
         const req = inputUrl
-            ? createRequest({ url: input.query }, uuidv4(), null)
+            ? createRequest({ url: input.query }, randomId(), null)
             : createSearchRequest(
                 input.query,
                 input.maxResults,
@@ -59,7 +59,7 @@ async function getSearch(request: IncomingMessage, response: ServerResponse) {
         addTimeMeasureEvent(req.userData!, 'request-received', requestReceivedTime);
         if (inputUrl) {
             // If the input query is a URL, we don't need to run the search crawler
-            log.info(`Skipping search crawler as ${input.query} is a valid URL`);
+            log.info(`Skipping Google Search query as ${input.query} is a valid URL`);
             await addPlaywrightCrawlRequest(req, req.uniqueKey!, playwrightCrawlerKey);
         } else {
             await addSearchRequest(req, response, cheerioCrawlerOptions);
@@ -91,17 +91,19 @@ const server = createServer(async (req, res) => {
             res.end(JSON.stringify({ errorMessage: 'Bad request' }));
         }
     } else {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.writeHead(404, { 'Content-Type': 'application/json' });
         res.end(
             JSON.stringify({
-                message: 'RAG-Web-Browser is running in standby mode, sent GET request to "/search?query=apify"',
+                message: `There is nothing at this HTTP endpoint. Send a GET request to ${process.env.ACTOR_STANDBY_URL}/search?query=hello+world instead`,
             }),
         );
     }
 });
 
+const standbyMode = Actor.getEnv().metaOrigin === 'STANDBY';
 const { input, cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings } = await processInput(
     (await Actor.getInput<Partial<Input>>()) ?? ({} as Input),
+    standbyMode,
 );
 
 log.info(`Loaded input: ${JSON.stringify(input)},
@@ -110,17 +112,17 @@ log.info(`Loaded input: ${JSON.stringify(input)},
     playwrightScraperSettings ${JSON.stringify(playwrightScraperSettings)}
 `);
 
-if (Actor.getEnv().metaOrigin === 'STANDBY') {
-    log.info('Actor is running in STANDBY mode');
+if (standbyMode) {
+    log.info('Actor is running in the STANDBY mode.');
 
     const port = Actor.isAtHome() ? process.env.ACTOR_STANDBY_PORT : 3000;
     server.listen(port, async () => {
         // Pre-create default crawlers
-        log.info(`RAG-Web-Browser is listening for user requests`);
+        log.info(`The Actor web server is listening for user requests at ${process.env.ACTOR_STANDBY_URL}.`);
         await createAndStartCrawlers(cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings);
     });
 } else {
-    log.info('Actor is running in the NORMAL mode');
+    log.info('Actor is running in the NORMAL mode.');
     try {
         const startedTime = Date.now();
         cheerioCrawlerOptions.keepAlive = false;
@@ -140,7 +142,7 @@ if (Actor.getEnv().metaOrigin === 'STANDBY') {
         input.query = inputUrl ?? input.query;
         // Create a request depending on whether the input is a URL or search query
         const req = inputUrl
-            ? createRequest({ url: input.query }, uuidv4(), null)
+            ? createRequest({ url: input.query }, randomId(), null)
             : createSearchRequest(
                 input.query,
                 input.maxResults,
@@ -150,7 +152,7 @@ if (Actor.getEnv().metaOrigin === 'STANDBY') {
         addTimeMeasureEvent(req.userData!, 'actor-started', startedTime);
         if (inputUrl) {
             // If the input query is a URL, we don't need to run the search crawler
-            log.info(`Skipping Google Search query because "${input.query}" is a valid URL`);
+            log.info(`Skipping Google Search query because "${input.query}" is a valid URL.`);
             await addPlaywrightCrawlRequest(req, req.uniqueKey!, playwrightCrawlerKey);
         } else {
             await addSearchRequest(req, null, cheerioCrawlerOptions);
