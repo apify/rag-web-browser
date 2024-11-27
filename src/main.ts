@@ -6,7 +6,7 @@ import { PLAYWRIGHT_REQUEST_TIMEOUT_NORMAL_MODE_SECS } from './const.js';
 import { addPlaywrightCrawlRequest, addSearchRequest, createAndStartCrawlers, getPlaywrightCrawlerKey } from './crawlers.js';
 import { UserInputError } from './errors.js';
 import { processInput } from './input.js';
-import { addTimeoutToAllResponses, sendResponseError } from './responses.js';
+import { addTimeoutToAllResponses, createResponse, sendResponseError } from './responses.js';
 import { Input } from './types.js';
 import {
     addTimeMeasureEvent,
@@ -48,8 +48,9 @@ async function getSearch(request: IncomingMessage, response: ServerResponse) {
         const inputUrl = interpretAsUrl(input.query);
         input.query = inputUrl ?? input.query;
         // Create a request depending on whether the input is a URL or search query
+        const responseId = randomId();
         const req = inputUrl
-            ? createRequest({ url: input.query }, randomId(), null)
+            ? createRequest({ url: input.query }, responseId, null)
             : createSearchRequest(
                 input.query,
                 input.maxResults,
@@ -60,7 +61,8 @@ async function getSearch(request: IncomingMessage, response: ServerResponse) {
         if (inputUrl) {
             // If the input query is a URL, we don't need to run the search crawler
             log.info(`Skipping Google Search query as ${input.query} is a valid URL`);
-            await addPlaywrightCrawlRequest(req, req.uniqueKey!, playwrightCrawlerKey);
+            createResponse(responseId, response);
+            await addPlaywrightCrawlRequest(req, responseId, playwrightCrawlerKey);
         } else {
             await addSearchRequest(req, response, cheerioCrawlerOptions);
         }
