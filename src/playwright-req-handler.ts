@@ -9,7 +9,12 @@ import { addTimeMeasureEvent, transformTimeMeasuresToRelative } from './utils.js
 import { processHtml } from './website-content-crawler/html-processing.js';
 import { htmlToMarkdown } from './website-content-crawler/markdown.js';
 
-const ACTOR_TIMEOUT_AT = process.env.ACTOR_TIMEOUT_AT ? parseInt(process.env.ACTOR_TIMEOUT_AT, 10) : null;
+let ACTOR_TIMEOUT_AT: number | undefined;
+try {
+    ACTOR_TIMEOUT_AT = process.env.ACTOR_TIMEOUT_AT ? new Date(process.env.ACTOR_TIMEOUT_AT).getTime() : undefined;
+} catch (err) {
+    ACTOR_TIMEOUT_AT = undefined;
+}
 
 /**
  * Waits for the `time` to pass, but breaks early if the page is loaded (source: Website Content Crawler).
