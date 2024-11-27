@@ -40,7 +40,7 @@
             "maximum": 300,
             "default": 40,
             "unit": "seconds",
-            "hidden": true
+            "editor": "hidden"
         },
         "serpProxyGroup": {
             "title": "SERP proxy group",
