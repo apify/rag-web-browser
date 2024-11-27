@@ -113,7 +113,7 @@ export async function requestHandlerPlaywright(
 
     const result: Output = {
         crawl: {
-            httpStatusCode: page ? response?.status() : null,
+            httpStatusCode: page ? response?.status() : undefined,
             httpStatusMessage: 'OK',
             loadedAt: new Date(),
             uniqueKey: request.uniqueKey,
@@ -121,16 +121,16 @@ export async function requestHandlerPlaywright(
         },
         searchResult: request.userData.searchResult!,
         metadata: {
-            author: $('meta[name=author]').first().attr('content') ?? null,
+            author: $('meta[name=author]').first().attr('content') ?? undefined,
             title: $('title').first().text(),
-            description: $('meta[name=description]').first().attr('content') ?? null,
-            languageCode: $html.first().attr('lang') ?? null,
+            description: $('meta[name=description]').first().attr('content') ?? undefined,
+            languageCode: $html.first().attr('lang') ?? undefined,
             url: request.url,
         },
         query: request.userData.query,
-        text: settings.outputFormats.includes('text') ? text : null,
-        markdown: settings.outputFormats.includes('markdown') ? htmlToMarkdown(processedHtml) : null,
-        html: settings.outputFormats.includes('html') ? processedHtml : null,
+        text: settings.outputFormats.includes('text') ? text : undefined,
+        markdown: settings.outputFormats.includes('markdown') ? htmlToMarkdown(processedHtml) : undefined,
+        html: settings.outputFormats.includes('html') ? processedHtml : undefined,
     };
 
     addTimeMeasureEvent(request.userData, 'playwright-before-response-send');

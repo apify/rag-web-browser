@@ -11,7 +11,7 @@ export function parseParameters(url: string): ParsedUrlQuery {
 /**
  * Check whether the query parameters are valid (do not support extra parameters)
  */
-export function checkForExtraParams(params: ParsedUrlQuery) {
+export function checkAndRemoveExtraParams(params: ParsedUrlQuery) {
     const keys = Object.keys(defaults);
     keys.push('token', '?token'); // token is a special parameter
     for (const key of Object.keys(params)) {

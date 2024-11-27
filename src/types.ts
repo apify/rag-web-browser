@@ -30,6 +30,10 @@ export type Input = {
     removeCookieWarnings: boolean;
 };
 
+export type StandbyInput = Input & {
+    outputFormats: OutputFormats[] | string
+}
+
 export type OrganicResult = {
     description?: string;
     title?: string;

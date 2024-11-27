@@ -89,7 +89,7 @@ async function createAndStartSearchCrawler(
 
             addTimeMeasureEvent(request.userData!, 'before-playwright-queue-add');
             const responseId = request.uniqueKey;
-            let rank = 0;
+            let rank = 1;
             for (const result of results) {
                 result.rank = rank++;
                 const r = createRequest(result, responseId, request.userData.timeMeasures!);

@@ -10,7 +10,7 @@ import { addTimeoutToAllResponses, sendResponseError } from './responses.js';
 import { Input } from './types.js';
 import {
     addTimeMeasureEvent,
-    checkForExtraParams,
+    checkAndRemoveExtraParams,
     createRequest,
     createSearchRequest,
     interpretAsUrl,
@@ -31,7 +31,7 @@ async function getSearch(request: IncomingMessage, response: ServerResponse) {
         const requestReceivedTime = Date.now();
         const params = parseParameters(request.url?.slice(ROUTE_SEARCH.length, request.url.length) ?? '');
         log.info(`Received query parameters: ${JSON.stringify(params)}`);
-        checkForExtraParams(params);
+        checkAndRemoveExtraParams(params);
 
         // Process the query parameters the same way se normal inputs
         const {

@@ -4,13 +4,19 @@ import { firefox } from 'playwright';
 
 import { defaults } from './const.js';
 import { UserInputError } from './errors.js';
-import type { Input, PlaywrightScraperSettings, OutputFormats } from './types.js';
+import type { Input, PlaywrightScraperSettings, OutputFormats, StandbyInput } from './types.js';
 
 /**
  * Processes the input and returns the settings for the crawler (adapted from: Website Content Crawler).
  */
 
-export async function processInput(originalInput: Partial<Input>, standbyInit: boolean = false) {
+export async function processInput(
+    originalInput: Partial<Input> | Partial<StandbyInput>,
+    standbyInit: boolean = false,
+) {
+    if (originalInput.outputFormats && typeof originalInput.outputFormats === 'string') {
+        originalInput.outputFormats = originalInput.outputFormats.split(',').map((format) => format.trim()) as OutputFormats[];
+    }
     const input = { ...defaults, ...originalInput } as Input;
 
     validateAndFillInput(input, standbyInit);
@@ -24,7 +30,6 @@ export async function processInput(originalInput: Partial<Input>, standbyInit: b
         maxConcurrency,
         maxRequestRetries,
         serpMaxRetries,
-        outputFormats,
         proxyConfiguration,
         serpProxyGroup,
         readableTextCharThreshold,
@@ -70,7 +75,7 @@ export async function processInput(originalInput: Partial<Input>, standbyInit: b
         dynamicContentWaitSecs,
         htmlTransformer: 'none',
         maxHtmlCharsToProcess: 1.5e6,
-        outputFormats,
+        outputFormats: input.outputFormats as OutputFormats[],
         readableTextCharThreshold,
         removeCookieWarnings,
         removeElementsCssSelector: input.removeElementsCssSelector,
