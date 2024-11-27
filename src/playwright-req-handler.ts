@@ -36,8 +36,6 @@ export function hasTimeLeftToTimeout(time: number) {
     if (!ACTOR_TIMEOUT_AT) return true;
 
     const timeLeft = ACTOR_TIMEOUT_AT - Date.now();
-    log.debug(`Actor timeout at: ${process.env.ACTOR_TIMEOUT_AT}`);
-    log.debug(`Actor timeout: ${ACTOR_TIMEOUT_AT}, time left: ${timeLeft}, time needed: ${time}`);
     if (timeLeft > time) return true;
 
     log.debug('Not enough time left to wait for dynamic content. Skipping');
