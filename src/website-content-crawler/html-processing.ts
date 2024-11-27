@@ -15,7 +15,7 @@ export async function processHtml(
 ): Promise<string> {
     const $body = $('body').clone();
     if (settings.removeElementsCssSelector) {
-        $body.remove(settings.removeElementsCssSelector);
+        $body.find(settings.removeElementsCssSelector).remove();
     }
     const simplifiedBody = $body.html()?.trim();
 

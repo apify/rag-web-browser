@@ -78,7 +78,7 @@ export function createRequest(
         uniqueKey: randomId(),
         userData: {
             responseId,
-            searchResult: result,
+            searchResult: result.url && result.title ? result : undefined,
             timeMeasures: timeMeasures ? [...timeMeasures] : [],
         },
     };
