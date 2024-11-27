@@ -39,7 +39,8 @@
             "minimum": 1,
             "maximum": 300,
             "default": 40,
-            "unit": "seconds"
+            "unit": "seconds",
+            "hidden": true
         },
         "serpProxyGroup": {
             "title": "SERP proxy group",
