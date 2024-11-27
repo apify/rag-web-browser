@@ -76,7 +76,7 @@ export const sendResponseOk = (responseId: string, result: unknown, contentType:
 };
 
 /**
- * Check if all results have been handled.
+ * Check if all results have been handled. It is used to determine if the response can be sent.
  */
 const checkAllResultsHandled = (responseId: string) => {
     const res = getResponse(responseId);
@@ -88,6 +88,19 @@ const checkAllResultsHandled = (responseId: string) => {
         }
     }
     return true;
+};
+
+/**
+ * Sort results by rank.
+ */
+const sortResultsByRank = (res: ResponseData): Output[] => {
+    const resultsArray = Array.from(res.resultsMap.values());
+    resultsArray.sort((a, b) => {
+        const ra = a.searchResult.rank ?? Infinity;
+        const rb = b.searchResult.rank ?? Infinity;
+        return ra - rb;
+    });
+    return resultsArray;
 };
 
 /**
@@ -115,7 +128,7 @@ export const sendResponseError = (responseId: string, message: string) => {
     res.response.writeHead(returnStatusCode, { 'Content-Type': 'application/json' });
     if (returnStatusCode === 200) {
         log.warning(`Response for request ${responseId} has been sent with partial results`);
-        res.response.end(JSON.stringify(Array.from(res.resultsMap.values())));
+        res.response.end(JSON.stringify(sortResultsByRank(res)));
     } else {
         log.error(`Response for request ${responseId} has been sent with error: ${message}`);
         res.response.end(JSON.stringify({ errorMessage: message }));
@@ -131,7 +144,7 @@ export const sendResponseIfFinished = (responseId: string) => {
     if (!res) return;
 
     if (checkAllResultsHandled(responseId)) {
-        sendResponseOk(responseId, JSON.stringify(Array.from(res.resultsMap.values())), 'application/json');
+        sendResponseOk(responseId, JSON.stringify(sortResultsByRank(res)), 'application/json');
         responseData.delete(responseId);
     }
 };
