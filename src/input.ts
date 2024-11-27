@@ -68,10 +68,12 @@ export async function processInput(originalInput: Partial<Input>, standbyInit: b
     const playwrightScraperSettings: PlaywrightScraperSettings = {
         debugMode,
         dynamicContentWaitSecs,
+        htmlTransformer: 'none',
         maxHtmlCharsToProcess: 1.5e6,
         outputFormats,
         readableTextCharThreshold,
         removeCookieWarnings,
+        removeElementsCssSelector: input.removeElementsCssSelector,
     };
 
     return { input, cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings };

@@ -26,12 +26,14 @@ export type Input = {
     minConcurrency: number;
     proxyConfiguration: ProxyConfigurationOptions;
     readableTextCharThreshold: number;
+    removeElementsCssSelector: string;
     removeCookieWarnings: boolean;
 };
 
 export type OrganicResult = {
     description?: string;
     title?: string;
+    rank?: number;
     url?: string;
 };
 
@@ -72,10 +74,12 @@ export type UserData = {
 export interface PlaywrightScraperSettings {
     debugMode: boolean;
     dynamicContentWaitSecs: number;
+    htmlTransformer?: string
     maxHtmlCharsToProcess: number;
     outputFormats: OutputFormats[];
     readableTextCharThreshold: number;
     removeCookieWarnings?: boolean;
+    removeElementsCssSelector?: string;
 }
 
 export type Output = {

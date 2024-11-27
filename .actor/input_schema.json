@@ -71,6 +71,29 @@
             "editor": "proxy",
             "sectionCaption": "Target pages scraping settings"
         },
+        "removeElementsCssSelector": {
+            "title": "Remove HTML elements (CSS selector)",
+            "type": "string",
+            "description": "A CSS selector matching HTML elements that will be removed from the DOM, before converting it to text, Markdown, or saving as HTML. This is useful to skip irrelevant page content. The value must be a valid CSS selector as accepted by the `document.querySelectorAll()` function. \n\nBy default, the Actor removes common navigation elements, headers, footers, modals, scripts, and inline image. You can disable the removal by setting this value to some non-existent CSS selector like `dummy_keep_everything`.",
+            "editor": "textarea",
+            "default": "nav, footer, script, style, noscript, svg, img[src^='data:'],\n[role=\"alert\"],\n[role=\"banner\"],\n[role=\"dialog\"],\n[role=\"alertdialog\"],\n[role=\"region\"][aria-label*=\"skip\" i],\n[aria-modal=\"true\"]",
+            "prefill": "nav, footer, script, style, noscript, svg, img[src^='data:'],\n[role=\"alert\"],\n[role=\"banner\"],\n[role=\"dialog\"],\n[role=\"alertdialog\"],\n[role=\"region\"][aria-label*=\"skip\" i],\n[aria-modal=\"true\"]"
+        },
+        "htmlTransformer": {
+            "title": "HTML transformer",
+            "type": "string",
+            "enum": [
+                "readableText",
+                "none"
+            ],
+            "enumTitles": [
+                "Readable text",
+                "None"
+            ],
+            "description": "Specify how to transform the HTML to extract meaningful content without any extra fluff, like navigation or modals. The HTML transformation happens after removing and clicking the DOM elements.\n\n- **None** (default) - Only removes the HTML elements specified via 'Remove HTML elements' option.\n\n- **Readable text** - Extracts the main contents of the webpage, without navigation and other fluff.",
+            "default": "none",
+            "editor": "hidden"
+        },
         "initialConcurrency": {
             "title": "Initial browsing concurrency",
             "type": "integer",
