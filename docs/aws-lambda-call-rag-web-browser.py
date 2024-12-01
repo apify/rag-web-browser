@@ -13,6 +13,7 @@ import urllib.request
 ACTOR_BASE_URL = "https://rag-web-browser.apify.actor"  # Base URL from OpenAPI schema
 MAX_RESULTS = 3  # Limit the number of results to decrease response size, limit 25KB
 TRUNCATE_TEXT_LENGTH = 5000  # Truncate the response body to decrease the response size, limit 25KB
+OUTPUT_FORMATS = "markdown"  # Default output format
 
 # Lambda function environment variable
 APIFY_API_TOKEN = os.getenv("APIFY_API_TOKEN")
@@ -37,7 +38,11 @@ def lambda_handler(event, context):
     # Limit the number of results to decrease response size
     # Getting: lambda response exceeds maximum size 25KB: 66945
     print("Query params: ", query_params)
-    query_params["maxResults"] = min(3, int(query_params.get("maxResults", 3)))
+    query_params["maxResults"] = min(MAX_RESULTS, int(query_params.get("maxResults", MAX_RESULTS)))
+
+    # Always return Markdown format
+    query_params["outputFormats"] = query_params.get("outputFormats", OUTPUT_FORMATS) + f",{OUTPUT_FORMATS}"
+    query_params["outputFormats"] = ",".join(set(query_params["outputFormats"].split(",")))
     print("Limited max results to: ", query_params["maxResults"])
 
     try:
@@ -47,13 +52,16 @@ def lambda_handler(event, context):
             req = urllib.request.Request(url, headers=headers, method="GET")
             with urllib.request.urlopen(req) as response:
                 response_body = response.read().decode("utf-8")
+                print("Received response from RAG Web Browser", response_body)
 
         else:
             return {"statusCode": 400, "body": json.dumps({"message": f"HTTP method {http_method} not supported"})}
 
         response = json.loads(response_body)
+
         # Truncate the response body to decrease the response size, there is a limit of 25KB
-        body = [d["text"][:TRUNCATE_TEXT_LENGTH] + "..." for d in response]
+        print("Truncating the response body")
+        body = [d.get("markdown", "")[:TRUNCATE_TEXT_LENGTH] + "..." for d in response]
 
         # Handle the API response
         action_response = {
@@ -70,6 +78,7 @@ def lambda_handler(event, context):
         return dummy_api_response
 
     except Exception as e:
+        print("Error occurred", e)
         return {"statusCode": 500, "body": json.dumps({"message": "Internal server error", "error": str(e)})}
 
 
@@ -88,4 +97,3 @@ if __name__ == "__main__":
         "messageVersion": "1.0",
     }
     handler_response = lambda_handler(test_event, None)
-    print("Response: ", handler_response)
