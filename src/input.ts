@@ -91,15 +91,18 @@ export async function processInput(
  */
 export function validateAndFillInput(input: Input, standbyInit: boolean) {
     const validateRange = (
-        value: number | undefined,
+        value: number | string | undefined,
         min: number,
         max: number,
         defaultValue: number,
         fieldName: string,
     ) => {
+        // parse the value as a number to check if it's a valid number
         if (value === undefined) {
             log.warning(`The \`${fieldName}\` parameter must be defined. Using the default value ${defaultValue} instead.`);
             return defaultValue;
+        } if (typeof value === 'string') {
+            value = Number(value);
         } if (value < min) {
             log.warning(`The \`${fieldName}\` parameter must be at least ${min}, but was ${fieldName}. Using ${min} instead.`);
             return min;
