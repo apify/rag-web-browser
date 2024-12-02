@@ -1,5 +1,5 @@
 {
-    "openapi": "3.1.0",
+    "openapi": "3.0.0",
     "info": {
         "title": "RAG Web Browser",
         "description": "Web browser for OpenAI Assistants API and RAG pipelines, similar to a web browser in ChatGPT. It queries Google Search, scrapes the top N pages from the results, and returns their cleaned content as Markdown for further processing by an LLM.",
@@ -15,12 +15,13 @@
             "get": {
                 "operationId": "apify_rag-web-browser",
                 "x-openai-isConsequential": false,
-                "summary": "Web browser for OpenAI Assistants API and RAG pipelines, similar to a web browser in ChatGPT. It queries Google Search, scrapes the top N pages from the results, and returns their cleaned content as Markdown for further processing.",
+                "description": "Web browser for OpenAI Assistants API and RAG pipelines, similar to a web browser in ChatGPT. It queries Google Search, scrapes the top N pages from the results, and returns their cleaned content as Markdown for further processing by an LLM.",
+                "summary": "Web browser for OpenAI Assistants API and RAG pipelines, similar to a web browser in ChatGPT. It queries Google Search, scrapes the top N pages from the results, and returns their cleaned content as Markdown for further processing by an LLM.",
                 "parameters": [
                     {
                         "name": "query",
                         "in": "query",
-                        "description": "Enter Google Search keywords or a URL to a specific web page. The keywords might include the Google's advanced search operators, e.g. site:example.com",
+                        "description": "Enter Google Search keywords or a URL of a specific web page. The keywords might include the [advanced search operators](https://blog.apify.com/how-to-scrape-google-like-a-pro/). Examples:\n\n- <code>san francisco weather</code>\n- <code>https://www.cnn.com</code>\n- <code>function calling site:openai.com</code>",
                         "required": true,
                         "schema": {
                             "type": "string",
@@ -30,7 +31,7 @@
                     {
                         "name": "maxResults",
                         "in": "query",
-                        "description": "The maximum number of top organic Google Search results whose web pages will be extracted. If `query` is a URL, then this parameter is ignored and the Actor only fetches the specific web page.",
+                        "description": "The maximum number of top organic Google Search results whose web pages will be extracted. If `query` is a URL, then this field is ignored and the Actor only fetches the specific web page.",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -41,7 +42,7 @@
                     {
                         "name": "outputFormats",
                         "in": "query",
-                        "description": "Select the desired output formats for the retrieved content",
+                        "description": "Select one or more formats to which the target web pages will be extracted and saved in the resulting dataset.",
                         "required": false,
                         "schema": {
                             "type": "array",
@@ -54,7 +55,7 @@
                                 ]
                             },
                             "default": [
-                                "text"
+                                "markdown"
                             ]
                         },
                         "style": "form",
@@ -63,19 +64,19 @@
                     {
                         "name": "requestTimeoutSecs",
                         "in": "query",
-                        "description": "The maximum time (in seconds) allowed for request. If the request exceeds this time, it will be marked as failed and only already finished results will be returned",
+                        "description": "The maximum time in seconds available for the request, including querying Google Search and scraping the target web pages. For example, OpenAI allows only [45 seconds](https://platform.openai.com/docs/actions/production#timeouts) for custom actions. If a target page loading and extraction exceeds this timeout, the corresponding page will be skipped in results to ensure at least some results are returned within the timeout. If no page is extracted within the timeout, the whole request fails.",
                         "required": false,
                         "schema": {
                             "type": "integer",
                             "minimum": 1,
                             "maximum": 600,
-                            "default": 45
+                            "default": 40
                         }
                     },
                     {
                         "name": "serpProxyGroup",
                         "in": "query",
-                        "description": "Proxy group for loading search results.",
+                        "description": "Enables overriding the default Apify Proxy group used for fetching Google Search results.",
                         "required": false,
                         "schema": {
                             "type": "string",
@@ -89,7 +90,7 @@
                     {
                         "name": "serpMaxRetries",
                         "in": "query",
-                        "description": "Maximum retries for Google search requests on errors.",
+                        "description": "The maximum number of times the Actor will retry fetching the Google Search results on error. If the last attempt fails, the entire request fails.",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -99,9 +100,19 @@
                         }
                     },
                     {
+                        "name": "removeElementsCssSelector",
+                        "in": "query",
+                        "required": false,
+                        "description": "A CSS selector matching HTML elements that will be removed from the DOM, before converting it to text, Markdown, or saving as HTML. This is useful to skip irrelevant page content. The value must be a valid CSS selector as accepted by the `document.querySelectorAll()` function. \n\nBy default, the Actor removes common navigation elements, headers, footers, modals, scripts, and inline image. You can disable the removal by setting this value to some non-existent CSS selector like `dummy_keep_everything`.",
+                        "schema": {
+                            "type": "string",
+                            "default": "nav, footer, script, style, noscript, svg, img[src^='data:'],\n[role=\"alert\"],\n[role=\"banner\"],\n[role=\"dialog\"],\n[role=\"alertdialog\"],\n[role=\"region\"][aria-label*=\"skip\" i],\n[aria-modal=\"true\"]"
+                        }
+                    },
+                    {
                         "name": "maxRequestRetries",
                         "in": "query",
-                        "description": "Maximum retries for Playwright content crawler.",
+                        "description": "The maximum number of times the Actor will retry loading the target web page on error. If the last attempt fails, the page will be skipped in the results.",
                         "required": false,
                         "schema": {
                             "type": "integer",
