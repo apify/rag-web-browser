@@ -3,7 +3,7 @@
     "name": "rag-web-browser",
     "title": "RAG Web browser",
     "description": "Web browser for OpenAI Assistants API and RAG pipelines, similar to a web browser in ChatGPT. It queries Google Search, scrapes the top N pages from the results, and returns their cleaned content as Markdown for further processing by an LLM.",
-    "version": "0.1",
+    "version": "1.0",
     "input": "./input_schema.json",
     "dockerfile": "./Dockerfile",
     "storages": {

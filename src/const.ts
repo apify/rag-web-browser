@@ -11,6 +11,7 @@ export const PLAYWRIGHT_REQUEST_TIMEOUT_NORMAL_MODE_SECS = 60;
 export const defaults = {
     debugMode: false,
     dynamicContentWaitSecs: 10,
+    htmlTransformer: 'none',
     initialConcurrency: 5,
     keepAlive: true,
     maxConcurrency: 10,
@@ -24,6 +25,7 @@ export const defaults = {
     query: null,
     readableTextCharThreshold: 100,
     removeCookieWarnings: true,
+    removeElementsCssSelector: "nav, footer, script, style, noscript, svg, img[src^='data:'],\n[role=\"alert\"],\n[role=\"banner\"],\n[role=\"dialog\"],\n[role=\"alertdialog\"],\n[role=\"region\"][aria-label*=\"skip\" i],\n[aria-modal=\"true\"]",
     requestTimeoutSecs: 40,
     requestTimeoutSecsMax: 300,
     serpMaxRetries: 2,

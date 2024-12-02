@@ -14,7 +14,9 @@ export async function processHtml(
     $: CheerioAPI,
 ): Promise<string> {
     const $body = $('body').clone();
-
+    if (settings.removeElementsCssSelector) {
+        $body.find(settings.removeElementsCssSelector).remove();
+    }
     const simplifiedBody = $body.html()?.trim();
 
     const simplified = typeof simplifiedBody === 'string'
@@ -31,10 +33,12 @@ export async function processHtml(
         : (html ?? '');
 
     let ret = null;
-    try {
-        ret = await readableText({ html: simplified, url, settings, options: { fallbackToNone: false } });
-    } catch (error) {
-        log.warning(`Processing of HTML failed with error:`, { error });
+    if (settings.htmlTransformer === 'readableText') {
+        try {
+            ret = await readableText({ html: simplified, url, settings, options: { fallbackToNone: false } });
+        } catch (error) {
+            log.warning(`Processing of HTML failed with error:`, { error });
+        }
     }
     return ret ?? (simplified as string);
 }

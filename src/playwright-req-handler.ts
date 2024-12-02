@@ -9,7 +9,12 @@ import { addTimeMeasureEvent, transformTimeMeasuresToRelative } from './utils.js
 import { processHtml } from './website-content-crawler/html-processing.js';
 import { htmlToMarkdown } from './website-content-crawler/markdown.js';
 
-const ACTOR_TIMEOUT_AT = process.env.ACTOR_TIMEOUT_AT ? parseInt(process.env.ACTOR_TIMEOUT_AT, 10) : null;
+let ACTOR_TIMEOUT_AT: number | undefined;
+try {
+    ACTOR_TIMEOUT_AT = process.env.ACTOR_TIMEOUT_AT ? new Date(process.env.ACTOR_TIMEOUT_AT).getTime() : undefined;
+} catch (err) {
+    ACTOR_TIMEOUT_AT = undefined;
+}
 
 /**
  * Waits for the `time` to pass, but breaks early if the page is loaded (source: Website Content Crawler).
@@ -113,7 +118,7 @@ export async function requestHandlerPlaywright(
 
     const result: Output = {
         crawl: {
-            httpStatusCode: page ? response?.status() : null,
+            httpStatusCode: page ? response?.status() : undefined,
             httpStatusMessage: 'OK',
             loadedAt: new Date(),
             uniqueKey: request.uniqueKey,
@@ -121,16 +126,16 @@ export async function requestHandlerPlaywright(
         },
         searchResult: request.userData.searchResult!,
         metadata: {
-            author: $('meta[name=author]').first().attr('content') ?? null,
+            author: $('meta[name=author]').first().attr('content') ?? undefined,
             title: $('title').first().text(),
-            description: $('meta[name=description]').first().attr('content') ?? null,
-            languageCode: $html.first().attr('lang') ?? null,
+            description: $('meta[name=description]').first().attr('content') ?? undefined,
+            languageCode: $html.first().attr('lang') ?? undefined,
             url: request.url,
         },
         query: request.userData.query,
-        text: settings.outputFormats.includes('text') ? text : null,
-        markdown: settings.outputFormats.includes('markdown') ? htmlToMarkdown(processedHtml) : null,
-        html: settings.outputFormats.includes('html') ? processedHtml : null,
+        text: settings.outputFormats.includes('text') ? text : undefined,
+        markdown: settings.outputFormats.includes('markdown') ? htmlToMarkdown(processedHtml) : undefined,
+        html: settings.outputFormats.includes('html') ? processedHtml : undefined,
     };
 
     addTimeMeasureEvent(request.userData, 'playwright-before-response-send');

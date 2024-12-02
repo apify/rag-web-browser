@@ -56,7 +56,6 @@ the web page content directly like this:
         "httpStatusMessage": "OK",
         "loadedAt": "2024-11-21T14:04:28.090Z"
     },
-    "searchResult": null,
     "metadata": {
         "url": "https://openai.com/index/introducing-chatgpt-search/",
         "title": "Introducing ChatGPT search | OpenAI",
