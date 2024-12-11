@@ -162,7 +162,7 @@ For example, in Claude Desktop, you can configure the MCP server in its settings
 
 Alternatively, you can develop a custom MCP client to interact with the RAG Web Browser Actor.
 
-To learn more about MCP server integration, check out the [MCP server documentation](https://github.com/apify/mcp-server-rag-web-browser).
+To learn more about MCP server integration, check out the [RAG Web Browser MCP server documentation](https://github.com/apify/mcp-server-rag-web-browser).
 
 ## ⏳ Performance optimization
 
