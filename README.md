@@ -159,7 +159,9 @@ Learn more about [adding custom actions to your GPTs with Apify Actors](https://
 
 The RAG Web Browser Actor can also be used as an [MCP server](https://github.com/modelcontextprotocol) and integrated with AI applications and agents, such as Claude Desktop.
 For example, in Claude Desktop, you can configure the MCP server in its settings to perform web searches and extract content.
+
 Alternatively, you can develop a custom MCP client to interact with the RAG Web Browser Actor.
+
 To learn more about MCP server integration, check out the [MCP server documentation](https://github.com/apify/mcp-server-rag-web-browser).
 
 ## ⏳ Performance optimization
