@@ -42,16 +42,17 @@ export async function createAndStartCrawlers(
     playwrightScraperSettings: PlaywrightScraperSettings,
     startCrawlers: boolean = true,
 ) {
-    const crawler1 = await createAndStartSearchCrawler(
+    const searchCrawler = await createAndStartSearchCrawler(
         cheerioCrawlerOptions,
         startCrawlers,
     );
-    const crawler2 = await createAndStartCrawlerPlaywright(
+    const playwrightCrawler = await createAndStartCrawlerPlaywright(
         playwrightCrawlerOptions,
         playwrightScraperSettings,
         startCrawlers,
     );
-    return [crawler1, crawler2];
+    const playwrightCrawlerKey = getPlaywrightCrawlerKey(playwrightCrawlerOptions, playwrightScraperSettings);
+    return { playwrightCrawlerKey, searchCrawler, playwrightCrawler };
 }
 
 /**
