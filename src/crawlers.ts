@@ -35,6 +35,7 @@ export function getPlaywrightCrawlerKey(
 
 /**
  * Creates and starts a Google search crawler and Playwright content crawler with the provided configurations.
+ * A crawler won't be created if it already exists.
  */
 export async function createAndStartCrawlers(
     cheerioCrawlerOptions: CheerioCrawlerOptions,
@@ -57,6 +58,7 @@ export async function createAndStartCrawlers(
 
 /**
  * Creates and starts a Google search crawler with the provided configuration.
+ * A crawler won't be created if it already exists.
  */
 async function createAndStartSearchCrawler(
     cheerioCrawlerOptions: CheerioCrawlerOptions,
@@ -116,6 +118,10 @@ async function createAndStartSearchCrawler(
     return crawler;
 }
 
+/**
+ * Creates and starts a Playwright content crawler with the provided configuration.
+ * A crawler won't be created if it already exists.
+ */
 async function createAndStartCrawlerPlaywright(
     crawlerOptions: PlaywrightCrawlerOptions,
     settings: PlaywrightScraperSettings,
