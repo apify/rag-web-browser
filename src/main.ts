@@ -55,10 +55,11 @@ log.info(`Loaded input: ${JSON.stringify(input)},
 if (standbyMode) {
     log.info('Actor is running in the STANDBY mode.');
 
+    const host = Actor.isAtHome() ? process.env.ACTOR_STANDBY_URL : 'http://localhost';
     const port = Actor.isAtHome() ? process.env.ACTOR_STANDBY_PORT : 3000;
     server.listen(port, async () => {
         // Pre-create default crawlers
-        log.info(`The Actor web server is listening for user requests at ${process.env.ACTOR_STANDBY_URL}.`);
+        log.info(`The Actor web server is listening for user requests at ${host}.`);
         await createAndStartCrawlers(cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings);
     });
 } else {
