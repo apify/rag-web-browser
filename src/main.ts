@@ -22,7 +22,7 @@ const app = express();
 const mcpServer = new RagWebBrowserServer();
 let transport: SSEServerTransport;
 
-const HELP_MESSAGE = ` Send a GET request to ${process.env.ACTOR_STANDBY_URL}/search?query=hello+world`
+const HELP_MESSAGE = `Send a GET request to ${process.env.ACTOR_STANDBY_URL}/search?query=hello+world`
         + ` or to ${process.env.ACTOR_STANDBY_URL}/messages to use Model context protocol.`;
 
 app.get('/', async (req, res) => {
@@ -54,7 +54,7 @@ app.post(Routes.MESSAGE, async (req: Request, res: Response) => {
 
 // Catch-all for undefined routes
 app.use((req, res) => {
-    res.status(404).json({ message: `The is nothing at route ${req.method} ${req.originalUrl}.` + HELP_MESSAGE });
+    res.status(404).json({ message: `The is nothing at route ${req.method} ${req.originalUrl}. ${HELP_MESSAGE}` });
 });
 
 const standbyMode = Actor.getEnv().metaOrigin === 'STANDBY';
