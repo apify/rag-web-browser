@@ -15,3 +15,4 @@ node_modules
 # data
 data
 src/storage
+dist

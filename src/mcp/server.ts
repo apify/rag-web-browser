@@ -8,7 +8,7 @@ import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import type { Transport } from '@modelcontextprotocol/sdk/shared/transport.js';
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 
-import inputSchema from '../../.actor/input_schema.json' assert { type: 'json' };
+import inputSchema from '../../.actor/input_schema.json' with { type: 'json' };
 import { handleModelContextProtocol } from '../search.js';
 import { Input } from '../types.js';
 

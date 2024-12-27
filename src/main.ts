@@ -6,7 +6,7 @@ import express, { Request, Response } from 'express';
 import { Routes } from './const.js';
 import { createAndStartCrawlers } from './crawlers.js';
 import { processInput } from './input.js';
-import { RagWebBrowserServer } from './mcp/server';
+import { RagWebBrowserServer } from './mcp/server.js';
 import { addTimeoutToAllResponses } from './responses.js';
 import { handleSearchRequest, handleSearchNormalMode } from './search.js';
 import { Input } from './types.js';
