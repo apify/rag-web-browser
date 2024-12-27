@@ -277,3 +277,9 @@ And then you can run it locally using [Apify CLI](https://docs.apify.com/cli) as
 ```bash
 APIFY_META_ORIGIN=STANDBY apify run -p
 ```
+
+Server will start on `http://localhost:3000` and you can send requests to it, for example:
+
+```bash
+curl "http://localhost:3000/search?query=example.com"
+```

@@ -43,6 +43,7 @@ export function randomId() {
  */
 export function createSearchRequest(
     query: string,
+    responseId: string,
     maxResults: number,
     playwrightCrawlerKey: string,
     proxyConfiguration: ProxyConfiguration | undefined,
@@ -58,7 +59,7 @@ export function createSearchRequest(
     return {
         url: urlSearch,
         uniqueKey: randomId(),
-        userData: { maxResults, timeMeasures: [], query, playwrightCrawlerKey },
+        userData: { maxResults, timeMeasures: [], query, playwrightCrawlerKey, responseId },
     };
 }
 
@@ -71,7 +72,7 @@ export function createSearchRequest(
 export function createRequest(
     result: OrganicResult,
     responseId: string,
-    timeMeasures: TimeMeasure[] | null,
+    timeMeasures: TimeMeasure[] | null = null,
 ): RequestOptions<UserData> {
     return {
         url: result.url!,

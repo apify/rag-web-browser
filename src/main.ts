@@ -1,10 +1,12 @@
+import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import { Actor } from 'apify';
 import { log } from 'crawlee';
-import { createServer } from 'http';
+import express, { Request, Response } from 'express';
 
 import { Routes } from './const.js';
 import { createAndStartCrawlers } from './crawlers.js';
 import { processInput } from './input.js';
+import { RagWebBrowserServer } from './mcp/server';
 import { addTimeoutToAllResponses } from './responses.js';
 import { handleSearchRequest, handleSearchNormalMode } from './search.js';
 import { Input } from './types.js';
@@ -15,29 +17,40 @@ Actor.on('migrating', () => {
     addTimeoutToAllResponses(60);
 });
 
-const server = createServer(async (req, res) => {
-    log.info(`Request received: ${req.method} ${req.url}`);
+const app = express();
 
-    if (req.url?.startsWith(Routes.SEARCH)) {
-        if (req.method === 'GET') {
-            await handleSearchRequest(req, res);
-        } else if (req.method === 'HEAD') {
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end();
-        } else {
-            res.writeHead(400, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ errorMessage: 'Bad request' }));
-        }
-    } else if (req.url?.startsWith(Routes.SSE)) {
-        log.debug('SSE request received');
-    } else {
-        res.writeHead(404, { 'Content-Type': 'application/json' });
-        res.end(
-            JSON.stringify({
-                message: `There is nothing at this HTTP endpoint. Send a GET request to ${process.env.ACTOR_STANDBY_URL}/search?query=hello+world instead`,
-            }),
-        );
-    }
+const mcpServer = new RagWebBrowserServer();
+let transport: SSEServerTransport;
+
+app.get(Routes.SEARCH, async (req: Request, res: Response) => {
+    log.info(`Received GET message at: ${req.url}`);
+    await handleSearchRequest(req, res);
+});
+
+app.head(Routes.SEARCH, async (req: Request, res: Response) => {
+    log.info(`Received HEAD message at: ${req.url}`);
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end();
+});
+
+app.get(Routes.SSE, async (req: Request, res: Response) => {
+    log.info(`Received GET message at: ${req.url}`);
+    transport = new SSEServerTransport(Routes.MESSAGE, res);
+    await mcpServer.connect(transport);
+});
+
+app.post(Routes.MESSAGE, async (req: Request, res: Response) => {
+    log.info(`Received POST message at: ${req.url}`);
+    await transport.handlePostMessage(req, res);
+});
+
+// Catch-all for undefined routes
+app.use((req, res) => {
+    res.status(404).json({
+        message: `The is nothing at route ${req.method} ${req.originalUrl}.`
+            + ` Send a GET request to ${process.env.ACTOR_STANDBY_URL}/search?query=hello+world`
+            + ` or to ${process.env.ACTOR_STANDBY_URL}/messages to use Model context protocol.`,
+    });
 });
 
 const standbyMode = Actor.getEnv().metaOrigin === 'STANDBY';
@@ -57,7 +70,7 @@ if (standbyMode) {
 
     const host = Actor.isAtHome() ? process.env.ACTOR_STANDBY_URL : 'http://localhost';
     const port = Actor.isAtHome() ? process.env.ACTOR_STANDBY_PORT : 3000;
-    server.listen(port, async () => {
+    app.listen(port, async () => {
         // Pre-create default crawlers
         log.info(`The Actor web server is listening for user requests at ${host}.`);
         await createAndStartCrawlers(cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings);

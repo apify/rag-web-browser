@@ -1,19 +1,15 @@
 import { log } from 'apify';
 import { RequestOptions } from 'crawlee';
-import { ServerResponse } from 'http';
 
 import { ContentCrawlerStatus } from './const.js';
 import { Output, UserData } from './types.js';
 
-class ResponseData {
-    response: ServerResponse;
+type ResponseData = {
     resultsMap: Map<string, Output>;
-
-    constructor(response: ServerResponse) {
-        this.response = response;
-        this.resultsMap = new Map<string, Output>();
-    }
-}
+    resolve: (value: Output[]) => void;
+    reject: (reason?: unknown) => void;
+    timeoutId?: NodeJS.Timeout;
+};
 
 const responseData = new Map<string, ResponseData>();
 
@@ -28,18 +24,31 @@ const getResponse = (responseId: string): ResponseData | null => {
 };
 
 /**
- * Create a response object for a search request
+ * Create a response promise
  * (for content crawler requests there is no need to create a response object).
  */
-export const createResponse = (responseId: string, response: ServerResponse) => {
-    responseData.set(responseId, new ResponseData(response));
-};
+export function createResponsePromise(responseId: string, timeoutSecs: number): Promise<Output[]> {
+    log.info(`Created responsePromise for response ID: ${responseId}`);
+    return new Promise<Output[]>((resolve, reject) => {
+        const data: ResponseData = {
+            resultsMap: new Map<string, Output>(),
+            resolve,
+            reject,
+        };
+        responseData.set(responseId, data);
+
+        // Set a timeout to reject the promise if it takes too long
+        data.timeoutId = setTimeout(() => {
+            sendResponseError(responseId, 'Timed out');
+        }, timeoutSecs * 1000);
+    });
+}
 
 /**
  * Add empty result to response object when the content crawler request is created.
  * This is needed to keep track of all results and to know that all results have been handled.
  */
-export const addEmptyResultToResponse = (responseId: string, request: RequestOptions<UserData>) => {
+export function addEmptyResultToResponse(responseId: string, request: RequestOptions<UserData>) {
     const res = getResponse(responseId);
     if (!res) return;
 
@@ -49,51 +58,58 @@ export const addEmptyResultToResponse = (responseId: string, request: RequestOpt
         crawl: { createdAt: new Date(), requestStatus: ContentCrawlerStatus.PENDING, uniqueKey: request.uniqueKey! },
     };
     res.resultsMap.set(request.uniqueKey!, result as Output);
-};
+}
 
-export const addResultToResponse = (responseId: string, uniqueKey: string, result: Output) => {
+export function addResultToResponse(responseId: string, uniqueKey: string, result: Output) {
     const res = getResponse(responseId);
     if (!res) return;
 
-    if (!res.resultsMap.get(uniqueKey)) {
-        log.info(
-            `Result for request ${result.metadata.url} (key: ${uniqueKey}) were not found in response ${responseId}`,
-        );
+    const existing = res.resultsMap.get(uniqueKey);
+    if (!existing) {
+        log.info(`Result for request ${result.metadata.url} (key: ${uniqueKey}) not found in response ${responseId}`);
         return;
     }
-    res.resultsMap.set(uniqueKey, { ...res.resultsMap.get(uniqueKey), ...result });
-    log.info(`Updated request ${responseId} with result.`);
-};
+    res.resultsMap.set(uniqueKey, { ...existing, ...result });
+    log.info(`Updated response ${responseId} with a result from ${result.metadata.url}`);
+}
 
-export const sendResponseOk = (responseId: string, result: unknown, contentType: string) => {
+export function sendResponseOk(responseId: string, result: string | Output[]) {
     const res = getResponse(responseId);
     if (!res) return;
 
-    res.response.writeHead(200, { 'Content-Type': contentType });
-    res.response.end(result);
-    log.info(`Response for request ${responseId} has been sent`);
+    if (res.timeoutId) clearTimeout(res.timeoutId);
+
+    let parsedResults: Output[];
+    if (typeof result === 'string') {
+        parsedResults = JSON.parse(result) as Output[];
+    } else {
+        parsedResults = result as Output[];
+    }
+
+    res.resolve(parsedResults);
+    log.info(`Response ${responseId} resolved successfully with ${parsedResults.length} results.`);
     responseData.delete(responseId);
-};
+}
 
 /**
  * Check if all results have been handled. It is used to determine if the response can be sent.
  */
-const checkAllResultsHandled = (responseId: string) => {
+function checkAllResultsHandled(responseId: string): boolean {
     const res = getResponse(responseId);
-    if (!res) return;
+    if (!res) return false;
 
-    for (const key of res.resultsMap.keys()) {
-        if (res.resultsMap.get(key)!.crawl.requestStatus === ContentCrawlerStatus.PENDING) {
+    for (const value of res.resultsMap.values()) {
+        if (value.crawl.requestStatus === ContentCrawlerStatus.PENDING) {
             return false;
         }
     }
     return true;
-};
+}
 
 /**
  * Sort results by rank.
  */
-const sortResultsByRank = (res: ResponseData): Output[] => {
+function sortResultsByRank(res: ResponseData): Output[] {
     const resultsArray = Array.from(res.resultsMap.values());
     resultsArray.sort((a, b) => {
         const ra = a.searchResult.rank ?? Infinity;
@@ -101,53 +117,52 @@ const sortResultsByRank = (res: ResponseData): Output[] => {
         return ra - rb;
     });
     return resultsArray;
-};
+}
 
 /**
  * Send response with error status code. If the response contains some handled requests,
  * return 200 status otherwise 500.
  */
-export const sendResponseError = (responseId: string, message: string) => {
+export function sendResponseError(responseId: string, message: string) {
     const res = getResponse(responseId);
     if (!res) return;
 
-    let returnStatusCode = 500;
-    for (const key of res.resultsMap.keys()) {
-        const { requestStatus } = res.resultsMap.get(key)!.crawl;
-        if (requestStatus === ContentCrawlerStatus.PENDING) {
-            const r = res.resultsMap.get(key)!;
-            r.crawl.httpStatusCode = 500;
-            r.crawl.httpStatusMessage = message;
-            r.crawl.requestStatus = ContentCrawlerStatus.FAILED;
-            r.metadata.title = '';
-            r.text = '';
-        } else if (requestStatus === ContentCrawlerStatus.HANDLED) {
-            returnStatusCode = 200;
+    if (res.timeoutId) clearTimeout(res.timeoutId);
+
+    let returnStatus = 500;
+    for (const [key, val] of res.resultsMap) {
+        if (val.crawl.requestStatus === ContentCrawlerStatus.PENDING) {
+            val.crawl.httpStatusCode = 500;
+            val.crawl.httpStatusMessage = message;
+            val.crawl.requestStatus = ContentCrawlerStatus.FAILED;
+            val.metadata.title = '';
+            val.text = '';
+        } else if (val.crawl.requestStatus === ContentCrawlerStatus.HANDLED) {
+            returnStatus = 200;
         }
+        res.resultsMap.set(key, val);
     }
-    res.response.writeHead(returnStatusCode, { 'Content-Type': 'application/json' });
-    if (returnStatusCode === 200) {
+    if (returnStatus === 200) {
         log.warning(`Response for request ${responseId} has been sent with partial results`);
-        res.response.end(JSON.stringify(sortResultsByRank(res)));
+        res.resolve(sortResultsByRank(res));
     } else {
         log.error(`Response for request ${responseId} has been sent with error: ${message}`);
-        res.response.end(JSON.stringify({ errorMessage: message }));
+        res.reject(new Error(message));
     }
     responseData.delete(responseId);
-};
+}
 
 /**
  * Send response if all results have been handled or failed.
  */
-export const sendResponseIfFinished = (responseId: string) => {
+export function sendResponseIfFinished(responseId: string) {
     const res = getResponse(responseId);
     if (!res) return;
 
     if (checkAllResultsHandled(responseId)) {
-        sendResponseOk(responseId, JSON.stringify(sortResultsByRank(res)), 'application/json');
-        responseData.delete(responseId);
+        sendResponseOk(responseId, sortResultsByRank(res));
     }
-};
+}
 /**
  * Add timeout to all responses when actor is migrating (source: SuperScraper).
  */
