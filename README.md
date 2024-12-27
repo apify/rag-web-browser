@@ -159,8 +159,45 @@ Learn more about [adding custom actions to your GPTs with Apify Actors](https://
 
 The RAG Web Browser Actor can also be used as an [MCP server](https://github.com/modelcontextprotocol) and integrated with AI applications and agents, such as Claude Desktop.
 For example, in Claude Desktop, you can configure the MCP server in its settings to perform web searches and extract content.
-
 Alternatively, you can develop a custom MCP client to interact with the RAG Web Browser Actor.
+
+In the Standby mode, the Actor runs an HTTP server that supports the MCP protocol via SSE (Server-Sent Events).
+
+1. Initiate SSE connection:
+```shell
+https://rag-web-browser.apify.actor/sse?token=<APIFY_API_TOKEN>
+```
+On connection, you’ll receive a `sessionId`:
+```shell
+event: endpoint
+data: /message?sessionId=5b2
+```
+
+1. Send a message to the server by making a POST request with the `sessionId`, `APIFY-API-TOKEN` and your query:
+```shell
+curl -X POST "https://rag-web-browser.apify.actor/message?session_id=5b2&token=<APIFY-API-TOKEN>" -H "Content-Type: application/json" -d '{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "arguments": { "query": "recent news about LLMs", "maxResults": 1 },
+    "name": "rag-web-browser"
+  }
+}'
+```
+
+For the POST request, the server will respond with:
+
+```text
+Accepted
+```
+
+The server will then invoke `Actor` and its tool using the provided query and stream the response back to the client via SSE:
+
+```text
+event: message
+data: {"result":{"content":[{"type":"text","text":"[{\"searchResult\":{\"title\":\"Language models recent news\",\"description\":\"Amazon Launches New Generation of LLM Foundation Model...\"}}
+```
 
 To learn more about MCP server integration, check out the [RAG Web Browser MCP server documentation](https://github.com/apify/mcp-server-rag-web-browser).
 
