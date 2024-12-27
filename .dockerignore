@@ -5,7 +5,6 @@
 apify_storage
 crawlee_storage
 storage
-dist
 
 # installed files
 node_modules
