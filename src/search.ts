@@ -6,7 +6,7 @@ import { addPlaywrightCrawlRequest, addSearchRequest, createAndStartCrawlers } f
 import { UserInputError } from './errors.js';
 import { processInput } from './input.js';
 import { createResponsePromise } from './responses.js';
-import { Input, PlaywrightScraperSettings } from './types.js';
+import { Input, Output, PlaywrightScraperSettings } from './types.js';
 import {
     addTimeMeasureEvent,
     checkAndRemoveExtraParams,
@@ -53,7 +53,7 @@ function prepareRequest(
  * Internal function that handles the common logic for search.
  * Returns a promise that resolves to the final results array of Output objects.
  */
-async function runSearchProcess(params: Partial<Input>): Promise<unknown> {
+async function runSearchProcess(params: Partial<Input>): Promise<Output[]> {
     // Process the query parameters the same way as normal inputs
     const {
         input,
@@ -114,14 +114,14 @@ export async function handleSearchRequest(request: IncomingMessage, response: Se
  * Handles the model context protocol scenario (non-HTTP scenario).
  * Uses the same runSearchProcess function but just returns the results as a promise.
  */
-export async function handleModelContextProtocol(params: Partial<Input>) {
+export async function handleModelContextProtocol(params: Partial<Input>): Promise<Output[]> {
     try {
         log.info(`Received parameters: ${JSON.stringify(params)}`);
         return await runSearchProcess(params);
     } catch (e) {
         const error = e as Error;
         log.error(`UserInputError occurred: ${error.message}`);
-        return JSON.stringify({ errorMessage: error.message });
+        return [{ text: error.message }] as Output[];
     }
 }
 

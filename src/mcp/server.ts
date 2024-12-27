@@ -8,28 +8,19 @@ import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import type { Transport } from '@modelcontextprotocol/sdk/shared/transport.js';
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 
-import { defaults } from '../const.js';
+import inputSchema from '../../.actor/input_schema.json' assert { type: 'json' };
 import { handleModelContextProtocol } from '../search.js';
 import { Input } from '../types.js';
 
-const TOOL_SEARCH = 'search';
+const TOOL_SEARCH = inputSchema.title.toLowerCase().replace(/ /g, '-');
 
-const WebBrowserArgsSchema = {
-    type: 'object',
-    properties: {
-        query: {
-            type: 'string',
-            description: 'Google Search keywords or a URL of a specific web page',
-        },
-        maxResults: {
-            type: 'integer',
-            description: 'The maximum number of top organic Google Search results whose web pages will be extracted (default: 1)',
-            default: defaults.maxResults,
-            minimum: 1, // Ensures the number is positive
-        },
+const TOOLS = [
+    {
+        name: TOOL_SEARCH,
+        description: inputSchema.description,
+        inputSchema,
     },
-    required: ['query'],
-};
+];
 
 /**
  * Create an MCP server with a tool to call RAG Web Browser Actor
@@ -66,13 +57,7 @@ export class RagWebBrowserServer {
     private setupToolHandlers(): void {
         this.server.setRequestHandler(ListToolsRequestSchema, async () => {
             return {
-                tools: [
-                    {
-                        name: TOOL_SEARCH,
-                        description: 'Search phrase or a URL at Google and return crawled web pages as text or Markdown',
-                        inputSchema: WebBrowserArgsSchema,
-                    },
-                ],
+                tools: TOOLS,
             };
         });
         this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
@@ -80,9 +65,7 @@ export class RagWebBrowserServer {
             switch (name) {
                 case TOOL_SEARCH: {
                     const content = await handleModelContextProtocol(args as unknown as Input);
-                    return {
-                        content: [{ type: 'text', text: JSON.stringify(content) }],
-                    };
+                    return { content: content.map((message) => ({ type: 'text', text: JSON.stringify(message) })) };
                 }
                 default: {
                     throw new Error(`Unknown tool: ${name}`);
