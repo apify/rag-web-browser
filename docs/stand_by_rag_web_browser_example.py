@@ -4,9 +4,10 @@ This script demonstrates how to interact with the Rag-Web-Browser API in Standby
 The example usage in the __main__ block shows how to perform searches for both general topics and specific websites, outputting the results in different formats.
 """
 
-import requests
-from typing import List
 import os
+from typing import List
+
+import requests
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -24,7 +25,7 @@ class RagWebBrowserClient:
                request_timeout_secs: int = 30,
                dynamic_content_wait_secs: int = 10) -> List[dict]:
         
-        # For info about params see: https://apify.com/apify/rag-web-browser
+        # For info about params see: https://apify.com/apify/rag-web-browser#query-parameters
         params = {
             'query': query,
             'maxResults': max_results,
@@ -57,7 +58,7 @@ if __name__ == "__main__":
     client = RagWebBrowserClient(API_TOKEN)
     
     queries = [
-        "artificial intelligence latest developments", # Non specific website query
+        "artificial intelligence latest developments", # Non-specific website query
         "https://www.example.com", # Specific website query
     ]
     
