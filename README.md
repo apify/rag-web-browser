@@ -192,7 +192,8 @@ For the POST request, the server will respond with:
 Accepted
 ```
 
-The server will then invoke `Actor` and its tool using the provided query and stream the response back to the client via SSE:
+The server will then invoke `Actor` and its tool using the provided query and stream the response back to the client via SSE.
+The response will be received at the initiated SSE connection:
 
 ```text
 event: message

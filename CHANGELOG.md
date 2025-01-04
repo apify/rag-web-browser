@@ -1,6 +1,6 @@
 This changelog summarizes all changes of the RAG Web Browser
 
-### 1.0.4 (2024-12-27)
+### 1.0.4 (2025-01-04)
 
 🚀 Features
 - Include Model Context Protocol in Standby Mode
