@@ -4,6 +4,12 @@ export enum ContentCrawlerStatus {
     FAILED = 'failed',
 }
 
+export enum Routes {
+    SEARCH = '/search',
+    SSE = '/sse',
+    MESSAGE = '/message',
+}
+
 export const PLAYWRIGHT_REQUEST_TIMEOUT_NORMAL_MODE_SECS = 60;
 
 // TODO: It would be better to simply use input_schema.json rather then hard-coding these values,

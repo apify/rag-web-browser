@@ -11,11 +11,10 @@ import {
     PlaywrightCrawlingContext,
     RequestOptions,
 } from 'crawlee';
-import { ServerResponse } from 'http';
 
 import { scrapeOrganicResults } from './google-search/google-extractors-urls.js';
 import { failedRequestHandlerPlaywright, requestHandlerPlaywright } from './playwright-req-handler.js';
-import { createResponse, addEmptyResultToResponse, sendResponseError } from './responses.js';
+import { addEmptyResultToResponse, sendResponseError } from './responses.js';
 import { PlaywrightScraperSettings, UserData } from './types.js';
 import { addTimeMeasureEvent, createRequest } from './utils.js';
 
@@ -35,6 +34,7 @@ export function getPlaywrightCrawlerKey(
 
 /**
  * Creates and starts a Google search crawler and Playwright content crawler with the provided configurations.
+ * A crawler won't be created if it already exists.
  */
 export async function createAndStartCrawlers(
     cheerioCrawlerOptions: CheerioCrawlerOptions,
@@ -42,20 +42,21 @@ export async function createAndStartCrawlers(
     playwrightScraperSettings: PlaywrightScraperSettings,
     startCrawlers: boolean = true,
 ) {
-    const crawler1 = await createAndStartSearchCrawler(
+    const { crawler: searchCrawler } = await createAndStartSearchCrawler(
         cheerioCrawlerOptions,
         startCrawlers,
     );
-    const crawler2 = await createAndStartCrawlerPlaywright(
+    const { key: playwrightCrawlerKey, crawler: playwrightCrawler } = await createAndStartCrawlerPlaywright(
         playwrightCrawlerOptions,
         playwrightScraperSettings,
         startCrawlers,
     );
-    return [crawler1, crawler2];
+    return { searchCrawler, playwrightCrawler, playwrightCrawlerKey };
 }
 
 /**
  * Creates and starts a Google search crawler with the provided configuration.
+ * A crawler won't be created if it already exists.
  */
 async function createAndStartSearchCrawler(
     cheerioCrawlerOptions: CheerioCrawlerOptions,
@@ -63,7 +64,7 @@ async function createAndStartSearchCrawler(
 ) {
     const key = getSearchCrawlerKey(cheerioCrawlerOptions);
     if (crawlers.has(key)) {
-        return crawlers.get(key);
+        return { key, crawler: crawlers.get(key) };
     }
 
     log.info(`Creating new cheerio crawler with key ${key}`);
@@ -88,7 +89,7 @@ async function createAndStartSearchCrawler(
             log.info(`Extracted ${results.length} results: \n${results.map((r) => r.url).join('\n')}`);
 
             addTimeMeasureEvent(request.userData!, 'before-playwright-queue-add');
-            const responseId = request.uniqueKey;
+            const responseId = request.userData.responseId!;
             let rank = 1;
             for (const result of results) {
                 result.rank = rank++;
@@ -112,9 +113,13 @@ async function createAndStartSearchCrawler(
     }
     crawlers.set(key, crawler);
     log.info(`Number of crawlers ${crawlers.size}`);
-    return crawler;
+    return { key, crawler };
 }
 
+/**
+ * Creates and starts a Playwright content crawler with the provided configuration.
+ * A crawler won't be created if it already exists.
+ */
 async function createAndStartCrawlerPlaywright(
     crawlerOptions: PlaywrightCrawlerOptions,
     settings: PlaywrightScraperSettings,
@@ -122,7 +127,7 @@ async function createAndStartCrawlerPlaywright(
 ) {
     const key = getPlaywrightCrawlerKey(crawlerOptions, settings);
     if (crawlers.has(key)) {
-        return crawlers.get(key);
+        return { key, crawler: crawlers.get(key) };
     }
 
     log.info(`Creating new playwright crawler with key ${key}`);
@@ -143,7 +148,7 @@ async function createAndStartCrawlerPlaywright(
     }
     crawlers.set(key, crawler);
     log.info(`Number of crawlers ${crawlers.size}`);
-    return crawler;
+    return { key, crawler };
 }
 
 /**
@@ -152,7 +157,6 @@ async function createAndStartCrawlerPlaywright(
  */
 export const addSearchRequest = async (
     request: RequestOptions<UserData>,
-    response: ServerResponse | null,
     cheerioCrawlerOptions: CheerioCrawlerOptions,
 ) => {
     const key = getSearchCrawlerKey(cheerioCrawlerOptions);
@@ -161,11 +165,6 @@ export const addSearchRequest = async (
     if (!crawler) {
         log.error(`Cheerio crawler not found: key ${key}`);
         return;
-    }
-
-    if (response) {
-        createResponse(request.uniqueKey!, response);
-        log.info(`Created response for request ${request.uniqueKey}, request.url: ${request.url}`);
     }
     addTimeMeasureEvent(request.userData!, 'before-cheerio-queue-add');
     await crawler.requestQueue!.addRequest(request);

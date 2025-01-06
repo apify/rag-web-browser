@@ -1,6 +1,11 @@
 This changelog summarizes all changes of the RAG Web Browser
 
-### 2024-11-13
+### 1.0.4 (2025-01-04)
+
+🚀 Features
+- Include Model Context Protocol in Standby Mode
+
+### 1.0.3 (2024-11-13)
 
 🚀 Features
 - Improve README.md and simplify configuration
@@ -11,13 +16,13 @@ This changelog summarizes all changes of the RAG Web Browser
 - Rename googleSearchResults to searchResults and searchProxyGroup to serpProxyGroup
 - Implement input validation
 
-### 2024-11-08
+### 0.1.4 (2024-11-08)
 
 🚀 Features
 - Add functionality to extract content from a specific URL
 - Update README.md to include new functionality and provide examples
 
-### 2024-10-17
+### 0.0.32 (2024-10-17)
 
 🚀 Features
 - Handle errors when request is added to Playwright queue.
