@@ -84,6 +84,10 @@ async function createAndStartSearchCrawler(
             // remove results with URL starting with '/search?q=' (google return empty search results for images)
             results = results.filter((result) => !result.url!.startsWith('/search?q='));
 
+            if (results.length === 0) {
+                throw new Error(`No results found for search request: ${request.url}`);
+            }
+
             // limit the number of search results to the maxResults
             results = results.slice(0, request.userData?.maxResults ?? results.length);
             log.info(`Extracted ${results.length} results: \n${results.map((r) => r.url).join('\n')}`);
