@@ -109,6 +109,13 @@ export function transformTimeMeasuresToRelative(timeMeasures: TimeMeasure[]): Ti
         .sort((a, b) => a.timeMs - b.timeMs);
 }
 
+/**
+ * Interpret the input as a URL (valid URL starts with http:// or https://).
+ * If the input is a URL, return it; otherwise, try to decode it and check if it's a valid URL.
+ * Attempt to decode the input string up to 3 times, as users may encode the URL multiple times.
+ * @param input - The input string to interpret as a URL.
+ * @returns The valid URL string or null if invalid.
+ */
 export function interpretAsUrl(input: string): string | null {
     if (!input) return null;
 
