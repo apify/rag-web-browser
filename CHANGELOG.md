@@ -1,5 +1,10 @@
 This changelog summarizes all changes of the RAG Web Browser
 
+### 1.0.6 (2025-02-04)
+
+🚀 Features
+- Handle double encoding of URLs
+
 ### 1.0.5 (2025-01-17)
 
 🐛 Bug Fixes

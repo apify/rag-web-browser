@@ -109,13 +109,34 @@ export function transformTimeMeasuresToRelative(timeMeasures: TimeMeasure[]): Ti
         .sort((a, b) => a.timeMs - b.timeMs);
 }
 
+/**
+ * Interpret the input as a URL (valid URL starts with http:// or https://).
+ * If the input is a URL, return it; otherwise, try to decode it and check if it's a valid URL.
+ * Attempt to decode the input string up to 3 times, as users may encode the URL multiple times.
+ * @param input - The input string to interpret as a URL.
+ * @returns The valid URL string or null if invalid.
+ */
 export function interpretAsUrl(input: string): string | null {
-    try {
-        if (!input) return null;
-        const url = new URL(input);
-        // Only HTTP/HTTPS URLs are supported
-        return /^https?:/i.test(url.protocol) ? url.toString() : null;
-    } catch {
-        return null;
+    if (!input) return null;
+
+    function tryValid(s: string): string | null {
+        try {
+            const url = new URL(s);
+            return /^https?:/i.test(url.protocol) ? url.href : null;
+        } catch {
+            return null;
+        }
     }
+
+    let candidate = input;
+    for (let i = 0; i < 3; i++) {
+        const result = tryValid(candidate);
+        if (result) return result;
+        try {
+            candidate = decodeURIComponent(candidate);
+        } catch {
+            break;
+        }
+    }
+    return null;
 }
