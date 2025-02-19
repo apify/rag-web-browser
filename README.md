@@ -14,6 +14,7 @@ The extracted text can then be injected into prompts and retrieval augmented gen
 - ⚙️ Supports **dynamic JavaScript-heavy websites** using a headless browser
 - 🕷 Automatically **bypasses anti-scraping protections** using proxies and browser fingerprints
 - 📝 Output formats include **Markdown**, plain text, and HTML
+- 🔌 Supports **OpenAPI and MCP** for easy integration
 - 🪟 It's **open source**, so you can review and modify it
 
 ## Example
