@@ -73,6 +73,7 @@ export type UserData = {
     timeMeasures?: TimeMeasure[];
     searchResult?: OrganicResult;
     playwrightCrawlerKey?: string;
+    playwrightScraperSettings?: PlaywrightScraperSettings;
 };
 
 export interface PlaywrightScraperSettings {

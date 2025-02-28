@@ -2,7 +2,7 @@ import { RequestOptions, log, ProxyConfiguration } from 'crawlee';
 import { parse, ParsedUrlQuery } from 'querystring';
 
 import { defaults } from './const.js';
-import { OrganicResult, TimeMeasure, UserData } from './types.js';
+import { OrganicResult, PlaywrightScraperSettings, TimeMeasure, UserData } from './types.js';
 
 export function parseParameters(url: string): ParsedUrlQuery {
     return parse(url.slice(1));
@@ -47,6 +47,7 @@ export function createSearchRequest(
     maxResults: number,
     playwrightCrawlerKey: string,
     proxyConfiguration: ProxyConfiguration | undefined,
+    playwrightScraperSettings: PlaywrightScraperSettings,
 ): RequestOptions<UserData> {
     // add some overhead for the maxResults to account for the fact that some results are not Organic
     const n = Number(maxResults) + 5;
@@ -59,7 +60,7 @@ export function createSearchRequest(
     return {
         url: urlSearch,
         uniqueKey: randomId(),
-        userData: { maxResults, timeMeasures: [], query, playwrightCrawlerKey, responseId },
+        userData: { maxResults, timeMeasures: [], query, playwrightCrawlerKey, responseId, playwrightScraperSettings },
     };
 }
 
@@ -72,6 +73,7 @@ export function createSearchRequest(
 export function createRequest(
     result: OrganicResult,
     responseId: string,
+    playwrightScraperSettings: PlaywrightScraperSettings,
     timeMeasures: TimeMeasure[] | null = null,
 ): RequestOptions<UserData> {
     return {
@@ -81,6 +83,7 @@ export function createRequest(
             responseId,
             searchResult: result.url && result.title ? result : undefined,
             timeMeasures: timeMeasures ? [...timeMeasures] : [],
+            playwrightScraperSettings,
         },
     };
 }

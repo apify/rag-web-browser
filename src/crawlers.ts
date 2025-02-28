@@ -15,21 +15,14 @@ import {
 import { scrapeOrganicResults } from './google-search/google-extractors-urls.js';
 import { failedRequestHandlerPlaywright, requestHandlerPlaywright } from './playwright-req-handler.js';
 import { addEmptyResultToResponse, sendResponseError } from './responses.js';
-import { PlaywrightScraperSettings, UserData } from './types.js';
+import type { UserData } from './types.js';
 import { addTimeMeasureEvent, createRequest } from './utils.js';
 
 const crawlers = new Map<string, CheerioCrawler | PlaywrightCrawler>();
 const client = new MemoryStorage({ persistStorage: false });
 
-export function getSearchCrawlerKey(cheerioCrawlerOptions: CheerioCrawlerOptions) {
-    return JSON.stringify(cheerioCrawlerOptions);
-}
-
-export function getPlaywrightCrawlerKey(
-    playwrightCrawlerOptions: PlaywrightCrawlerOptions,
-    playwrightScraperSettings: PlaywrightScraperSettings,
-) {
-    return JSON.stringify(playwrightCrawlerOptions) + JSON.stringify(playwrightScraperSettings);
+export function getCrawlerKey(crawlerOptions: CheerioCrawlerOptions | PlaywrightCrawlerOptions) {
+    return JSON.stringify(crawlerOptions);
 }
 
 /**
@@ -39,7 +32,6 @@ export function getPlaywrightCrawlerKey(
 export async function createAndStartCrawlers(
     cheerioCrawlerOptions: CheerioCrawlerOptions,
     playwrightCrawlerOptions: PlaywrightCrawlerOptions,
-    playwrightScraperSettings: PlaywrightScraperSettings,
     startCrawlers: boolean = true,
 ) {
     const { crawler: searchCrawler } = await createAndStartSearchCrawler(
@@ -48,7 +40,6 @@ export async function createAndStartCrawlers(
     );
     const { key: playwrightCrawlerKey, crawler: playwrightCrawler } = await createAndStartCrawlerPlaywright(
         playwrightCrawlerOptions,
-        playwrightScraperSettings,
         startCrawlers,
     );
     return { searchCrawler, playwrightCrawler, playwrightCrawlerKey };
@@ -62,7 +53,7 @@ async function createAndStartSearchCrawler(
     cheerioCrawlerOptions: CheerioCrawlerOptions,
     startCrawler: boolean = true,
 ) {
-    const key = getSearchCrawlerKey(cheerioCrawlerOptions);
+    const key = getCrawlerKey(cheerioCrawlerOptions);
     if (crawlers.has(key)) {
         return { key, crawler: crawlers.get(key) };
     }
@@ -97,7 +88,12 @@ async function createAndStartSearchCrawler(
             let rank = 1;
             for (const result of results) {
                 result.rank = rank++;
-                const r = createRequest(result, responseId, request.userData.timeMeasures!);
+                const r = createRequest(
+                    result,
+                    responseId,
+                    request.userData.playwrightScraperSettings!,
+                    request.userData.timeMeasures!,
+                );
                 await addPlaywrightCrawlRequest(r, responseId, request.userData.playwrightCrawlerKey!);
             }
         },
@@ -126,10 +122,9 @@ async function createAndStartSearchCrawler(
  */
 async function createAndStartCrawlerPlaywright(
     crawlerOptions: PlaywrightCrawlerOptions,
-    settings: PlaywrightScraperSettings,
     startCrawler: boolean = true,
 ) {
-    const key = getPlaywrightCrawlerKey(crawlerOptions, settings);
+    const key = getCrawlerKey(crawlerOptions);
     if (crawlers.has(key)) {
         return { key, crawler: crawlers.get(key) };
     }
@@ -139,7 +134,7 @@ async function createAndStartCrawlerPlaywright(
         ...(crawlerOptions as PlaywrightCrawlerOptions),
         keepAlive: crawlerOptions.keepAlive,
         requestQueue: await RequestQueue.open(key, { storageClient: client }),
-        requestHandler: (context: PlaywrightCrawlingContext) => requestHandlerPlaywright(context, settings),
+        requestHandler: (context: PlaywrightCrawlingContext) => requestHandlerPlaywright(context),
         failedRequestHandler: ({ request }, err) => failedRequestHandlerPlaywright(request, err),
     });
 
@@ -163,7 +158,7 @@ export const addSearchRequest = async (
     request: RequestOptions<UserData>,
     cheerioCrawlerOptions: CheerioCrawlerOptions,
 ) => {
-    const key = getSearchCrawlerKey(cheerioCrawlerOptions);
+    const key = getCrawlerKey(cheerioCrawlerOptions);
     const crawler = crawlers.get(key);
 
     if (!crawler) {
