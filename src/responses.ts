@@ -2,7 +2,7 @@ import { log } from 'apify';
 import { RequestOptions } from 'crawlee';
 
 import { ContentCrawlerStatus } from './const.js';
-import { Output, PlaywrightCrawlerUserData } from './types.js';
+import { Output, ContentCrawlerUserData } from './types.js';
 
 type ResponseData = {
     resultsMap: Map<string, Output>;
@@ -48,7 +48,7 @@ export function createResponsePromise(responseId: string, timeoutSecs: number): 
  * Add empty result to response object when the content crawler request is created.
  * This is needed to keep track of all results and to know that all results have been handled.
  */
-export function addEmptyResultToResponse(responseId: string, request: RequestOptions<PlaywrightCrawlerUserData>) {
+export function addEmptyResultToResponse(responseId: string, request: RequestOptions<ContentCrawlerUserData>) {
     const res = getResponse(responseId);
     if (!res) return;
 

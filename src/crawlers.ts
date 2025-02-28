@@ -13,11 +13,10 @@ import {
 } from 'crawlee';
 
 import { scrapeOrganicResults } from './google-search/google-extractors-urls.js';
+import { failedRequestHandler, requestHandlerCheerio, requestHandlerPlaywright } from './request-handler.js';
 import { addEmptyResultToResponse, sendResponseError } from './responses.js';
 import type { ContentCrawlerUserData, SearchCrawlerUserData } from './types.js';
 import { addTimeMeasureEvent, createRequest } from './utils.js';
-import { requestHandlerCheerio, failedRequestHandlerCheerio } from './cheerio-req-handler.js';
-import { requestHandlerPlaywright, failedRequestHandlerPlaywright } from './playwright-req-handler.js';
 
 const crawlers = new Map<string, CheerioCrawler | PlaywrightCrawler>();
 const client = new MemoryStorage({ persistStorage: false });
@@ -165,7 +164,7 @@ async function createPlaywrightContentCrawler(
         requestHandler: async (context) => {
             await requestHandlerPlaywright(context as unknown as PlaywrightCrawlingContext<ContentCrawlerUserData>);
         },
-        failedRequestHandler: ({ request }, err) => failedRequestHandlerPlaywright(request, err),
+        failedRequestHandler: ({ request }, err) => failedRequestHandler(request, err, 'playwright'),
     });
 }
 
@@ -181,7 +180,7 @@ async function createCheerioContentCrawler(
         requestHandler: async (context) => {
             await requestHandlerCheerio(context as unknown as CheerioCrawlingContext<ContentCrawlerUserData>);
         },
-        failedRequestHandler: ({ request }, err) => failedRequestHandlerCheerio(request, err),
+        failedRequestHandler: ({ request }, err) => failedRequestHandler(request, err, 'cheerio'),
     });
 }
 
