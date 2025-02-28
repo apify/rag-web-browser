@@ -2,11 +2,11 @@ import { CheerioCrawlerOptions, log, PlaywrightCrawlerOptions } from 'crawlee';
 import { IncomingMessage, ServerResponse } from 'http';
 
 import { PLAYWRIGHT_REQUEST_TIMEOUT_NORMAL_MODE_SECS, Routes } from './const.js';
-import { addPlaywrightCrawlRequest, addSearchRequest, createAndStartCrawlers } from './crawlers.js';
+import { addContentCrawlRequest, addSearchRequest, createAndStartCrawlers } from './crawlers.js';
 import { UserInputError } from './errors.js';
 import { processInput } from './input.js';
 import { createResponsePromise } from './responses.js';
-import { Input, Output, PlaywrightScraperSettings } from './types.js';
+import { Input, Output, ContentScraperSettings } from './types.js';
 import {
     addTimeMeasureEvent,
     checkAndRemoveExtraParams,
@@ -25,8 +25,8 @@ import {
 function prepareRequest(
     input: Input,
     cheerioCrawlerOptions: CheerioCrawlerOptions,
-    playwrightCrawlerKey: string,
-    playwrightScraperSettings: PlaywrightScraperSettings,
+    contentCrawlerKey: string,
+    contentScraperSettings: ContentScraperSettings,
 ) {
     const interpretedUrl = interpretAsUrl(input.query);
     const query = interpretedUrl ?? input.query;
@@ -37,16 +37,16 @@ function prepareRequest(
             query,
             { url: query },
             responseId,
-            playwrightScraperSettings,
+            contentScraperSettings,
             null,
         )
         : createSearchRequest(
             query,
             responseId,
             input.maxResults,
-            playwrightCrawlerKey,
+            contentCrawlerKey,
             cheerioCrawlerOptions.proxyConfiguration,
-            playwrightScraperSettings,
+            contentScraperSettings,
         );
 
     addTimeMeasureEvent(req.userData!, 'request-received', Date.now());
@@ -62,21 +62,22 @@ async function runSearchProcess(params: Partial<Input>): Promise<Output[]> {
     const {
         input,
         cheerioCrawlerOptions,
-        playwrightCrawlerOptions,
-        playwrightScraperSettings,
+        contentCrawlerOptions,
+        contentScraperSettings,
     } = await processInput(params);
 
     // Create and start crawlers
-    const { playwrightCrawlerKey } = await createAndStartCrawlers(
+    const { contentCrawlerKey } = await createAndStartCrawlers(
         cheerioCrawlerOptions,
-        playwrightCrawlerOptions,
+        contentCrawlerOptions,
+        input.useCheerioCrawler,
     );
 
     const { req, isUrl, responseId } = prepareRequest(
         input,
         cheerioCrawlerOptions,
-        playwrightCrawlerKey,
-        playwrightScraperSettings,
+        contentCrawlerKey,
+        contentScraperSettings,
     );
 
     // Create a promise that resolves when all requests are processed
@@ -85,7 +86,7 @@ async function runSearchProcess(params: Partial<Input>): Promise<Output[]> {
     if (isUrl) {
         // If input is a direct URL, skip the search crawler
         log.info(`Skipping Google Search query as "${input.query}" is a valid URL`);
-        await addPlaywrightCrawlRequest(req, responseId, playwrightCrawlerKey);
+        await addContentCrawlRequest(req, responseId, contentCrawlerKey);
     } else {
         // If input is a search query, run the search crawler first
         await addSearchRequest(req, cheerioCrawlerOptions);
@@ -138,31 +139,31 @@ export async function handleModelContextProtocol(params: Partial<Input>): Promis
  */
 export async function handleSearchNormalMode(input: Input,
     cheerioCrawlerOptions: CheerioCrawlerOptions,
-    playwrightCrawlerOptions: PlaywrightCrawlerOptions,
-    playwrightScraperSettings: PlaywrightScraperSettings,
+    contentCrawlerOptions: PlaywrightCrawlerOptions | CheerioCrawlerOptions,
+    contentScraperSettings: ContentScraperSettings,
 ) {
     const startedTime = Date.now();
     cheerioCrawlerOptions.keepAlive = false;
-    playwrightCrawlerOptions.keepAlive = false;
-    playwrightCrawlerOptions.requestHandlerTimeoutSecs = PLAYWRIGHT_REQUEST_TIMEOUT_NORMAL_MODE_SECS;
+    contentCrawlerOptions.keepAlive = false;
+    contentCrawlerOptions.requestHandlerTimeoutSecs = PLAYWRIGHT_REQUEST_TIMEOUT_NORMAL_MODE_SECS;
 
-    // playwrightCrawlerKey is used to identify the crawler that should process the search results
-    const { playwrightCrawlerKey, searchCrawler, playwrightCrawler } = await createAndStartCrawlers(
+    // contentCrawlerKey is used to identify the crawler that should process the search results
+    const { contentCrawlerKey, searchCrawler, contentCrawler } = await createAndStartCrawlers(
         cheerioCrawlerOptions,
-        playwrightCrawlerOptions,
+        contentCrawlerOptions,
         false,
     );
 
     const { req, isUrl } = prepareRequest(
         input,
         cheerioCrawlerOptions,
-        playwrightCrawlerKey,
-        playwrightScraperSettings,
+        contentCrawlerKey,
+        contentScraperSettings,
     );
     if (isUrl) {
         // If the input query is a URL, we don't need to run the search crawler
         log.info(`Skipping Google Search query because "${input.query}" is a valid URL.`);
-        await addPlaywrightCrawlRequest(req, '', playwrightCrawlerKey);
+        await addContentCrawlRequest(req, '', contentCrawlerKey);
     } else {
         await addSearchRequest(req, cheerioCrawlerOptions);
         addTimeMeasureEvent(req.userData!, 'before-cheerio-run', startedTime);
@@ -172,5 +173,5 @@ export async function handleSearchNormalMode(input: Input,
 
     addTimeMeasureEvent(req.userData!, 'before-playwright-run', startedTime);
     log.info(`Running target page crawler with request: ${JSON.stringify(req)}`);
-    await playwrightCrawler!.run();
+    await contentCrawler!.run();
 }

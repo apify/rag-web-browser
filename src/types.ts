@@ -28,6 +28,7 @@ export type Input = {
     readableTextCharThreshold: number;
     removeElementsCssSelector: string;
     removeCookieWarnings: boolean;
+    useCheerioCrawler: boolean;
 };
 
 export type StandbyInput = Input & {
@@ -48,9 +49,13 @@ export interface TimeMeasure {
         | 'before-cheerio-run'
         | 'before-playwright-queue-add'
         | 'before-playwright-run'
+        | 'cheerio-request-start'
         | 'cheerio-failed-request'
+        | 'cheerio-process-html'
         | 'cheerio-request-end'
         | 'cheerio-request-handler-start'
+        | 'cheerio-before-response-send'
+        | 'cheerio-failed-request'
         | 'error'
         | 'playwright-request-start'
         | 'playwright-wait-dynamic-content'
@@ -68,20 +73,21 @@ export type SearchCrawlerUserData = {
     maxResults: number;
     timeMeasures: TimeMeasure[];
     query: string;
-    playwrightCrawlerKey: string;
+    contentCrawlerKey: string;
     responseId: string;
-    playwrightScraperSettings: PlaywrightScraperSettings;
+    contentScraperSettings: ContentScraperSettings;
 };
 
-export type PlaywrightCrawlerUserData = {
+export type ContentCrawlerUserData = {
     query: string;
     responseId: string;
     timeMeasures: TimeMeasure[];
     searchResult?: OrganicResult;
-    playwrightScraperSettings: PlaywrightScraperSettings;
+    contentCrawlerKey?: string;
+    contentScraperSettings: ContentScraperSettings;
 };
 
-export interface PlaywrightScraperSettings {
+export interface ContentScraperSettings {
     debugMode: boolean;
     dynamicContentWaitSecs: number;
     htmlTransformer?: string

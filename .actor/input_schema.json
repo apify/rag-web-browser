@@ -136,6 +136,12 @@
             "description": "If enabled, the Actor attempts to close or remove cookie consent dialogs to improve the quality of extracted text. Note that this setting increases the latency.",
             "default": true
         },
+        "useCheerioCrawler": {
+            "title": "Use Cheerio Crawler",
+            "type": "boolean",
+            "description": "If enabled, the Actor uses the Cheerio Crawler to extract the target web page content.",
+            "default": false
+        },
         "debugMode": {
             "title": "Enable debug mode",
             "type": "boolean",

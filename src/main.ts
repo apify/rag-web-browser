@@ -58,15 +58,16 @@ app.use((req, res) => {
 });
 
 const standbyMode = Actor.getEnv().metaOrigin === 'STANDBY';
-const { input, cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings } = await processInput(
-    (await Actor.getInput<Partial<Input>>()) ?? ({} as Input),
+const rawInput = (await Actor.getInput<Partial<Input>>()) ?? ({} as Input);
+let { input, cheerioCrawlerOptions, contentCrawlerOptions, contentScraperSettings } = await processInput(
+    rawInput,
     standbyMode,
 );
 
 log.info(`Loaded input: ${JSON.stringify(input)},
     cheerioCrawlerOptions: ${JSON.stringify(cheerioCrawlerOptions)},
-    playwrightCrawlerOptions: ${JSON.stringify(playwrightCrawlerOptions)},
-    playwrightScraperSettings ${JSON.stringify(playwrightScraperSettings)}
+    contentCrawlerOptions: ${JSON.stringify(contentCrawlerOptions)},
+    contentScraperSettings ${JSON.stringify(contentScraperSettings)}
 `);
 
 if (standbyMode) {
@@ -75,14 +76,30 @@ if (standbyMode) {
     const host = Actor.isAtHome() ? process.env.ACTOR_STANDBY_URL : 'http://localhost';
     const port = Actor.isAtHome() ? process.env.ACTOR_STANDBY_PORT : 3000;
     app.listen(port, async () => {
-        // Pre-create default crawlers
-        log.info(`The Actor web server is listening for user requests at ${host}.`);
-        await createAndStartCrawlers(cheerioCrawlerOptions, playwrightCrawlerOptions);
+        // Pre-create default crawlers with playwright content
+        log.info(`The Actor web server is listening for user requests at ${host}:${port}`);
+        await createAndStartCrawlers(
+            cheerioCrawlerOptions,
+            contentCrawlerOptions,
+            input.useCheerioCrawler,
+        );
+
+        rawInput.useCheerioCrawler = !rawInput.useCheerioCrawler;
+        ({ input, cheerioCrawlerOptions, contentCrawlerOptions, contentScraperSettings } = await processInput(
+            rawInput,
+            standbyMode,
+        ));
+        // Pre-create the other content crawler
+        await createAndStartCrawlers(
+            cheerioCrawlerOptions,
+            contentCrawlerOptions,
+            input.useCheerioCrawler,
+        );
     });
 } else {
     log.info('Actor is running in the NORMAL mode.');
     try {
-        await handleSearchNormalMode(input, cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings);
+        await handleSearchNormalMode(input, cheerioCrawlerOptions, contentCrawlerOptions, contentScraperSettings);
     } catch (e) {
         const error = e as Error;
         await Actor.fail(error.message as string);

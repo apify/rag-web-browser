@@ -1,10 +1,10 @@
 import { Actor } from 'apify';
-import { BrowserName, CheerioCrawlerOptions, log, PlaywrightCrawlerOptions } from 'crawlee';
+import { BrowserName, CheerioCrawlerOptions, log, PlaywrightCrawlerOptions, ProxyConfiguration } from 'crawlee';
 import { firefox } from 'playwright';
 
 import { defaults } from './const.js';
 import { UserInputError } from './errors.js';
-import type { Input, PlaywrightScraperSettings, OutputFormats, StandbyInput } from './types.js';
+import type { Input, ContentScraperSettings, OutputFormats, StandbyInput } from './types.js';
 
 /**
  * Processes the input and returns the settings for the crawler (adapted from: Website Content Crawler).
@@ -24,16 +24,13 @@ export async function processInput(
     const {
         debugMode,
         dynamicContentWaitSecs,
-        initialConcurrency,
         keepAlive,
-        minConcurrency,
-        maxConcurrency,
-        maxRequestRetries,
         serpMaxRetries,
         proxyConfiguration,
         serpProxyGroup,
         readableTextCharThreshold,
         removeCookieWarnings,
+        useCheerioCrawler,
     } = input;
 
     log.setLevel(debugMode ? log.LEVELS.DEBUG : log.LEVELS.INFO);
@@ -46,7 +43,28 @@ export async function processInput(
         autoscaledPoolOptions: { desiredConcurrency: 1 },
     };
     const proxy = await Actor.createProxyConfiguration(proxyConfiguration);
-    const playwrightCrawlerOptions: PlaywrightCrawlerOptions = {
+    const contentCrawlerOptions: PlaywrightCrawlerOptions | CheerioCrawlerOptions = useCheerioCrawler
+        ? createCheerioCrawlerOptions(input, proxy)
+        : createPlaywrightCrawlerOptions(input, proxy);
+
+    const contentScraperSettings: ContentScraperSettings = {
+        debugMode,
+        dynamicContentWaitSecs,
+        htmlTransformer: 'none',
+        maxHtmlCharsToProcess: 1.5e6,
+        outputFormats: input.outputFormats as OutputFormats[],
+        readableTextCharThreshold,
+        removeCookieWarnings,
+        removeElementsCssSelector: input.removeElementsCssSelector,
+    };
+
+    return { input, cheerioCrawlerOptions, contentCrawlerOptions, contentScraperSettings };
+}
+
+function createPlaywrightCrawlerOptions(input: Input, proxy: ProxyConfiguration | undefined): PlaywrightCrawlerOptions {
+    const { keepAlive, maxRequestRetries, initialConcurrency, maxConcurrency, minConcurrency } = input;
+
+    return {
         headless: true,
         keepAlive,
         maxRequestRetries,
@@ -69,19 +87,22 @@ export async function processInput(
             minConcurrency,
         },
     };
+}
 
-    const playwrightScraperSettings: PlaywrightScraperSettings = {
-        debugMode,
-        dynamicContentWaitSecs,
-        htmlTransformer: 'none',
-        maxHtmlCharsToProcess: 1.5e6,
-        outputFormats: input.outputFormats as OutputFormats[],
-        readableTextCharThreshold,
-        removeCookieWarnings,
-        removeElementsCssSelector: input.removeElementsCssSelector,
+function createCheerioCrawlerOptions(input: Input, proxy: ProxyConfiguration | undefined): CheerioCrawlerOptions {
+    const { keepAlive, maxRequestRetries, initialConcurrency, maxConcurrency, minConcurrency } = input;
+
+    return {
+        keepAlive,
+        maxRequestRetries,
+        proxyConfiguration: proxy,
+        requestHandlerTimeoutSecs: input.requestTimeoutSecs,
+        autoscaledPoolOptions: {
+            desiredConcurrency: initialConcurrency === 0 ? undefined : Math.min(initialConcurrency, maxConcurrency),
+            maxConcurrency,
+            minConcurrency,
+        },
     };
-
-    return { input, cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings };
 }
 
 /**
