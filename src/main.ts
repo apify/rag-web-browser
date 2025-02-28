@@ -4,7 +4,6 @@ import { log } from 'crawlee';
 import express, { Request, Response } from 'express';
 
 import { Routes } from './const.js';
-import { createAndStartCrawlers } from './crawlers.js';
 import { processInput } from './input.js';
 import { RagWebBrowserServer } from './mcp/server.js';
 import { addTimeoutToAllResponses } from './responses.js';
@@ -75,9 +74,7 @@ if (standbyMode) {
     const host = Actor.isAtHome() ? process.env.ACTOR_STANDBY_URL : 'http://localhost';
     const port = Actor.isAtHome() ? process.env.ACTOR_STANDBY_PORT : 3000;
     app.listen(port, async () => {
-        // Pre-create default crawlers
         log.info(`The Actor web server is listening for user requests at ${host}.`);
-        await createAndStartCrawlers(cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings);
     });
 } else {
     log.info('Actor is running in the NORMAL mode.');
