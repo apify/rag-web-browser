@@ -65,11 +65,7 @@ export function createSearchRequest(
 }
 
 /**
- * Create a request for Playwright crawler with the provided result, responseId and timeMeasures.
- * @param query
- * @param result
- * @param responseId
- * @param timeMeasures
+ * Create a request for Playwright crawler with the provided query, result, responseId and timeMeasures.
  */
 export function createRequest(
     query: string,

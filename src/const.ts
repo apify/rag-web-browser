@@ -29,7 +29,7 @@ export const defaults = {
     minConcurrency: inputSchema.properties.minConcurrency.default,
     outputFormats: inputSchema.properties.outputFormats.default,
     proxyConfiguration: inputSchema.properties.proxyConfiguration.default,
-    query: undefined, // No defult value in input_schema.json
+    query: undefined, // No default value in input_schema.json
     readableTextCharThreshold: 100, // Not in input_schema.json
     removeCookieWarnings: inputSchema.properties.removeCookieWarnings.default,
     removeElementsCssSelector: inputSchema.properties.removeElementsCssSelector.default,
