@@ -4,7 +4,7 @@ import { htmlToText, log, PlaywrightCrawlingContext, sleep, Request } from 'craw
 
 import { ContentCrawlerStatus } from './const.js';
 import { addResultToResponse, sendResponseIfFinished } from './responses.js';
-import { Output, PlaywrightScraperSettings, UserData } from './types.js';
+import { Output, PlaywrightCrawlerUserData } from './types.js';
 import { addTimeMeasureEvent, transformTimeMeasuresToRelative } from './utils.js';
 import { processHtml } from './website-content-crawler/html-processing.js';
 import { htmlToMarkdown } from './website-content-crawler/markdown.js';
@@ -59,11 +59,9 @@ function isValidContentType(contentType: string | undefined) {
 /**
  * Generic handler for processing the page content (adapted from: Website Content Crawler).
  */
-export async function requestHandlerPlaywright(
-    context: PlaywrightCrawlingContext<UserData>,
-    settings: PlaywrightScraperSettings,
-) {
+export async function requestHandlerPlaywright(context: PlaywrightCrawlingContext<PlaywrightCrawlerUserData>) {
     const { request, contentType, page, response, closeCookieModals } = context;
+    const { playwrightScraperSettings: settings, responseId } = request.userData;
 
     log.info(`Processing URL: ${request.url}`);
     addTimeMeasureEvent(request.userData, 'playwright-request-start');
@@ -81,7 +79,6 @@ export async function requestHandlerPlaywright(
     const $ = await context.parseWithCheerio();
     addTimeMeasureEvent(request.userData, 'playwright-parse-with-cheerio');
 
-    const { responseId } = request.userData;
     const headers = response?.headers instanceof Function ? response.headers() : response?.headers;
     // @ts-expect-error false-positive?
     if (!$ || !isValidContentType(headers['content-type'])) {

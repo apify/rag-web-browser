@@ -64,15 +64,21 @@ export interface TimeMeasure {
     timeDeltaPrevMs: number;
 }
 
-export type UserData = {
-    finishedAt?: Date;
-    maxResults?: number;
-    query?: string;
-    responseId?: string;
-    startedAt?: Date;
-    timeMeasures?: TimeMeasure[];
+export type SearchCrawlerUserData = {
+    maxResults: number;
+    timeMeasures: TimeMeasure[];
+    query: string;
+    playwrightCrawlerKey: string;
+    responseId: string;
+    playwrightScraperSettings: PlaywrightScraperSettings;
+};
+
+export type PlaywrightCrawlerUserData = {
+    query: string;
+    responseId: string;
+    timeMeasures: TimeMeasure[];
     searchResult?: OrganicResult;
-    playwrightCrawlerKey?: string;
+    playwrightScraperSettings: PlaywrightScraperSettings;
 };
 
 export interface PlaywrightScraperSettings {

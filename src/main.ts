@@ -77,7 +77,7 @@ if (standbyMode) {
     app.listen(port, async () => {
         // Pre-create default crawlers
         log.info(`The Actor web server is listening for user requests at ${host}.`);
-        await createAndStartCrawlers(cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings);
+        await createAndStartCrawlers(cheerioCrawlerOptions, playwrightCrawlerOptions);
     });
 } else {
     log.info('Actor is running in the NORMAL mode.');

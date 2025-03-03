@@ -2,7 +2,7 @@ import { RequestOptions, log, ProxyConfiguration } from 'crawlee';
 import { parse, ParsedUrlQuery } from 'querystring';
 
 import { defaults } from './const.js';
-import { OrganicResult, TimeMeasure, UserData } from './types.js';
+import { OrganicResult, PlaywrightScraperSettings, TimeMeasure, PlaywrightCrawlerUserData, SearchCrawlerUserData } from './types.js';
 
 export function parseParameters(url: string): ParsedUrlQuery {
     return parse(url.slice(1));
@@ -47,7 +47,8 @@ export function createSearchRequest(
     maxResults: number,
     playwrightCrawlerKey: string,
     proxyConfiguration: ProxyConfiguration | undefined,
-): RequestOptions<UserData> {
+    playwrightScraperSettings: PlaywrightScraperSettings,
+): RequestOptions<SearchCrawlerUserData> {
     // add some overhead for the maxResults to account for the fact that some results are not Organic
     const n = Number(maxResults) + 5;
 
@@ -59,33 +60,34 @@ export function createSearchRequest(
     return {
         url: urlSearch,
         uniqueKey: randomId(),
-        userData: { maxResults, timeMeasures: [], query, playwrightCrawlerKey, responseId },
+        userData: { maxResults, timeMeasures: [], query, playwrightCrawlerKey, responseId, playwrightScraperSettings },
     };
 }
 
 /**
- * Create a request for Playwright crawler with the provided result, responseId and timeMeasures.
- * @param result
- * @param responseId
- * @param timeMeasures
+ * Create a request for Playwright crawler with the provided query, result, responseId and timeMeasures.
  */
 export function createRequest(
+    query: string,
     result: OrganicResult,
     responseId: string,
+    playwrightScraperSettings: PlaywrightScraperSettings,
     timeMeasures: TimeMeasure[] | null = null,
-): RequestOptions<UserData> {
+): RequestOptions<PlaywrightCrawlerUserData> {
     return {
         url: result.url!,
         uniqueKey: randomId(),
         userData: {
+            query,
             responseId,
             searchResult: result.url && result.title ? result : undefined,
             timeMeasures: timeMeasures ? [...timeMeasures] : [],
+            playwrightScraperSettings,
         },
     };
 }
 
-export function addTimeMeasureEvent(userData: UserData, event: TimeMeasure['event'], time: number | null = null) {
+export function addTimeMeasureEvent(userData: PlaywrightCrawlerUserData, event: TimeMeasure['event'], time: number | null = null) {
     let timePrev = 0;
     if (!userData.timeMeasures?.length) {
         userData.timeMeasures = [];
