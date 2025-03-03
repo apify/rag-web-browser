@@ -4,7 +4,7 @@ import { htmlToText, log, PlaywrightCrawlingContext, sleep, Request } from 'craw
 
 import { ContentCrawlerStatus } from './const.js';
 import { addResultToResponse, sendResponseIfFinished } from './responses.js';
-import { Output, UserData } from './types.js';
+import { Output, PlaywrightCrawlerUserData } from './types.js';
 import { addTimeMeasureEvent, transformTimeMeasuresToRelative } from './utils.js';
 import { processHtml } from './website-content-crawler/html-processing.js';
 import { htmlToMarkdown } from './website-content-crawler/markdown.js';
@@ -59,14 +59,9 @@ function isValidContentType(contentType: string | undefined) {
 /**
  * Generic handler for processing the page content (adapted from: Website Content Crawler).
  */
-export async function requestHandlerPlaywright(context: PlaywrightCrawlingContext<UserData>) {
+export async function requestHandlerPlaywright(context: PlaywrightCrawlingContext<PlaywrightCrawlerUserData>) {
     const { request, contentType, page, response, closeCookieModals } = context;
     const { playwrightScraperSettings: settings, responseId } = request.userData;
-
-    if (!settings) {
-        log.error('Missing playwrightScraperSettings in request.userData');
-        return;
-    }
 
     log.info(`Processing URL: ${request.url}`);
     addTimeMeasureEvent(request.userData, 'playwright-request-start');

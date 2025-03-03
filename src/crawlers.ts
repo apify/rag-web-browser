@@ -15,7 +15,7 @@ import {
 import { scrapeOrganicResults } from './google-search/google-extractors-urls.js';
 import { failedRequestHandlerPlaywright, requestHandlerPlaywright } from './playwright-req-handler.js';
 import { addEmptyResultToResponse, sendResponseError } from './responses.js';
-import type { UserData } from './types.js';
+import type { PlaywrightCrawlerUserData, SearchCrawlerUserData } from './types.js';
 import { addTimeMeasureEvent, createRequest } from './utils.js';
 
 const crawlers = new Map<string, CheerioCrawler | PlaywrightCrawler>();
@@ -62,7 +62,7 @@ async function createAndStartSearchCrawler(
     const crawler = new CheerioCrawler({
         ...(cheerioCrawlerOptions as CheerioCrawlerOptions),
         requestQueue: await RequestQueue.open(key, { storageClient: client }),
-        requestHandler: async ({ request, $: _$ }: CheerioCrawlingContext<UserData>) => {
+        requestHandler: async ({ request, $: _$ }: CheerioCrawlingContext<SearchCrawlerUserData>) => {
             // NOTE: we need to cast this to fix `cheerio` type errors
             addTimeMeasureEvent(request.userData!, 'cheerio-request-handler-start');
             const $ = _$ as CheerioAPI;
@@ -89,6 +89,7 @@ async function createAndStartSearchCrawler(
             for (const result of results) {
                 result.rank = rank++;
                 const r = createRequest(
+                    request.userData.query,
                     result,
                     responseId,
                     request.userData.playwrightScraperSettings!,
@@ -134,7 +135,9 @@ async function createAndStartCrawlerPlaywright(
         ...(crawlerOptions as PlaywrightCrawlerOptions),
         keepAlive: crawlerOptions.keepAlive,
         requestQueue: await RequestQueue.open(key, { storageClient: client }),
-        requestHandler: (context: PlaywrightCrawlingContext) => requestHandlerPlaywright(context),
+        requestHandler: (
+            context: PlaywrightCrawlingContext<PlaywrightCrawlerUserData>,
+        ) => requestHandlerPlaywright(context),
         failedRequestHandler: ({ request }, err) => failedRequestHandlerPlaywright(request, err),
     });
 
@@ -155,7 +158,7 @@ async function createAndStartCrawlerPlaywright(
  * Create a response for the request and set the desired number of results (maxResults).
  */
 export const addSearchRequest = async (
-    request: RequestOptions<UserData>,
+    request: RequestOptions<PlaywrightCrawlerUserData>,
     cheerioCrawlerOptions: CheerioCrawlerOptions,
 ) => {
     const key = getCrawlerKey(cheerioCrawlerOptions);
@@ -175,7 +178,7 @@ export const addSearchRequest = async (
  * Get existing crawler based on crawlerOptions and scraperSettings, if not present -> create new
  */
 export const addPlaywrightCrawlRequest = async (
-    request: RequestOptions<UserData>,
+    request: RequestOptions<PlaywrightCrawlerUserData>,
     responseId: string,
     playwrightCrawlerKey: string,
 ) => {

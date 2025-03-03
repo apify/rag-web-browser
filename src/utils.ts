@@ -2,7 +2,7 @@ import { RequestOptions, log, ProxyConfiguration } from 'crawlee';
 import { parse, ParsedUrlQuery } from 'querystring';
 
 import { defaults } from './const.js';
-import { OrganicResult, PlaywrightScraperSettings, TimeMeasure, UserData } from './types.js';
+import { OrganicResult, PlaywrightScraperSettings, TimeMeasure, PlaywrightCrawlerUserData, SearchCrawlerUserData } from './types.js';
 
 export function parseParameters(url: string): ParsedUrlQuery {
     return parse(url.slice(1));
@@ -48,7 +48,7 @@ export function createSearchRequest(
     playwrightCrawlerKey: string,
     proxyConfiguration: ProxyConfiguration | undefined,
     playwrightScraperSettings: PlaywrightScraperSettings,
-): RequestOptions<UserData> {
+): RequestOptions<SearchCrawlerUserData> {
     // add some overhead for the maxResults to account for the fact that some results are not Organic
     const n = Number(maxResults) + 5;
 
@@ -66,20 +66,23 @@ export function createSearchRequest(
 
 /**
  * Create a request for Playwright crawler with the provided result, responseId and timeMeasures.
+ * @param query
  * @param result
  * @param responseId
  * @param timeMeasures
  */
 export function createRequest(
+    query: string,
     result: OrganicResult,
     responseId: string,
     playwrightScraperSettings: PlaywrightScraperSettings,
     timeMeasures: TimeMeasure[] | null = null,
-): RequestOptions<UserData> {
+): RequestOptions<PlaywrightCrawlerUserData> {
     return {
         url: result.url!,
         uniqueKey: randomId(),
         userData: {
+            query,
             responseId,
             searchResult: result.url && result.title ? result : undefined,
             timeMeasures: timeMeasures ? [...timeMeasures] : [],
@@ -88,7 +91,7 @@ export function createRequest(
     };
 }
 
-export function addTimeMeasureEvent(userData: UserData, event: TimeMeasure['event'], time: number | null = null) {
+export function addTimeMeasureEvent(userData: PlaywrightCrawlerUserData, event: TimeMeasure['event'], time: number | null = null) {
     let timePrev = 0;
     if (!userData.timeMeasures?.length) {
         userData.timeMeasures = [];

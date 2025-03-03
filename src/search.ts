@@ -34,6 +34,7 @@ function prepareRequest(
 
     const req = interpretedUrl
         ? createRequest(
+            query,
             { url: query },
             responseId,
             playwrightScraperSettings,
