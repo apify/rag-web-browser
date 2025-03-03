@@ -108,7 +108,7 @@ async function createAndStartSearchCrawler(
     if (startCrawler) {
         crawler.run().then(
             () => log.warning(`Google-search-crawler has finished`),
-            () => {},
+            () => { },
         );
         log.info('Google-search-crawler has started 🫡');
     }
@@ -135,9 +135,9 @@ async function createAndStartCrawlerPlaywright(
         ...(crawlerOptions as PlaywrightCrawlerOptions),
         keepAlive: crawlerOptions.keepAlive,
         requestQueue: await RequestQueue.open(key, { storageClient: client }),
-        requestHandler: (
-            context: PlaywrightCrawlingContext<PlaywrightCrawlerUserData>,
-        ) => requestHandlerPlaywright(context),
+        requestHandler: async (context: PlaywrightCrawlingContext) => {
+            await requestHandlerPlaywright(context as unknown as PlaywrightCrawlingContext<PlaywrightCrawlerUserData>);
+        },
         failedRequestHandler: ({ request }, err) => failedRequestHandlerPlaywright(request, err),
     });
 
