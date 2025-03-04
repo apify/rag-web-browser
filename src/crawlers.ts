@@ -32,7 +32,6 @@ export function getCrawlerKey(crawlerOptions: CheerioCrawlerOptions | Playwright
 export async function createAndStartCrawlers(
     searchCrawlerOptions: CheerioCrawlerOptions,
     contentCrawlerOptions: PlaywrightCrawlerOptions | CheerioCrawlerOptions,
-    useCheerioCrawler: boolean,
     startCrawlers: boolean = true,
 ) {
     const { crawler: searchCrawler } = await createAndStartSearchCrawler(
@@ -40,12 +39,35 @@ export async function createAndStartCrawlers(
         startCrawlers,
     );
 
-    const { key: contentCrawlerKey, crawler: contentCrawler } = await createAndStartContentCrawler(
+    const { crawler: contentCrawler, key: contentCrawlerKey } = await createAndStartContentCrawler(
         contentCrawlerOptions,
-        useCheerioCrawler,
         startCrawlers,
     );
+
     return { searchCrawler, contentCrawler, contentCrawlerKey };
+}
+
+/**
+ * Creates and starts a Google search crawler and content crawlers for all provided configurations.
+ * A crawler won't be created if it already exists.
+ */
+export async function createAndStartAllCrawlers(
+    searchCrawlerOptions: CheerioCrawlerOptions,
+    contentCrawlerOptions: (PlaywrightCrawlerOptions | CheerioCrawlerOptions)[],
+    startCrawlers: boolean = true,
+) {
+    const { crawler: searchCrawler } = await createAndStartSearchCrawler(
+        searchCrawlerOptions,
+        startCrawlers,
+    );
+
+    const contentCrawlersInfo: { crawler: PlaywrightCrawler | CheerioCrawler | undefined, key: string }[] = [];
+    for (const options of contentCrawlerOptions) {
+        const { crawler, key } = await createAndStartContentCrawler(options, startCrawlers);
+        contentCrawlersInfo.push({ crawler, key });
+    }
+
+    return { searchCrawler, contentCrawlersInfo };
 }
 
 /**
@@ -122,12 +144,11 @@ async function createAndStartSearchCrawler(
 
 /**
  * Creates and starts a content crawler with the provided configuration.
- * Either Playwright or Cheerio crawler will be created based on the provided flag `useCheerioCrawler`.
+ * Either Playwright or Cheerio crawler will be created based on the provided crawler options.
  * A crawler won't be created if it already exists.
  */
 async function createAndStartContentCrawler(
     crawlerOptions: PlaywrightCrawlerOptions | CheerioCrawlerOptions,
-    useCheerioCrawler: boolean,
     startCrawler: boolean = true,
 ) {
     const key = getCrawlerKey(crawlerOptions);
@@ -135,11 +156,14 @@ async function createAndStartContentCrawler(
         return { key, crawler: crawlers.get(key) };
     }
 
-    const crawler = useCheerioCrawler
-        ? await createCheerioContentCrawler(crawlerOptions as CheerioCrawlerOptions, key)
-        : await createPlaywrightContentCrawler(crawlerOptions as PlaywrightCrawlerOptions, key);
+    // Typeguard to determine if we should use Playwright or Cheerio crawler
+    const usePlaywrightCrawler = 'browserPoolOptions' in crawlerOptions;
 
-    const name = useCheerioCrawler ? 'cheerio' : 'playwright';
+    const crawler = usePlaywrightCrawler
+        ? await createPlaywrightContentCrawler(crawlerOptions as PlaywrightCrawlerOptions, key)
+        : await createCheerioContentCrawler(crawlerOptions as CheerioCrawlerOptions, key);
+
+    const name = usePlaywrightCrawler ? 'playwright' : 'cheerio';
     if (startCrawler) {
         crawler.run().then(
             () => log.warning(`Crawler ${name} has finished`),
