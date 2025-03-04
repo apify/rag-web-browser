@@ -43,9 +43,17 @@ export async function processInput(
         autoscaledPoolOptions: { desiredConcurrency: 1 },
     };
     const proxy = await Actor.createProxyConfiguration(proxyConfiguration);
-    const contentCrawlerOptions: PlaywrightCrawlerOptions | CheerioCrawlerOptions = useCheerioCrawler
-        ? createCheerioCrawlerOptions(input, proxy)
-        : createPlaywrightCrawlerOptions(input, proxy);
+    const contentCrawlerOptions: (PlaywrightCrawlerOptions | CheerioCrawlerOptions)[] = [];
+
+    if (standbyInit) {
+        contentCrawlerOptions.push(createPlaywrightCrawlerOptions(input, proxy));
+        contentCrawlerOptions.push(createCheerioCrawlerOptions(input, proxy));
+    } else {
+        contentCrawlerOptions.push(useCheerioCrawler
+            ? createCheerioCrawlerOptions(input, proxy)
+            : createPlaywrightCrawlerOptions(input, proxy),
+        );
+    }
 
     const contentScraperSettings: ContentScraperSettings = {
         debugMode,

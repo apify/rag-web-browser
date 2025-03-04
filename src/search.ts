@@ -69,7 +69,7 @@ async function runSearchProcess(params: Partial<Input>): Promise<Output[]> {
     // Create and start crawlers
     const { contentCrawlerKey } = await createAndStartCrawlers(
         searchCrawlerOptions,
-        contentCrawlerOptions,
+        contentCrawlerOptions[0],
         input.useCheerioCrawler,
     );
 

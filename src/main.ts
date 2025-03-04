@@ -58,9 +58,8 @@ app.use((req, res) => {
 });
 
 const standbyMode = Actor.getEnv().metaOrigin === 'STANDBY';
-const rawInput = (await Actor.getInput<Partial<Input>>()) ?? ({} as Input);
-let { input, searchCrawlerOptions, contentCrawlerOptions, contentScraperSettings } = await processInput(
-    rawInput,
+const { input, searchCrawlerOptions, contentCrawlerOptions, contentScraperSettings } = await processInput(
+    (await Actor.getInput<Partial<Input>>()) ?? ({} as Input),
     standbyMode,
 );
 
@@ -80,26 +79,20 @@ if (standbyMode) {
         log.info(`The Actor web server is listening for user requests at ${host}:${port}`);
         await createAndStartCrawlers(
             searchCrawlerOptions,
-            contentCrawlerOptions,
+            contentCrawlerOptions[0],
             input.useCheerioCrawler,
         );
 
-        rawInput.useCheerioCrawler = !rawInput.useCheerioCrawler;
-        ({ input, searchCrawlerOptions, contentCrawlerOptions, contentScraperSettings } = await processInput(
-            rawInput,
-            standbyMode,
-        ));
-        // Pre-create the other content crawler
         await createAndStartCrawlers(
             searchCrawlerOptions,
-            contentCrawlerOptions,
+            contentCrawlerOptions[1],
             input.useCheerioCrawler,
         );
     });
 } else {
     log.info('Actor is running in the NORMAL mode.');
     try {
-        await handleSearchNormalMode(input, searchCrawlerOptions, contentCrawlerOptions, contentScraperSettings);
+        await handleSearchNormalMode(input, searchCrawlerOptions, contentCrawlerOptions[0], contentScraperSettings);
     } catch (e) {
         const error = e as Error;
         await Actor.fail(error.message as string);
