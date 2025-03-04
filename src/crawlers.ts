@@ -53,17 +53,17 @@ export async function createAndStartCrawlers(
  * A crawler won't be created if it already exists.
  */
 async function createAndStartSearchCrawler(
-    cheerioCrawlerOptions: CheerioCrawlerOptions,
+    searchCrawlerOptions: CheerioCrawlerOptions,
     startCrawler: boolean = true,
 ) {
-    const key = getCrawlerKey(cheerioCrawlerOptions);
+    const key = getCrawlerKey(searchCrawlerOptions);
     if (crawlers.has(key)) {
         return { key, crawler: crawlers.get(key) };
     }
 
     log.info(`Creating new cheerio crawler with key ${key}`);
     const crawler = new CheerioCrawler({
-        ...(cheerioCrawlerOptions as CheerioCrawlerOptions),
+        ...(searchCrawlerOptions as CheerioCrawlerOptions),
         requestQueue: await RequestQueue.open(key, { storageClient: client }),
         requestHandler: async ({ request, $: _$ }: CheerioCrawlingContext<SearchCrawlerUserData>) => {
             // NOTE: we need to cast this to fix `cheerio` type errors
@@ -190,9 +190,9 @@ async function createCheerioContentCrawler(
  */
 export const addSearchRequest = async (
     request: RequestOptions<ContentCrawlerUserData>,
-    cheerioCrawlerOptions: CheerioCrawlerOptions,
+    searchCrawlerOptions: CheerioCrawlerOptions,
 ) => {
-    const key = getCrawlerKey(cheerioCrawlerOptions);
+    const key = getCrawlerKey(searchCrawlerOptions);
     const crawler = crawlers.get(key);
 
     if (!crawler) {

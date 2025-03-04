@@ -36,7 +36,7 @@ export async function processInput(
     log.setLevel(debugMode ? log.LEVELS.DEBUG : log.LEVELS.INFO);
 
     const proxySearch = await Actor.createProxyConfiguration({ groups: [serpProxyGroup] });
-    const cheerioCrawlerOptions: CheerioCrawlerOptions = {
+    const searchCrawlerOptions: CheerioCrawlerOptions = {
         keepAlive,
         maxRequestRetries: serpMaxRetries,
         proxyConfiguration: proxySearch,
@@ -58,7 +58,7 @@ export async function processInput(
         removeElementsCssSelector: input.removeElementsCssSelector,
     };
 
-    return { input, cheerioCrawlerOptions, contentCrawlerOptions, contentScraperSettings };
+    return { input, searchCrawlerOptions, contentCrawlerOptions, contentScraperSettings };
 }
 
 function createPlaywrightCrawlerOptions(input: Input, proxy: ProxyConfiguration | undefined): PlaywrightCrawlerOptions {
