@@ -29,7 +29,7 @@ export async function processInput(originalInput: Partial<Input> | Partial<Stand
     const { input, searchCrawlerOptions, contentScraperSettings } = await processInputInternal(originalInput);
 
     const proxy = await Actor.createProxyConfiguration(input.proxyConfiguration);
-    const contentCrawlerOptions: ContentCrawlerOptions = input.scrapingTool === 'cheerio'
+    const contentCrawlerOptions: ContentCrawlerOptions = input.scrapingTool === 'raw-http'
         ? createCheerioCrawlerOptions(input, proxy)
         : createPlaywrightCrawlerOptions(input, proxy);
 
@@ -183,7 +183,7 @@ export function validateAndFillInput(input: Input, standbyInit: boolean) {
     if (input.dynamicContentWaitSecs >= input.requestTimeoutSecs) {
         input.dynamicContentWaitSecs = Math.round(input.requestTimeoutSecs / 2);
     }
-    if (input.scrapingTool !== 'playwright' && input.scrapingTool !== 'cheerio') {
-        throw new UserInputError('The `scrapingTool` parameter must be either `playwright` or `cheerio`.');
+    if (input.scrapingTool !== 'browser-playwright' && input.scrapingTool !== 'raw-http') {
+        throw new UserInputError('The `scrapingTool` parameter must be either `browser-playwright` or `raw-http`.');
     }
 }

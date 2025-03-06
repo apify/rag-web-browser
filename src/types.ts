@@ -31,7 +31,7 @@ export type Input = {
     readableTextCharThreshold: number;
     removeElementsCssSelector: string;
     removeCookieWarnings: boolean;
-    scrapingTool: 'playwright' | 'cheerio';
+    scrapingTool: 'browser-playwright' | 'raw-http';
 };
 
 export type StandbyInput = Input & {
