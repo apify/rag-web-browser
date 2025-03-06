@@ -12,6 +12,7 @@ The extracted text can then be injected into prompts and retrieval augmented gen
 
 - 🚀 **Quick response times** for great user experience
 - ⚙️ Supports **dynamic JavaScript-heavy websites** using a headless browser
+- 🔄 **Flexible scraping** with Browser mode for complex websites or Plain HTML mode for faster scraping
 - 🕷 Automatically **bypasses anti-scraping protections** using proxies and browser fingerprints
 - 📝 Output formats include **Markdown**, plain text, and HTML
 - 🔌 Supports **OpenAPI and MCP** for easy integration
@@ -72,6 +73,8 @@ the web page content directly like this:
 The RAG Web Browser can be used in two ways: **as a standard Actor** by passing it an input object with the settings,
 or in the **Standby mode** by sending it an HTTP request.
 
+See the [Performance Optimization](#-performance-optimization) section below for detailed benchmarks and configuration recommendations to achieve optimal response times.
+
 ### Normal Actor run
 
 You can run the Actor "normally" via the Apify API, schedule, integrations, or manually in Console.
@@ -104,20 +107,20 @@ The response is a JSON array with objects containing the web content from the fo
 
 The `/search` GET HTTP endpoint accepts the following query parameters:
 
-| Parameter                    | Type    | Default       | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-|------------------------------|---------|---------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `query`                      | string  | N/A           | Enter Google Search keywords or a URL to a specific web page. The keywords might include the [advanced search operators](https://blog.apify.com/how-to-scrape-google-like-a-pro/). You need to percent-encode the value if it contains some special characters.                                                                                                                                                                                                                                                             |
-| `maxResults`                 | number  | `3`           | The maximum number of top organic Google Search results whose web pages will be extracted. If `query` is a URL, then this parameter is ignored and the Actor only fetches the specific web page.                                                                                                                                                                                                                                                                                                                             |
-| `outputFormats`              | string  | `markdown`    | Select one or more formats to which the target web pages will be extracted. Use comma to separate multiple values (e.g. `text,markdown`)                                                                                                                                                                                                                                                                                                                                                                                     |
-| `requestTimeoutSecs`         | number  | `30`          | The maximum time in seconds available for the request, including querying Google Search and scraping the target web pages. For example, OpenAI allows only [45 seconds](https://platform.openai.com/docs/actions/production#timeouts) for custom actions. If a target page loading and extraction exceeds this timeout, the corresponding page will be skipped in results to ensure at least some results are returned within the timeout. If no page is extracted within the timeout, the whole request fails.              |
-| `serpProxyGroup`             | string  | `GOOGLE_SERP` | Enables overriding the default Apify Proxy group used for fetching Google Search results.                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `serpMaxRetries`             | number  | `1`           | The maximum number of times the Actor will retry fetching the Google Search results on error. If the last attempt fails, the entire request fails.                                                                                                                                                                                                                                                                                                                                                                           |
-| `maxRequestRetries`          | number  | `1`           | The maximum number of times the Actor will retry loading the target web page on error. If the last attempt fails, the page will be skipped in the results.                                                                                                                                                                                                                                                                                                                                                                   |
-| `dynamicContentWaitSecs`     | number  | `10`          | The maximum time in seconds to wait for dynamic page content to load. The Actor considers the web page as fully loaded once this time elapses or when the network becomes idle.                                                                                                                                                                                                                                                                                                                                              |
-| `removeCookieWarnings`       | boolean | `true`        | If enabled, removes cookie consent dialogs to improve text extraction accuracy. This might increase latency.                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `removeElementsCssSelector`  | string  | `see input`   | A CSS selector matching HTML elements that will be removed from the DOM, before converting it to text, Markdown, or saving as HTML. This is useful to skip irrelevant page content. The value must be a valid CSS selector as accepted by the `document.querySelectorAll()` function. \n\nBy default, the Actor removes common navigation elements, headers, footers, modals, scripts, and inline image. You can disable the removal by setting this value to some non-existent CSS selector like `dummy_keep_everything`.   |
-| `scrapingTool`               | string  | `browser-playwright`  | Selects which scraping tool is used to extract the target websits. `browser-playwright` uses browser and can handle complex Javascript heavy website. Meanwhile `raw-http` uses simple HTTP request to fetch the HTML provided by the URL, it can't handle websites that rely on Javascript but it's about two times faster.                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `debugMode`                  | boolean | `false`       | If enabled, the Actor will store debugging information in the dataset's debug field.                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Parameter                    | Type    | Default               | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+|------------------------------|---------|-----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `query`                      | string  | N/A                   | Enter Google Search keywords or a URL to a specific web page. The keywords might include the [advanced search operators](https://blog.apify.com/how-to-scrape-google-like-a-pro/). You need to percent-encode the value if it contains some special characters.                                                                                                                                                                                                                                                            |
+| `maxResults`                 | number  | `3`                   | The maximum number of top organic Google Search results whose web pages will be extracted. If `query` is a URL, then this parameter is ignored and the Actor only fetches the specific web page.                                                                                                                                                                                                                                                                                                                           |
+| `outputFormats`              | string  | `markdown`            | Select one or more formats to which the target web pages will be extracted. Use comma to separate multiple values (e.g. `text,markdown`)                                                                                                                                                                                                                                                                                                                                                                                   |
+| `requestTimeoutSecs`         | number  | `30`                  | The maximum time in seconds available for the request, including querying Google Search and scraping the target web pages. For example, OpenAI allows only [45 seconds](https://platform.openai.com/docs/actions/production#timeouts) for custom actions. If a target page loading and extraction exceeds this timeout, the corresponding page will be skipped in results to ensure at least some results are returned within the timeout. If no page is extracted within the timeout, the whole request fails.            |
+| `serpProxyGroup`             | string  | `GOOGLE_SERP`         | Enables overriding the default Apify Proxy group used for fetching Google Search results.                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `serpMaxRetries`             | number  | `1`                   | The maximum number of times the Actor will retry fetching the Google Search results on error. If the last attempt fails, the entire request fails.                                                                                                                                                                                                                                                                                                                                                                         |
+| `scrapingTool`               | string  | `browser-playwright`  | Selects which scraping tool is used to extract the target websites. `browser-playwright` uses browser and can handle complex Javascript heavy website. Meanwhile `raw-http` uses simple HTTP request to fetch the HTML provided by the URL, it can't handle websites that rely on Javascript but it's about two times faster.                                                                                                                                                                                              |
+| `maxRequestRetries`          | number  | `1`                   | The maximum number of times the Actor will retry loading the target web page on error. If the last attempt fails, the page will be skipped in the results.                                                                                                                                                                                                                                                                                                                                                                 |
+| `dynamicContentWaitSecs`     | number  | `10`                  | The maximum time in seconds to wait for dynamic page content to load. The Actor considers the web page as fully loaded once this time elapses or when the network becomes idle.                                                                                                                                                                                                                                                                                                                                            |
+| `removeCookieWarnings`       | boolean | `true`                | If enabled, removes cookie consent dialogs to improve text extraction accuracy. This might increase latency.                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `removeElementsCssSelector`  | string  | `see input`           | A CSS selector matching HTML elements that will be removed from the DOM, before converting it to text, Markdown, or saving as HTML. This is useful to skip irrelevant page content. The value must be a valid CSS selector as accepted by the `document.querySelectorAll()` function. \n\nBy default, the Actor removes common navigation elements, headers, footers, modals, scripts, and inline image. You can disable the removal by setting this value to some non-existent CSS selector like `dummy_keep_everything`. |
+| `debugMode`                  | boolean | `false`               | If enabled, the Actor will store debugging information in the dataset's debug field.                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 
 <!-- TODO: we should probably add proxyConfiguration -->
 
@@ -169,7 +172,7 @@ In the Standby mode, the Actor runs an HTTP server that supports the MCP protoco
     ```shell
     curl https://rag-web-browser.apify.actor/sse?token=<APIFY_API_TOKEN>
     ```
-    On connection, you’ll receive a `sessionId`:
+   On connection, you'll receive a `sessionId`:
     ```text
     event: endpoint
     data: /message?sessionId=5b2
@@ -187,7 +190,7 @@ In the Standby mode, the Actor runs an HTTP server that supports the MCP protoco
       }
     }'
     ```
-    For the POST request, the server will respond with:
+   For the POST request, the server will respond with:
     ```text
     Accepted
     ```
@@ -207,6 +210,16 @@ To learn more about MCP server integration, check out the [RAG Web Browser MCP s
 To get the most value from RAG Web Browsers in your LLM applications,
 always use the Actor via the [Standby web server](#standby-web-server) as described above,
 and see the tips in the following sections.
+
+### Scraping tool
+
+The **most critical performance decision** is selecting the appropriate scraping method for your use case:
+
+- **For static websites**: Use `scrapingTool=raw-http` to achieve up to 2x faster performance. This lightweight method directly fetches HTML without JavaScript processing.
+
+- **For dynamic websites**: Use the default `scrapingTool=browser-playwright` when targeting sites with JavaScript-rendered content or interactive elements
+
+This single parameter choice can significantly impact both response times and content quality, so select based on your target websites' characteristics.
 
 ### Request timeout
 
@@ -236,6 +249,7 @@ Note that on the first request, the Actor takes a little time to respond (cold s
 
 Additionally, you can adjust the following query parameters to reduce the response time:
 
+- `scrapingTool`: Use `raw-http` for static websites or `browser-playwright` for dynamic websites.
 - `maxResults`: The lower the number of search results to scrape, the faster the response time. Just note that the LLM application might not have sufficient context for the prompt.
 - `dynamicContentWaitSecs`: The lower the value, the faster the response time. However, the important web content might not be loaded yet, which will reduce the accuracy of your LLM application.
 - `removeCookieWarnings`: If the websites you're scraping don't have cookie warnings or if their presence can be tolerated, set this to `false` to slightly improve latency.
@@ -258,7 +272,7 @@ By default, these Standby mode settings are optimized for quick response time:
 8 GB of memory and maximum of 24 requests per run gives approximately ~340 MB per web page.
 If you prefer to optimize the Actor for the cost, you can **Create task** for the Actor in Apify Console
 and override these settings. Just note that requests might take longer and so you should
-increase `requestTimeoutSecs` accordigly.
+increase `requestTimeoutSecs` accordingly.
 
 
 ### Benchmark
