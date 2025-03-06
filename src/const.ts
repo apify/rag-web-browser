@@ -38,5 +38,5 @@ export const defaults = {
     serpMaxRetries: inputSchema.properties.serpMaxRetries.default,
     serpMaxRetriesMax: inputSchema.properties.serpMaxRetries.maximum,
     serpProxyGroup: inputSchema.properties.serpProxyGroup.default,
-    useCheerioCrawler: inputSchema.properties.useCheerioCrawler.default,
+    scrapingTool: inputSchema.properties.scrapingTool.default,
 };

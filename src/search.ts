@@ -2,7 +2,7 @@ import { CheerioCrawlerOptions, log } from 'crawlee';
 import { IncomingMessage, ServerResponse } from 'http';
 
 import { PLAYWRIGHT_REQUEST_TIMEOUT_NORMAL_MODE_SECS, Routes } from './const.js';
-import { addContentCrawlRequest, addSearchRequest, createAndStartCrawlers } from './crawlers.js';
+import { addContentCrawlRequest, addSearchRequest, createAndStartSearchCrawler, createAndStartContentCrawler } from './crawlers.js';
 import { UserInputError } from './errors.js';
 import { processInput } from './input.js';
 import { createResponsePromise } from './responses.js';
@@ -66,12 +66,8 @@ async function runSearchProcess(params: Partial<Input>): Promise<Output[]> {
         contentScraperSettings,
     } = await processInput(params);
 
-    // Create and start crawlers
-    const { contentCrawlerKey } = await createAndStartCrawlers(
-        searchCrawlerOptions,
-        contentCrawlerOptions[0],
-        input.useCheerioCrawler,
-    );
+    await createAndStartSearchCrawler(searchCrawlerOptions);
+    const { key: contentCrawlerKey } = await createAndStartContentCrawler(contentCrawlerOptions);
 
     const { req, isUrl, responseId } = prepareRequest(
         input,
@@ -147,12 +143,11 @@ export async function handleSearchNormalMode(input: Input,
     contentCrawlerOptions.crawlerOptions.keepAlive = false;
     contentCrawlerOptions.crawlerOptions.requestHandlerTimeoutSecs = PLAYWRIGHT_REQUEST_TIMEOUT_NORMAL_MODE_SECS;
 
-    // contentCrawlerKey is used to identify the crawler that should process the search results
-    const { contentCrawlerKey, searchCrawler, contentCrawler } = await createAndStartCrawlers(
-        searchCrawlerOptions,
-        contentCrawlerOptions,
-        false,
-    );
+    const { crawler: searchCrawler } = await createAndStartSearchCrawler(searchCrawlerOptions, false);
+    const {
+        crawler: contentCrawler,
+        key: contentCrawlerKey,
+    } = await createAndStartContentCrawler(contentCrawlerOptions, false);
 
     const { req, isUrl } = prepareRequest(
         input,

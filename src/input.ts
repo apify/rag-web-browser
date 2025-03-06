@@ -7,10 +7,39 @@ import { UserInputError } from './errors.js';
 import type { Input, ContentScraperSettings, OutputFormats, StandbyInput, ContentCrawlerOptions } from './types.js';
 
 /**
+ * Processes the input and returns an array of crawler settings. This is ideal for startup of STANDBY mode
+ * because it makes it simple to start all crawlers at once.
+ */
+export async function processStandbyInput(originalInput: Partial<Input> | Partial<StandbyInput>) {
+    const { input, searchCrawlerOptions, contentScraperSettings } = await processInputInternal(originalInput, true);
+
+    const proxy = await Actor.createProxyConfiguration(input.proxyConfiguration);
+    const contentCrawlerOptions: ContentCrawlerOptions[] = [
+        createPlaywrightCrawlerOptions(input, proxy),
+        createCheerioCrawlerOptions(input, proxy),
+    ];
+
+    return { input, searchCrawlerOptions, contentCrawlerOptions, contentScraperSettings };
+}
+
+/**
+ * Processes the input and returns the settings for the crawler.
+ */
+export async function processInput(originalInput: Partial<Input> | Partial<StandbyInput>) {
+    const { input, searchCrawlerOptions, contentScraperSettings } = await processInputInternal(originalInput);
+
+    const proxy = await Actor.createProxyConfiguration(input.proxyConfiguration);
+    const contentCrawlerOptions: ContentCrawlerOptions = input.scrapingTool === 'cheerio'
+        ? createCheerioCrawlerOptions(input, proxy)
+        : createPlaywrightCrawlerOptions(input, proxy);
+
+    return { input, searchCrawlerOptions, contentCrawlerOptions, contentScraperSettings };
+}
+
+/**
  * Processes the input and returns the settings for the crawler (adapted from: Website Content Crawler).
  */
-
-export async function processInput(
+async function processInputInternal(
     originalInput: Partial<Input> | Partial<StandbyInput>,
     standbyInit: boolean = false,
 ) {
@@ -26,11 +55,9 @@ export async function processInput(
         dynamicContentWaitSecs,
         keepAlive,
         serpMaxRetries,
-        proxyConfiguration,
         serpProxyGroup,
         readableTextCharThreshold,
         removeCookieWarnings,
-        useCheerioCrawler,
     } = input;
 
     log.setLevel(debugMode ? log.LEVELS.DEBUG : log.LEVELS.INFO);
@@ -42,18 +69,6 @@ export async function processInput(
         proxyConfiguration: proxySearch,
         autoscaledPoolOptions: { desiredConcurrency: 1 },
     };
-    const proxy = await Actor.createProxyConfiguration(proxyConfiguration);
-    const contentCrawlerOptions: ContentCrawlerOptions[] = [];
-
-    if (standbyInit) {
-        contentCrawlerOptions.push(createPlaywrightCrawlerOptions(input, proxy));
-        contentCrawlerOptions.push(createCheerioCrawlerOptions(input, proxy));
-    } else {
-        contentCrawlerOptions.push(useCheerioCrawler
-            ? createCheerioCrawlerOptions(input, proxy)
-            : createPlaywrightCrawlerOptions(input, proxy),
-        );
-    }
 
     const contentScraperSettings: ContentScraperSettings = {
         debugMode,
@@ -66,7 +81,7 @@ export async function processInput(
         removeElementsCssSelector: input.removeElementsCssSelector,
     };
 
-    return { input, searchCrawlerOptions, contentCrawlerOptions, contentScraperSettings };
+    return { input, searchCrawlerOptions, contentScraperSettings };
 }
 
 function createPlaywrightCrawlerOptions(input: Input, proxy: ProxyConfiguration | undefined): ContentCrawlerOptions {
@@ -167,5 +182,8 @@ export function validateAndFillInput(input: Input, standbyInit: boolean) {
     }
     if (input.dynamicContentWaitSecs >= input.requestTimeoutSecs) {
         input.dynamicContentWaitSecs = Math.round(input.requestTimeoutSecs / 2);
+    }
+    if (input.scrapingTool !== 'playwright' && input.scrapingTool !== 'cheerio') {
+        throw new UserInputError('The `scrapingTool` parameter must be either `playwright` or `cheerio`.');
     }
 }

@@ -29,7 +29,7 @@ export type Input = {
     readableTextCharThreshold: number;
     removeElementsCssSelector: string;
     removeCookieWarnings: boolean;
-    useCheerioCrawler: boolean;
+    scrapingTool: 'playwright' | 'cheerio';
 };
 
 export type StandbyInput = Input & {
@@ -56,7 +56,6 @@ export interface TimeMeasure {
         | 'cheerio-request-end'
         | 'cheerio-request-handler-start'
         | 'cheerio-before-response-send'
-        | 'cheerio-failed-request'
         | 'error'
         | 'playwright-request-start'
         | 'playwright-wait-dynamic-content'

@@ -4,8 +4,8 @@ import { log } from 'crawlee';
 import express, { Request, Response } from 'express';
 
 import { Routes } from './const.js';
-import { createAndStartAllCrawlers } from './crawlers.js';
-import { processInput } from './input.js';
+import { createAndStartContentCrawler, createAndStartSearchCrawler } from './crawlers.js';
+import { processInput, processStandbyInput } from './input.js';
 import { RagWebBrowserServer } from './mcp/server.js';
 import { addTimeoutToAllResponses } from './responses.js';
 import { handleSearchRequest, handleSearchNormalMode } from './search.js';
@@ -58,35 +58,56 @@ app.use((req, res) => {
 });
 
 const standbyMode = Actor.getEnv().metaOrigin === 'STANDBY';
-const { input, searchCrawlerOptions, contentCrawlerOptions, contentScraperSettings } = await processInput(
-    (await Actor.getInput<Partial<Input>>()) ?? ({} as Input),
-    standbyMode,
-);
-
-log.info(`Loaded input: ${JSON.stringify(input)},
-    cheerioCrawlerOptions: ${JSON.stringify(searchCrawlerOptions)},
-    contentCrawlerOptions: ${JSON.stringify(contentCrawlerOptions)},
-    contentScraperSettings ${JSON.stringify(contentScraperSettings)}
-`);
+const originalInput = await Actor.getInput<Partial<Input>>() ?? {} as Input;
 
 if (standbyMode) {
     log.info('Actor is running in the STANDBY mode.');
 
     const host = Actor.isAtHome() ? process.env.ACTOR_STANDBY_URL : 'http://localhost';
     const port = Actor.isAtHome() ? process.env.ACTOR_STANDBY_PORT : 3000;
+
+    const {
+        input,
+        searchCrawlerOptions,
+        contentCrawlerOptions,
+        contentScraperSettings,
+    } = await processStandbyInput(originalInput);
+
+    log.info(`Loaded input: ${JSON.stringify(input)},
+        cheerioCrawlerOptions: ${JSON.stringify(searchCrawlerOptions)},
+        contentCrawlerOptions: ${JSON.stringify(contentCrawlerOptions)},
+        contentScraperSettings ${JSON.stringify(contentScraperSettings)}
+    `);
+
     app.listen(port, async () => {
         log.info(`The Actor web server is listening for user requests at ${host}:${port}`);
 
-        // Pre-create all default crawlers
-        await createAndStartAllCrawlers(
-            searchCrawlerOptions,
-            contentCrawlerOptions,
-        );
+        const promisese: Promise<unknown>[] = [];
+        promisese.push(createAndStartSearchCrawler(searchCrawlerOptions));
+        for (const settings of contentCrawlerOptions) {
+            promisese.push(createAndStartContentCrawler(settings));
+        }
+
+        await Promise.all(promisese);
     });
 } else {
     log.info('Actor is running in the NORMAL mode.');
+
+    const {
+        input,
+        searchCrawlerOptions,
+        contentCrawlerOptions,
+        contentScraperSettings,
+    } = await processInput(originalInput);
+
+    log.info(`Loaded input: ${JSON.stringify(input)},
+        cheerioCrawlerOptions: ${JSON.stringify(searchCrawlerOptions)},
+        contentCrawlerOptions: ${JSON.stringify(contentCrawlerOptions)},
+        contentScraperSettings ${JSON.stringify(contentScraperSettings)}
+    `);
+
     try {
-        await handleSearchNormalMode(input, searchCrawlerOptions, contentCrawlerOptions[0], contentScraperSettings);
+        await handleSearchNormalMode(input, searchCrawlerOptions, contentCrawlerOptions, contentScraperSettings);
     } catch (e) {
         const error = e as Error;
         await Actor.fail(error.message as string);
