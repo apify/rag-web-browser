@@ -2,7 +2,7 @@ import { Actor } from 'apify';
 import { load } from 'cheerio';
 import { CheerioCrawlingContext, htmlToText, log, PlaywrightCrawlingContext, sleep, Request } from 'crawlee';
 
-import { ContentCrawlerStatus } from './const.js';
+import { ContentCrawlerStatus, ContentCrawlerTypes } from './const.js';
 import { addResultToResponse, sendResponseIfFinished } from './responses.js';
 import { Output, ContentCrawlerUserData } from './types.js';
 import { addTimeMeasureEvent, transformTimeMeasuresToRelative } from './utils.js';
@@ -93,7 +93,7 @@ async function checkValidResponse(
 
 async function handleContent(
     $: CheerioCrawlingContext['$'],
-    crawlerName: 'playwright' | 'cheerio',
+    crawlerType: ContentCrawlerTypes,
     statusCode: number | undefined,
     context: PlaywrightCrawlingContext<ContentCrawlerUserData> | CheerioCrawlingContext<ContentCrawlerUserData>,
 ) {
@@ -103,7 +103,7 @@ async function handleContent(
     const $html = $('html');
     const html = $html.html()!;
     const processedHtml = await processHtml(html, request.url, settings, $);
-    addTimeMeasureEvent(request.userData, `${crawlerName}-process-html`);
+    addTimeMeasureEvent(request.userData, `${crawlerType}-process-html`);
 
     const isTooLarge = processedHtml.length > settings.maxHtmlCharsToProcess;
     const text = isTooLarge ? load(processedHtml).text() : htmlToText(load(processedHtml));
@@ -130,7 +130,7 @@ async function handleContent(
         html: settings.outputFormats.includes('html') ? processedHtml : undefined,
     };
 
-    addTimeMeasureEvent(request.userData, `${crawlerName}-before-response-send`);
+    addTimeMeasureEvent(request.userData, `${crawlerType}-before-response-send`);
     if (settings.debugMode) {
         result.crawl.debug = { timeMeasures: transformTimeMeasuresToRelative(request.userData.timeMeasures!) };
     }
@@ -173,7 +173,7 @@ export async function requestHandlerPlaywright(
 
     const statusCode = response?.status();
 
-    await handleContent($, 'playwright', statusCode, context);
+    await handleContent($, ContentCrawlerTypes.PLAYWRIGHT, statusCode, context);
 }
 
 export async function requestHandlerCheerio(
@@ -189,12 +189,12 @@ export async function requestHandlerCheerio(
 
     const statusCode = response?.statusCode;
 
-    await handleContent($, 'cheerio', statusCode, context);
+    await handleContent($, ContentCrawlerTypes.CHEERIO, statusCode, context);
 }
 
-export async function failedRequestHandler(request: Request, err: Error, crawlerName: 'playwright' | 'cheerio') {
+export async function failedRequestHandler(request: Request, err: Error, crawlerType: ContentCrawlerTypes) {
     log.error(`Content-crawler failed to process request ${request.url}, error ${err.message}`);
-    request.userData.timeMeasures!.push({ event: `${crawlerName}-failed-request`, time: Date.now() });
+    request.userData.timeMeasures!.push({ event: `${crawlerType}-failed-request`, time: Date.now() });
     const { responseId } = request.userData;
     if (responseId) {
         const resultErr: Output = {

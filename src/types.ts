@@ -1,6 +1,8 @@
 import type { ProxyConfigurationOptions } from 'apify';
 import { CheerioCrawlerOptions, PlaywrightCrawlerOptions } from 'crawlee';
 
+import { ContentCrawlerTypes } from './const';
+
 export type OutputFormats = 'text' | 'markdown' | 'html';
 
 export type Input = {
@@ -122,4 +124,10 @@ export type Output = {
     };
 };
 
-export type ContentCrawlerOptions = { type: 'cheerio', crawlerOptions: CheerioCrawlerOptions } | { type: 'playwright', crawlerOptions: PlaywrightCrawlerOptions };
+export type ContentCrawlerOptions = {
+    type: ContentCrawlerTypes.CHEERIO,
+    crawlerOptions: CheerioCrawlerOptions
+} | {
+    type: ContentCrawlerTypes.PLAYWRIGHT,
+    crawlerOptions: PlaywrightCrawlerOptions
+};

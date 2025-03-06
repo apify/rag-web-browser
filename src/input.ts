@@ -2,7 +2,7 @@ import { Actor } from 'apify';
 import { BrowserName, CheerioCrawlerOptions, log, ProxyConfiguration } from 'crawlee';
 import { firefox } from 'playwright';
 
-import { defaults } from './const.js';
+import { ContentCrawlerTypes, defaults } from './const.js';
 import { UserInputError } from './errors.js';
 import type { Input, ContentScraperSettings, OutputFormats, StandbyInput, ContentCrawlerOptions } from './types.js';
 
@@ -88,7 +88,7 @@ function createPlaywrightCrawlerOptions(input: Input, proxy: ProxyConfiguration 
     const { keepAlive, maxRequestRetries, initialConcurrency, maxConcurrency, minConcurrency } = input;
 
     return {
-        type: 'playwright',
+        type: ContentCrawlerTypes.PLAYWRIGHT,
         crawlerOptions: {
             headless: true,
             keepAlive,
@@ -119,7 +119,7 @@ function createCheerioCrawlerOptions(input: Input, proxy: ProxyConfiguration | u
     const { keepAlive, maxRequestRetries, initialConcurrency, maxConcurrency, minConcurrency } = input;
 
     return {
-        type: 'cheerio',
+        type: ContentCrawlerTypes.CHEERIO,
         crawlerOptions: {
             keepAlive,
             maxRequestRetries,

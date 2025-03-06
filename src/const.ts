@@ -12,6 +12,11 @@ export enum Routes {
     MESSAGE = '/message',
 }
 
+export enum ContentCrawlerTypes {
+    PLAYWRIGHT = 'playwright',
+    CHEERIO = 'cheerio',
+}
+
 export const PLAYWRIGHT_REQUEST_TIMEOUT_NORMAL_MODE_SECS = 60;
 
 // Default values parsed from input_schema.json

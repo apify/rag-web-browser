@@ -38,7 +38,7 @@ export function randomId() {
  * The maxResults parameter is passed to the UserData object, when the request is handled it is used to limit
  * the number of search results without the created overhead.
  *
- * Also add the contentCrawlerKey to the UserData object to be able to identify the conten crawler should
+ * Also add the contentCrawlerKey to the UserData object to be able to identify which content crawler should
  * handle the crawling .
  */
 export function createSearchRequest(

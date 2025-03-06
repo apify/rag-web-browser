@@ -12,6 +12,7 @@ import {
     RequestOptions,
 } from 'crawlee';
 
+import { ContentCrawlerTypes } from './const.js';
 import { scrapeOrganicResults } from './google-search/google-extractors-urls.js';
 import { failedRequestHandler, requestHandlerCheerio, requestHandlerPlaywright } from './request-handler.js';
 import { addEmptyResultToResponse, sendResponseError } from './responses.js';
@@ -141,7 +142,7 @@ async function createPlaywrightContentCrawler(
         requestHandler: async (context) => {
             await requestHandlerPlaywright(context as unknown as PlaywrightCrawlingContext<ContentCrawlerUserData>);
         },
-        failedRequestHandler: ({ request }, err) => failedRequestHandler(request, err, 'playwright'),
+        failedRequestHandler: ({ request }, err) => failedRequestHandler(request, err, ContentCrawlerTypes.PLAYWRIGHT),
     });
 }
 
@@ -157,7 +158,7 @@ async function createCheerioContentCrawler(
         requestHandler: async (context) => {
             await requestHandlerCheerio(context as unknown as CheerioCrawlingContext<ContentCrawlerUserData>);
         },
-        failedRequestHandler: ({ request }, err) => failedRequestHandler(request, err, 'cheerio'),
+        failedRequestHandler: ({ request }, err) => failedRequestHandler(request, err, ContentCrawlerTypes.CHEERIO),
     });
 }
 
