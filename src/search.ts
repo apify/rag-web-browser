@@ -1,4 +1,4 @@
-import { CheerioCrawlerOptions, log, PlaywrightCrawlerOptions } from 'crawlee';
+import { CheerioCrawlerOptions, log } from 'crawlee';
 import { IncomingMessage, ServerResponse } from 'http';
 
 import { PLAYWRIGHT_REQUEST_TIMEOUT_NORMAL_MODE_SECS, Routes } from './const.js';
@@ -6,7 +6,7 @@ import { addContentCrawlRequest, addSearchRequest, createAndStartCrawlers } from
 import { UserInputError } from './errors.js';
 import { processInput } from './input.js';
 import { createResponsePromise } from './responses.js';
-import { Input, Output, ContentScraperSettings } from './types.js';
+import { Input, Output, ContentScraperSettings, ContentCrawlerOptions } from './types.js';
 import {
     addTimeMeasureEvent,
     checkAndRemoveExtraParams,
@@ -139,13 +139,13 @@ export async function handleModelContextProtocol(params: Partial<Input>): Promis
  */
 export async function handleSearchNormalMode(input: Input,
     searchCrawlerOptions: CheerioCrawlerOptions,
-    contentCrawlerOptions: PlaywrightCrawlerOptions | CheerioCrawlerOptions,
+    contentCrawlerOptions: ContentCrawlerOptions,
     contentScraperSettings: ContentScraperSettings,
 ) {
     const startedTime = Date.now();
     searchCrawlerOptions.keepAlive = false;
-    contentCrawlerOptions.keepAlive = false;
-    contentCrawlerOptions.requestHandlerTimeoutSecs = PLAYWRIGHT_REQUEST_TIMEOUT_NORMAL_MODE_SECS;
+    contentCrawlerOptions.crawlerOptions.keepAlive = false;
+    contentCrawlerOptions.crawlerOptions.requestHandlerTimeoutSecs = PLAYWRIGHT_REQUEST_TIMEOUT_NORMAL_MODE_SECS;
 
     // contentCrawlerKey is used to identify the crawler that should process the search results
     const { contentCrawlerKey, searchCrawler, contentCrawler } = await createAndStartCrawlers(

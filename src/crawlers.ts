@@ -15,7 +15,7 @@ import {
 import { scrapeOrganicResults } from './google-search/google-extractors-urls.js';
 import { failedRequestHandler, requestHandlerCheerio, requestHandlerPlaywright } from './request-handler.js';
 import { addEmptyResultToResponse, sendResponseError } from './responses.js';
-import type { ContentCrawlerUserData, SearchCrawlerUserData } from './types.js';
+import type { ContentCrawlerOptions, ContentCrawlerUserData, SearchCrawlerUserData } from './types.js';
 import { addTimeMeasureEvent, createRequest } from './utils.js';
 
 const crawlers = new Map<string, CheerioCrawler | PlaywrightCrawler>();
@@ -31,7 +31,7 @@ export function getCrawlerKey(crawlerOptions: CheerioCrawlerOptions | Playwright
  */
 export async function createAndStartCrawlers(
     searchCrawlerOptions: CheerioCrawlerOptions,
-    contentCrawlerOptions: PlaywrightCrawlerOptions | CheerioCrawlerOptions,
+    contentCrawlerOptions: ContentCrawlerOptions,
     startCrawlers: boolean = true,
 ) {
     const { crawler: searchCrawler } = await createAndStartSearchCrawler(
@@ -53,7 +53,7 @@ export async function createAndStartCrawlers(
  */
 export async function createAndStartAllCrawlers(
     searchCrawlerOptions: CheerioCrawlerOptions,
-    contentCrawlerOptions: (PlaywrightCrawlerOptions | CheerioCrawlerOptions)[],
+    contentCrawlerOptions: ContentCrawlerOptions[],
     startCrawlers: boolean = true,
 ) {
     const { crawler: searchCrawler } = await createAndStartSearchCrawler(
@@ -148,28 +148,26 @@ async function createAndStartSearchCrawler(
  * A crawler won't be created if it already exists.
  */
 async function createAndStartContentCrawler(
-    crawlerOptions: PlaywrightCrawlerOptions | CheerioCrawlerOptions,
+    contentCrawlerOptions: ContentCrawlerOptions,
     startCrawler: boolean = true,
 ) {
+    const { type: crawlerType, crawlerOptions } = contentCrawlerOptions;
+
     const key = getCrawlerKey(crawlerOptions);
     if (crawlers.has(key)) {
         return { key, crawler: crawlers.get(key) };
     }
 
-    // Typeguard to determine if we should use Playwright or Cheerio crawler
-    const usePlaywrightCrawler = 'browserPoolOptions' in crawlerOptions;
+    const crawler = crawlerType === 'playwright'
+        ? await createPlaywrightContentCrawler(crawlerOptions, key)
+        : await createCheerioContentCrawler(crawlerOptions, key);
 
-    const crawler = usePlaywrightCrawler
-        ? await createPlaywrightContentCrawler(crawlerOptions as PlaywrightCrawlerOptions, key)
-        : await createCheerioContentCrawler(crawlerOptions as CheerioCrawlerOptions, key);
-
-    const name = usePlaywrightCrawler ? 'playwright' : 'cheerio';
     if (startCrawler) {
         crawler.run().then(
-            () => log.warning(`Crawler ${name} has finished`),
+            () => log.warning(`Crawler ${crawlerType} has finished`),
             () => {},
         );
-        log.info(`Crawler ${name} has started 💪🏼`);
+        log.info(`Crawler ${crawlerType} has started 💪🏼`);
     }
     crawlers.set(key, crawler);
     log.info(`Number of crawlers ${crawlers.size}`);

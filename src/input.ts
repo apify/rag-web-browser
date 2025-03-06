@@ -1,10 +1,10 @@
 import { Actor } from 'apify';
-import { BrowserName, CheerioCrawlerOptions, log, PlaywrightCrawlerOptions, ProxyConfiguration } from 'crawlee';
+import { BrowserName, CheerioCrawlerOptions, log, ProxyConfiguration } from 'crawlee';
 import { firefox } from 'playwright';
 
 import { defaults } from './const.js';
 import { UserInputError } from './errors.js';
-import type { Input, ContentScraperSettings, OutputFormats, StandbyInput } from './types.js';
+import type { Input, ContentScraperSettings, OutputFormats, StandbyInput, ContentCrawlerOptions } from './types.js';
 
 /**
  * Processes the input and returns the settings for the crawler (adapted from: Website Content Crawler).
@@ -43,7 +43,7 @@ export async function processInput(
         autoscaledPoolOptions: { desiredConcurrency: 1 },
     };
     const proxy = await Actor.createProxyConfiguration(proxyConfiguration);
-    const contentCrawlerOptions: (PlaywrightCrawlerOptions | CheerioCrawlerOptions)[] = [];
+    const contentCrawlerOptions: ContentCrawlerOptions[] = [];
 
     if (standbyInit) {
         contentCrawlerOptions.push(createPlaywrightCrawlerOptions(input, proxy));
@@ -69,46 +69,52 @@ export async function processInput(
     return { input, searchCrawlerOptions, contentCrawlerOptions, contentScraperSettings };
 }
 
-function createPlaywrightCrawlerOptions(input: Input, proxy: ProxyConfiguration | undefined): PlaywrightCrawlerOptions {
+function createPlaywrightCrawlerOptions(input: Input, proxy: ProxyConfiguration | undefined): ContentCrawlerOptions {
     const { keepAlive, maxRequestRetries, initialConcurrency, maxConcurrency, minConcurrency } = input;
 
     return {
-        headless: true,
-        keepAlive,
-        maxRequestRetries,
-        proxyConfiguration: proxy,
-        requestHandlerTimeoutSecs: input.requestTimeoutSecs,
-        launchContext: {
-            launcher: firefox,
-        },
-        browserPoolOptions: {
-            fingerprintOptions: {
-                fingerprintGeneratorOptions: {
-                    browsers: [BrowserName.firefox],
-                },
+        type: 'playwright',
+        crawlerOptions: {
+            headless: true,
+            keepAlive,
+            maxRequestRetries,
+            proxyConfiguration: proxy,
+            requestHandlerTimeoutSecs: input.requestTimeoutSecs,
+            launchContext: {
+                launcher: firefox,
             },
-            retireInactiveBrowserAfterSecs: 60,
-        },
-        autoscaledPoolOptions: {
-            desiredConcurrency: initialConcurrency === 0 ? undefined : Math.min(initialConcurrency, maxConcurrency),
-            maxConcurrency,
-            minConcurrency,
+            browserPoolOptions: {
+                fingerprintOptions: {
+                    fingerprintGeneratorOptions: {
+                        browsers: [BrowserName.firefox],
+                    },
+                },
+                retireInactiveBrowserAfterSecs: 60,
+            },
+            autoscaledPoolOptions: {
+                desiredConcurrency: initialConcurrency === 0 ? undefined : Math.min(initialConcurrency, maxConcurrency),
+                maxConcurrency,
+                minConcurrency,
+            },
         },
     };
 }
 
-function createCheerioCrawlerOptions(input: Input, proxy: ProxyConfiguration | undefined): CheerioCrawlerOptions {
+function createCheerioCrawlerOptions(input: Input, proxy: ProxyConfiguration | undefined): ContentCrawlerOptions {
     const { keepAlive, maxRequestRetries, initialConcurrency, maxConcurrency, minConcurrency } = input;
 
     return {
-        keepAlive,
-        maxRequestRetries,
-        proxyConfiguration: proxy,
-        requestHandlerTimeoutSecs: input.requestTimeoutSecs,
-        autoscaledPoolOptions: {
-            desiredConcurrency: initialConcurrency === 0 ? undefined : Math.min(initialConcurrency, maxConcurrency),
-            maxConcurrency,
-            minConcurrency,
+        type: 'cheerio',
+        crawlerOptions: {
+            keepAlive,
+            maxRequestRetries,
+            proxyConfiguration: proxy,
+            requestHandlerTimeoutSecs: input.requestTimeoutSecs,
+            autoscaledPoolOptions: {
+                desiredConcurrency: initialConcurrency === 0 ? undefined : Math.min(initialConcurrency, maxConcurrency),
+                maxConcurrency,
+                minConcurrency,
+            },
         },
     };
 }
