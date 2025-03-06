@@ -1,4 +1,4 @@
-import inputSchema from '../.actor/input_schema.json' assert { type: 'json' };
+import inputSchema from '../.actor/input_schema.json' with { type: 'json' };
 
 export enum ContentCrawlerStatus {
     PENDING = 'pending',

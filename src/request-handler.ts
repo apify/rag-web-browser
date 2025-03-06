@@ -2,12 +2,12 @@ import { Actor } from 'apify';
 import { load } from 'cheerio';
 import { CheerioCrawlingContext, htmlToText, log, PlaywrightCrawlingContext, sleep, Request } from 'crawlee';
 
-import { ContentCrawlerStatus } from './const';
-import { addResultToResponse, sendResponseIfFinished } from './responses';
-import { Output, ContentCrawlerUserData } from './types';
-import { addTimeMeasureEvent, transformTimeMeasuresToRelative } from './utils';
-import { processHtml } from './website-content-crawler/html-processing';
-import { htmlToMarkdown } from './website-content-crawler/markdown';
+import { ContentCrawlerStatus } from './const.js';
+import { addResultToResponse, sendResponseIfFinished } from './responses.js';
+import { Output, ContentCrawlerUserData } from './types.js';
+import { addTimeMeasureEvent, transformTimeMeasuresToRelative } from './utils.js';
+import { processHtml } from './website-content-crawler/html-processing.js';
+import { htmlToMarkdown } from './website-content-crawler/markdown.js';
 
 let ACTOR_TIMEOUT_AT: number | undefined;
 try {
