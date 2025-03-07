@@ -1,4 +1,7 @@
 import type { ProxyConfigurationOptions } from 'apify';
+import { CheerioCrawlerOptions, PlaywrightCrawlerOptions } from 'crawlee';
+
+import { ContentCrawlerTypes } from './const';
 
 export type OutputFormats = 'text' | 'markdown' | 'html';
 
@@ -28,6 +31,7 @@ export type Input = {
     readableTextCharThreshold: number;
     removeElementsCssSelector: string;
     removeCookieWarnings: boolean;
+    scrapingTool: 'browser-playwright' | 'raw-http';
 };
 
 export type StandbyInput = Input & {
@@ -48,9 +52,12 @@ export interface TimeMeasure {
         | 'before-cheerio-run'
         | 'before-playwright-queue-add'
         | 'before-playwright-run'
+        | 'cheerio-request-start'
         | 'cheerio-failed-request'
+        | 'cheerio-process-html'
         | 'cheerio-request-end'
         | 'cheerio-request-handler-start'
+        | 'cheerio-before-response-send'
         | 'error'
         | 'playwright-request-start'
         | 'playwright-wait-dynamic-content'
@@ -68,20 +75,21 @@ export type SearchCrawlerUserData = {
     maxResults: number;
     timeMeasures: TimeMeasure[];
     query: string;
-    playwrightCrawlerKey: string;
+    contentCrawlerKey: string;
     responseId: string;
-    playwrightScraperSettings: PlaywrightScraperSettings;
+    contentScraperSettings: ContentScraperSettings;
 };
 
-export type PlaywrightCrawlerUserData = {
+export type ContentCrawlerUserData = {
     query: string;
     responseId: string;
     timeMeasures: TimeMeasure[];
     searchResult?: OrganicResult;
-    playwrightScraperSettings: PlaywrightScraperSettings;
+    contentCrawlerKey?: string;
+    contentScraperSettings: ContentScraperSettings;
 };
 
-export interface PlaywrightScraperSettings {
+export interface ContentScraperSettings {
     debugMode: boolean;
     dynamicContentWaitSecs: number;
     htmlTransformer?: string
@@ -114,4 +122,12 @@ export type Output = {
         author?: string | null;
         languageCode?: string | null;
     };
+};
+
+export type ContentCrawlerOptions = {
+    type: ContentCrawlerTypes.CHEERIO,
+    crawlerOptions: CheerioCrawlerOptions
+} | {
+    type: ContentCrawlerTypes.PLAYWRIGHT,
+    crawlerOptions: PlaywrightCrawlerOptions
 };

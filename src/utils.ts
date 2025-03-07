@@ -2,7 +2,7 @@ import { RequestOptions, log, ProxyConfiguration } from 'crawlee';
 import { parse, ParsedUrlQuery } from 'querystring';
 
 import { defaults } from './const.js';
-import { OrganicResult, PlaywrightScraperSettings, TimeMeasure, PlaywrightCrawlerUserData, SearchCrawlerUserData } from './types.js';
+import { OrganicResult, ContentScraperSettings, TimeMeasure, ContentCrawlerUserData, SearchCrawlerUserData } from './types.js';
 
 export function parseParameters(url: string): ParsedUrlQuery {
     return parse(url.slice(1));
@@ -38,16 +38,16 @@ export function randomId() {
  * The maxResults parameter is passed to the UserData object, when the request is handled it is used to limit
  * the number of search results without the created overhead.
  *
- * Also add the playwrightCrawlerKey to the UserData object to be able to identify the playwright crawler should
+ * Also add the contentCrawlerKey to the UserData object to be able to identify which content crawler should
  * handle the crawling .
  */
 export function createSearchRequest(
     query: string,
     responseId: string,
     maxResults: number,
-    playwrightCrawlerKey: string,
+    contentCrawlerKey: string,
     proxyConfiguration: ProxyConfiguration | undefined,
-    playwrightScraperSettings: PlaywrightScraperSettings,
+    contentScraperSettings: ContentScraperSettings,
 ): RequestOptions<SearchCrawlerUserData> {
     // add some overhead for the maxResults to account for the fact that some results are not Organic
     const n = Number(maxResults) + 5;
@@ -60,20 +60,27 @@ export function createSearchRequest(
     return {
         url: urlSearch,
         uniqueKey: randomId(),
-        userData: { maxResults, timeMeasures: [], query, playwrightCrawlerKey, responseId, playwrightScraperSettings },
+        userData: {
+            maxResults,
+            timeMeasures: [],
+            query,
+            contentCrawlerKey,
+            contentScraperSettings,
+            responseId,
+        },
     };
 }
 
 /**
- * Create a request for Playwright crawler with the provided query, result, responseId and timeMeasures.
+ * Create a request for content crawler with the provided query, result, responseId and timeMeasures.
  */
 export function createRequest(
     query: string,
     result: OrganicResult,
     responseId: string,
-    playwrightScraperSettings: PlaywrightScraperSettings,
+    contentScraperSettings: ContentScraperSettings,
     timeMeasures: TimeMeasure[] | null = null,
-): RequestOptions<PlaywrightCrawlerUserData> {
+): RequestOptions<ContentCrawlerUserData> {
     return {
         url: result.url!,
         uniqueKey: randomId(),
@@ -82,12 +89,12 @@ export function createRequest(
             responseId,
             searchResult: result.url && result.title ? result : undefined,
             timeMeasures: timeMeasures ? [...timeMeasures] : [],
-            playwrightScraperSettings,
+            contentScraperSettings,
         },
     };
 }
 
-export function addTimeMeasureEvent(userData: PlaywrightCrawlerUserData, event: TimeMeasure['event'], time: number | null = null) {
+export function addTimeMeasureEvent(userData: ContentCrawlerUserData, event: TimeMeasure['event'], time: number | null = null) {
     let timePrev = 0;
     if (!userData.timeMeasures?.length) {
         userData.timeMeasures = [];

@@ -1,16 +1,45 @@
 import { Actor } from 'apify';
-import { BrowserName, CheerioCrawlerOptions, log, PlaywrightCrawlerOptions } from 'crawlee';
+import { BrowserName, CheerioCrawlerOptions, log, ProxyConfiguration } from 'crawlee';
 import { firefox } from 'playwright';
 
-import { defaults } from './const.js';
+import { ContentCrawlerTypes, defaults } from './const.js';
 import { UserInputError } from './errors.js';
-import type { Input, PlaywrightScraperSettings, OutputFormats, StandbyInput } from './types.js';
+import type { Input, ContentScraperSettings, OutputFormats, StandbyInput, ContentCrawlerOptions } from './types.js';
+
+/**
+ * Processes the input and returns an array of crawler settings. This is ideal for startup of STANDBY mode
+ * because it makes it simple to start all crawlers at once.
+ */
+export async function processStandbyInput(originalInput: Partial<Input> | Partial<StandbyInput>) {
+    const { input, searchCrawlerOptions, contentScraperSettings } = await processInputInternal(originalInput, true);
+
+    const proxy = await Actor.createProxyConfiguration(input.proxyConfiguration);
+    const contentCrawlerOptions: ContentCrawlerOptions[] = [
+        createPlaywrightCrawlerOptions(input, proxy),
+        createCheerioCrawlerOptions(input, proxy),
+    ];
+
+    return { input, searchCrawlerOptions, contentCrawlerOptions, contentScraperSettings };
+}
+
+/**
+ * Processes the input and returns the settings for the crawler.
+ */
+export async function processInput(originalInput: Partial<Input> | Partial<StandbyInput>) {
+    const { input, searchCrawlerOptions, contentScraperSettings } = await processInputInternal(originalInput);
+
+    const proxy = await Actor.createProxyConfiguration(input.proxyConfiguration);
+    const contentCrawlerOptions: ContentCrawlerOptions = input.scrapingTool === 'raw-http'
+        ? createCheerioCrawlerOptions(input, proxy)
+        : createPlaywrightCrawlerOptions(input, proxy);
+
+    return { input, searchCrawlerOptions, contentCrawlerOptions, contentScraperSettings };
+}
 
 /**
  * Processes the input and returns the settings for the crawler (adapted from: Website Content Crawler).
  */
-
-export async function processInput(
+async function processInputInternal(
     originalInput: Partial<Input> | Partial<StandbyInput>,
     standbyInit: boolean = false,
 ) {
@@ -24,13 +53,8 @@ export async function processInput(
     const {
         debugMode,
         dynamicContentWaitSecs,
-        initialConcurrency,
         keepAlive,
-        minConcurrency,
-        maxConcurrency,
-        maxRequestRetries,
         serpMaxRetries,
-        proxyConfiguration,
         serpProxyGroup,
         readableTextCharThreshold,
         removeCookieWarnings,
@@ -39,38 +63,14 @@ export async function processInput(
     log.setLevel(debugMode ? log.LEVELS.DEBUG : log.LEVELS.INFO);
 
     const proxySearch = await Actor.createProxyConfiguration({ groups: [serpProxyGroup] });
-    const cheerioCrawlerOptions: CheerioCrawlerOptions = {
+    const searchCrawlerOptions: CheerioCrawlerOptions = {
         keepAlive,
         maxRequestRetries: serpMaxRetries,
         proxyConfiguration: proxySearch,
         autoscaledPoolOptions: { desiredConcurrency: 1 },
     };
-    const proxy = await Actor.createProxyConfiguration(proxyConfiguration);
-    const playwrightCrawlerOptions: PlaywrightCrawlerOptions = {
-        headless: true,
-        keepAlive,
-        maxRequestRetries,
-        proxyConfiguration: proxy,
-        requestHandlerTimeoutSecs: input.requestTimeoutSecs,
-        launchContext: {
-            launcher: firefox,
-        },
-        browserPoolOptions: {
-            fingerprintOptions: {
-                fingerprintGeneratorOptions: {
-                    browsers: [BrowserName.firefox],
-                },
-            },
-            retireInactiveBrowserAfterSecs: 60,
-        },
-        autoscaledPoolOptions: {
-            desiredConcurrency: initialConcurrency === 0 ? undefined : Math.min(initialConcurrency, maxConcurrency),
-            maxConcurrency,
-            minConcurrency,
-        },
-    };
 
-    const playwrightScraperSettings: PlaywrightScraperSettings = {
+    const contentScraperSettings: ContentScraperSettings = {
         debugMode,
         dynamicContentWaitSecs,
         htmlTransformer: 'none',
@@ -81,7 +81,57 @@ export async function processInput(
         removeElementsCssSelector: input.removeElementsCssSelector,
     };
 
-    return { input, cheerioCrawlerOptions, playwrightCrawlerOptions, playwrightScraperSettings };
+    return { input, searchCrawlerOptions, contentScraperSettings };
+}
+
+function createPlaywrightCrawlerOptions(input: Input, proxy: ProxyConfiguration | undefined): ContentCrawlerOptions {
+    const { keepAlive, maxRequestRetries, initialConcurrency, maxConcurrency, minConcurrency } = input;
+
+    return {
+        type: ContentCrawlerTypes.PLAYWRIGHT,
+        crawlerOptions: {
+            headless: true,
+            keepAlive,
+            maxRequestRetries,
+            proxyConfiguration: proxy,
+            requestHandlerTimeoutSecs: input.requestTimeoutSecs,
+            launchContext: {
+                launcher: firefox,
+            },
+            browserPoolOptions: {
+                fingerprintOptions: {
+                    fingerprintGeneratorOptions: {
+                        browsers: [BrowserName.firefox],
+                    },
+                },
+                retireInactiveBrowserAfterSecs: 60,
+            },
+            autoscaledPoolOptions: {
+                desiredConcurrency: initialConcurrency === 0 ? undefined : Math.min(initialConcurrency, maxConcurrency),
+                maxConcurrency,
+                minConcurrency,
+            },
+        },
+    };
+}
+
+function createCheerioCrawlerOptions(input: Input, proxy: ProxyConfiguration | undefined): ContentCrawlerOptions {
+    const { keepAlive, maxRequestRetries, initialConcurrency, maxConcurrency, minConcurrency } = input;
+
+    return {
+        type: ContentCrawlerTypes.CHEERIO,
+        crawlerOptions: {
+            keepAlive,
+            maxRequestRetries,
+            proxyConfiguration: proxy,
+            requestHandlerTimeoutSecs: input.requestTimeoutSecs,
+            autoscaledPoolOptions: {
+                desiredConcurrency: initialConcurrency === 0 ? undefined : Math.min(initialConcurrency, maxConcurrency),
+                maxConcurrency,
+                minConcurrency,
+            },
+        },
+    };
 }
 
 /**
@@ -132,5 +182,8 @@ export function validateAndFillInput(input: Input, standbyInit: boolean) {
     }
     if (input.dynamicContentWaitSecs >= input.requestTimeoutSecs) {
         input.dynamicContentWaitSecs = Math.round(input.requestTimeoutSecs / 2);
+    }
+    if (input.scrapingTool !== 'browser-playwright' && input.scrapingTool !== 'raw-http') {
+        throw new UserInputError('The `scrapingTool` parameter must be either `browser-playwright` or `raw-http`.');
     }
 }

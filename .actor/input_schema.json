@@ -136,6 +136,15 @@
             "description": "If enabled, the Actor attempts to close or remove cookie consent dialogs to improve the quality of extracted text. Note that this setting increases the latency.",
             "default": true
         },
+        "scrapingTool": {
+            "title": "Which scraping tool to use",
+            "type": "string",
+            "description": "Choose what scraping tool to use for extracting the target web pages. The Browser tool is more powerful and can handle JavaScript heavy websites. While the Plain HTML tool is about two times faster.",
+            "editor": "select",
+            "default": "browser-playwright",
+            "enum": ["browser-playwright", "raw-http"],
+            "enumTitles": ["Browser (uses Playwright)", "Raw HTTP"]
+        },
         "debugMode": {
             "title": "Enable debug mode",
             "type": "boolean",

@@ -1,4 +1,4 @@
-import inputSchema from '../.actor/input_schema.json' assert { type: 'json' };
+import inputSchema from '../.actor/input_schema.json' with { type: 'json' };
 
 export enum ContentCrawlerStatus {
     PENDING = 'pending',
@@ -10,6 +10,11 @@ export enum Routes {
     SEARCH = '/search',
     SSE = '/sse',
     MESSAGE = '/message',
+}
+
+export enum ContentCrawlerTypes {
+    PLAYWRIGHT = 'playwright',
+    CHEERIO = 'cheerio',
 }
 
 export const PLAYWRIGHT_REQUEST_TIMEOUT_NORMAL_MODE_SECS = 60;
@@ -38,4 +43,5 @@ export const defaults = {
     serpMaxRetries: inputSchema.properties.serpMaxRetries.default,
     serpMaxRetriesMax: inputSchema.properties.serpMaxRetries.maximum,
     serpProxyGroup: inputSchema.properties.serpProxyGroup.default,
+    scrapingTool: inputSchema.properties.scrapingTool.default,
 };

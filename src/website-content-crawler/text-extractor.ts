@@ -2,7 +2,7 @@ import { Readability, isProbablyReaderable } from '@mozilla/readability';
 import { log } from 'crawlee';
 import { JSDOM, VirtualConsole } from 'jsdom';
 
-import type { PlaywrightScraperSettings } from '../types.js';
+import type { ContentScraperSettings } from '../types.js';
 
 const virtualConsole = new VirtualConsole();
 virtualConsole.on('error', (error) => {
@@ -20,7 +20,7 @@ export async function readableText({
 }: {
     html: string;
     url: string;
-    settings: PlaywrightScraperSettings;
+    settings: ContentScraperSettings;
     options?: {
         fallbackToNone?: boolean;
     };

@@ -58,5 +58,8 @@ COPY --from=builder --chown=myuser /home/myuser/dist ./dist
 # for most source file changes.
 COPY --chown=myuser . ./
 
+# Disable experimental feature warning from Node.js
+ENV NODE_NO_WARNINGS=1
+
 # Run the image.
 CMD npm run start:prod --silent

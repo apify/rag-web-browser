@@ -1,10 +1,10 @@
 import { Actor } from 'apify';
 import { load } from 'cheerio';
-import { htmlToText, log, PlaywrightCrawlingContext, sleep, Request } from 'crawlee';
+import { CheerioCrawlingContext, htmlToText, log, PlaywrightCrawlingContext, sleep, Request } from 'crawlee';
 
-import { ContentCrawlerStatus } from './const.js';
+import { ContentCrawlerStatus, ContentCrawlerTypes } from './const.js';
 import { addResultToResponse, sendResponseIfFinished } from './responses.js';
-import { Output, PlaywrightCrawlerUserData } from './types.js';
+import { Output, ContentCrawlerUserData } from './types.js';
 import { addTimeMeasureEvent, transformTimeMeasuresToRelative } from './utils.js';
 import { processHtml } from './website-content-crawler/html-processing.js';
 import { htmlToMarkdown } from './website-content-crawler/markdown.js';
@@ -56,33 +56,16 @@ function isValidContentType(contentType: string | undefined) {
     return ['text', 'html', 'xml'].some((type) => contentType?.includes(type));
 }
 
-/**
- * Generic handler for processing the page content (adapted from: Website Content Crawler).
- */
-export async function requestHandlerPlaywright(context: PlaywrightCrawlingContext<PlaywrightCrawlerUserData>) {
-    const { request, contentType, page, response, closeCookieModals } = context;
-    const { playwrightScraperSettings: settings, responseId } = request.userData;
+async function checkValidResponse(
+    $: CheerioCrawlingContext['$'],
+    contentType: string | undefined,
+    context: PlaywrightCrawlingContext<ContentCrawlerUserData> | CheerioCrawlingContext<ContentCrawlerUserData>,
+) {
+    const { request, response } = context;
+    const { responseId } = request.userData;
 
-    log.info(`Processing URL: ${request.url}`);
-    addTimeMeasureEvent(request.userData, 'playwright-request-start');
-    if (settings.dynamicContentWaitSecs > 0) {
-        await waitForDynamicContent(context, settings.dynamicContentWaitSecs * 1000);
-        addTimeMeasureEvent(request.userData, 'playwright-wait-dynamic-content');
-    }
-
-    if (page && settings.removeCookieWarnings) {
-        await closeCookieModals();
-        addTimeMeasureEvent(request.userData, 'playwright-remove-cookie');
-    }
-
-    // Parsing the page after the dynamic content has been loaded / cookie warnings removed
-    const $ = await context.parseWithCheerio();
-    addTimeMeasureEvent(request.userData, 'playwright-parse-with-cheerio');
-
-    const headers = response?.headers instanceof Function ? response.headers() : response?.headers;
-    // @ts-expect-error false-positive?
-    if (!$ || !isValidContentType(headers['content-type'])) {
-        log.info(`Skipping URL ${request.loadedUrl} as it could not be parsed.`, contentType as object);
+    if (!$ || !isValidContentType(contentType)) {
+        log.info(`Skipping URL ${request.loadedUrl} as it could not be parsed.`, { contentType });
         const resultSkipped: Output = {
             crawl: {
                 httpStatusCode: response?.status(),
@@ -102,20 +85,32 @@ export async function requestHandlerPlaywright(context: PlaywrightCrawlingContex
             addResultToResponse(responseId, request.uniqueKey, resultSkipped);
             sendResponseIfFinished(responseId);
         }
-        return;
+        return false;
     }
+
+    return true;
+}
+
+async function handleContent(
+    $: CheerioCrawlingContext['$'],
+    crawlerType: ContentCrawlerTypes,
+    statusCode: number | undefined,
+    context: PlaywrightCrawlingContext<ContentCrawlerUserData> | CheerioCrawlingContext<ContentCrawlerUserData>,
+) {
+    const { request } = context;
+    const { responseId, contentScraperSettings: settings } = request.userData;
 
     const $html = $('html');
     const html = $html.html()!;
     const processedHtml = await processHtml(html, request.url, settings, $);
-    addTimeMeasureEvent(request.userData, 'playwright-process-html');
+    addTimeMeasureEvent(request.userData, `${crawlerType}-process-html`);
 
     const isTooLarge = processedHtml.length > settings.maxHtmlCharsToProcess;
     const text = isTooLarge ? load(processedHtml).text() : htmlToText(load(processedHtml));
 
     const result: Output = {
         crawl: {
-            httpStatusCode: page ? response?.status() : undefined,
+            httpStatusCode: statusCode,
             httpStatusMessage: 'OK',
             loadedAt: new Date(),
             uniqueKey: request.uniqueKey,
@@ -135,7 +130,7 @@ export async function requestHandlerPlaywright(context: PlaywrightCrawlingContex
         html: settings.outputFormats.includes('html') ? processedHtml : undefined,
     };
 
-    addTimeMeasureEvent(request.userData, 'playwright-before-response-send');
+    addTimeMeasureEvent(request.userData, `${crawlerType}-before-response-send`);
     if (settings.debugMode) {
         result.crawl.debug = { timeMeasures: transformTimeMeasuresToRelative(request.userData.timeMeasures!) };
     }
@@ -149,9 +144,57 @@ export async function requestHandlerPlaywright(context: PlaywrightCrawlingContex
     }
 }
 
-export async function failedRequestHandlerPlaywright(request: Request, err: Error) {
-    log.error(`Playwright-content-crawler failed to process request ${request.url}, error ${err.message}`);
-    request.userData.timeMeasures!.push({ event: 'playwright-failed-request', time: Date.now() });
+export async function requestHandlerPlaywright(
+    context: PlaywrightCrawlingContext<ContentCrawlerUserData>,
+) {
+    const { request, response, page, closeCookieModals } = context;
+    const { contentScraperSettings: settings } = request.userData;
+
+    log.info(`Processing URL: ${request.url}`);
+    addTimeMeasureEvent(request.userData, 'playwright-request-start');
+    if (settings.dynamicContentWaitSecs > 0) {
+        await waitForDynamicContent(context, settings.dynamicContentWaitSecs * 1000);
+        addTimeMeasureEvent(request.userData, 'playwright-wait-dynamic-content');
+    }
+
+    if (page && settings.removeCookieWarnings) {
+        await closeCookieModals();
+        addTimeMeasureEvent(request.userData, 'playwright-remove-cookie');
+    }
+
+    // Parsing the page after the dynamic content has been loaded / cookie warnings removed
+    const $ = await context.parseWithCheerio();
+    addTimeMeasureEvent(request.userData, 'playwright-parse-with-cheerio');
+
+    const headers = response?.headers instanceof Function ? response.headers() : response?.headers;
+    // @ts-expect-error false-positive?
+    const isValidResponse = await checkValidResponse($, headers?.['content-type'], context);
+    if (!isValidResponse) return;
+
+    const statusCode = response?.status();
+
+    await handleContent($, ContentCrawlerTypes.PLAYWRIGHT, statusCode, context);
+}
+
+export async function requestHandlerCheerio(
+    context: CheerioCrawlingContext<ContentCrawlerUserData>,
+) {
+    const { $, request, response } = context;
+
+    log.info(`Processing URL: ${request.url}`);
+    addTimeMeasureEvent(request.userData, 'cheerio-request-start');
+
+    const isValidResponse = await checkValidResponse($, response.headers['content-type'], context);
+    if (!isValidResponse) return;
+
+    const statusCode = response?.statusCode;
+
+    await handleContent($, ContentCrawlerTypes.CHEERIO, statusCode, context);
+}
+
+export async function failedRequestHandler(request: Request, err: Error, crawlerType: ContentCrawlerTypes) {
+    log.error(`Content-crawler failed to process request ${request.url}, error ${err.message}`);
+    request.userData.timeMeasures!.push({ event: `${crawlerType}-failed-request`, time: Date.now() });
     const { responseId } = request.userData;
     if (responseId) {
         const resultErr: Output = {
