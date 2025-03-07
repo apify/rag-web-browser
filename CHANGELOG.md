@@ -1,5 +1,15 @@
 This changelog summarizes all changes of the RAG Web Browser
 
+### 1.0.8 (2025-03-07)
+
+🚀 Features
+- Add a new `scrapingTool` input to allow users to choose between Browser scraper and raw HTTP scraper
+
+### 1.0.7 (2025-02-20)
+
+🚀 Features
+- Update Readme.md to include information about MCP
+
 ### 1.0.6 (2025-02-04)
 
 🚀 Features

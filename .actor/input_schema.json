@@ -1,6 +1,6 @@
 {
     "title": "RAG Web Browser",
-    "description": "Here you can test RAG Web Browser and its settings. Just enter the search terms or URL and click *Start ▶* to get results. **In production applications, call the Actor via Standby HTTP server for fast response times.**",
+    "description": "Here you can test RAG Web Browser and its settings. Just enter the search terms or URL and click *Start ▶* to get results. In production applications, call the Actor via Standby HTTP server for fast response times.",
     "type": "object",
     "schemaVersion": 1,
     "properties": {
@@ -72,6 +72,15 @@
             "editor": "proxy",
             "sectionCaption": "Target pages scraping settings"
         },
+        "scrapingTool": {
+            "title": "Select a scraping tool",
+            "type": "string",
+            "description": "Select a scraping tool for extracting the target web pages. The Browser tool is more powerful and can handle JavaScript heavy websites, while the Plain HTML tool can't handle JavaScript but is about two times faster.",
+            "editor": "select",
+            "default": "browser-playwright",
+            "enum": ["browser-playwright", "raw-http"],
+            "enumTitles": ["Browser (uses Playwright)", "Raw HTTP"]
+        },
         "removeElementsCssSelector": {
             "title": "Remove HTML elements (CSS selector)",
             "type": "string",
@@ -135,15 +144,6 @@
             "type": "boolean",
             "description": "If enabled, the Actor attempts to close or remove cookie consent dialogs to improve the quality of extracted text. Note that this setting increases the latency.",
             "default": true
-        },
-        "scrapingTool": {
-            "title": "Which scraping tool to use",
-            "type": "string",
-            "description": "Choose what scraping tool to use for extracting the target web pages. The Browser tool is more powerful and can handle JavaScript heavy websites. While the Plain HTML tool is about two times faster.",
-            "editor": "select",
-            "default": "browser-playwright",
-            "enum": ["browser-playwright", "raw-http"],
-            "enumTitles": ["Browser (uses Playwright)", "Raw HTTP"]
         },
         "debugMode": {
             "title": "Enable debug mode",
