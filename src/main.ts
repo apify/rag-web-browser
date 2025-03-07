@@ -82,13 +82,13 @@ if (standbyMode) {
     app.listen(port, async () => {
         log.info(`The Actor web server is listening for user requests at ${host}:${port}`);
 
-        const promisese: Promise<unknown>[] = [];
-        promisese.push(createAndStartSearchCrawler(searchCrawlerOptions));
+        const promises: Promise<unknown>[] = [];
+        promises.push(createAndStartSearchCrawler(searchCrawlerOptions));
         for (const settings of contentCrawlerOptions) {
-            promisese.push(createAndStartContentCrawler(settings));
+            promises.push(createAndStartContentCrawler(settings));
         }
 
-        await Promise.all(promisese);
+        await Promise.all(promises);
     });
 } else {
     log.info('Actor is running in the NORMAL mode.');
