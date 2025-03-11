@@ -32,6 +32,7 @@ export type Input = {
     removeElementsCssSelector: string;
     removeCookieWarnings: boolean;
     scrapingTool: 'browser-playwright' | 'raw-http';
+    blockMedia: boolean;
 };
 
 export type StandbyInput = Input & {

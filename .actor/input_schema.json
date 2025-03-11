@@ -145,6 +145,12 @@
             "description": "If enabled, the Actor attempts to close or remove cookie consent dialogs to improve the quality of extracted text. Note that this setting increases the latency.",
             "default": true
         },
+        "blockMedia": {
+            "title": "Block media resources",
+            "type": "boolean",
+            "description": "If enabled, the Actor will block loading of images, videos and CSS resources when using the Playwright browser. This can improve performance and reduce bandwidth usage.",
+            "default": false
+        },
         "debugMode": {
             "title": "Enable debug mode",
             "type": "boolean",
