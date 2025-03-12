@@ -149,7 +149,7 @@
             "title": "Block media resources",
             "type": "boolean",
             "description": "If enabled, the Actor will block loading of images, videos and CSS resources when using the Playwright browser. This can improve performance and reduce bandwidth usage.",
-            "default": false
+            "default": true
         },
         "debugMode": {
             "title": "Enable debug mode",
