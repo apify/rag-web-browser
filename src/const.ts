@@ -37,6 +37,7 @@ export const defaults = {
     query: undefined, // No default value in input_schema.json
     readableTextCharThreshold: 100, // Not in input_schema.json
     removeCookieWarnings: inputSchema.properties.removeCookieWarnings.default,
+    blockMedia: inputSchema.properties.blockMedia.default,
     removeElementsCssSelector: inputSchema.properties.removeElementsCssSelector.default,
     requestTimeoutSecs: inputSchema.properties.requestTimeoutSecs.default,
     requestTimeoutSecsMax: inputSchema.properties.requestTimeoutSecs.maximum,
