@@ -101,6 +101,20 @@
                         }
                     },
                     {
+                        "name": "scrapingTool",
+                        "in": "query",
+                        "description": "Select a scraping tool for extracting the target web pages. The Browser tool is more powerful and can handle JavaScript heavy websites, while the Plain HTML tool can't handle JavaScript but is about two times faster.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "browser-playwright",
+                                "raw-http"
+                            ],
+                            "default": "raw-http"
+                        }
+                    },
+                    {
                         "name": "removeElementsCssSelector",
                         "in": "query",
                         "required": false,
@@ -125,7 +139,7 @@
                     {
                         "name": "dynamicContentWaitSecs",
                         "in": "query",
-                        "description": "Time to wait for dynamic content to load (seconds).",
+                        "description": "The maximum time in seconds to wait for dynamic page content to load. The Actor considers the web page as fully loaded once this time elapses or when the network becomes idle.",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -135,7 +149,7 @@
                     {
                         "name": "removeCookieWarnings",
                         "in": "query",
-                        "description": "Removes cookie consent dialogs to improve text extraction.",
+                        "description": "If enabled, the Actor attempts to close or remove cookie consent dialogs to improve the quality of extracted text. Note that this setting increases the latency.",
                         "required": false,
                         "schema": {
                             "type": "boolean",
@@ -145,7 +159,7 @@
                     {
                         "name": "debugMode",
                         "in": "query",
-                        "description": "Stores debugging information in dataset if enabled.",
+                        "description": "If enabled, the Actor will store debugging information into the resulting dataset under the `debug` field.",
                         "required": false,
                         "schema": {
                             "type": "boolean",

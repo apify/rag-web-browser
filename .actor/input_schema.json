@@ -77,7 +77,7 @@
             "type": "string",
             "description": "Select a scraping tool for extracting the target web pages. The Browser tool is more powerful and can handle JavaScript heavy websites, while the Plain HTML tool can't handle JavaScript but is about two times faster.",
             "editor": "select",
-            "default": "browser-playwright",
+            "default": "raw-http",
             "enum": ["browser-playwright", "raw-http"],
             "enumTitles": ["Browser (uses Playwright)", "Raw HTTP"]
         },
