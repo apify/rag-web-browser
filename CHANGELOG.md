@@ -1,5 +1,10 @@
 This changelog summarizes all changes of the RAG Web Browser
 
+### 1.0.9 (2025-03-14)
+
+🚀 Features
+- Change default value for `scrapingTool` from 'browser-playwright' to 'raw-http' to improve latency.
+
 ### 1.0.8 (2025-03-07)
 
 🚀 Features
