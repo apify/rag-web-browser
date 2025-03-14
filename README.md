@@ -2,7 +2,7 @@
 
 [![RAG Web Browser](https://apify.com/actor-badge?actor=apify/rag-web-browser)](https://apify.com/apify/rag-web-browser)
 
-This Actor provides web browsing functionality for AI and LLM applications,
+This Actor provides web browsing functionality for AI agents and LLM applications,
 similar to the [web browsing](https://openai.com/index/introducing-chatgpt-search/) feature in ChatGPT.
 It accepts a search phrase or a URL, queries Google Search, then crawls web pages from the top search results, cleans the HTML, converts it to text or Markdown,
 and returns it back for processing by the LLM application.
@@ -203,7 +203,8 @@ In the Standby mode, the Actor runs an HTTP server that supports the MCP protoco
     data: {"result":{"content":[{"type":"text","text":"[{\"searchResult\":{\"title\":\"Language models recent news\",\"description\":\"Amazon Launches New Generation of LLM Foundation Model...\"}}
     ```
 
-To learn more about MCP server integration, check out the [RAG Web Browser MCP server documentation](https://github.com/apify/mcp-server-rag-web-browser).
+You can try the MCP server using the [MCP Tester Client](https://apify.com/jiri.spilka/tester-mcp-client) available on Apify. In the MCP client, simply enter the URL `https://rag-web-browser.apify.actor/sse` in the Actor input field and click **Run** and interact with server in a UI.
+To learn more about MCP servers, check out the blog post [What is Anthropic's Model Context Protocol](https://blog.apify.com/what-is-model-context-protocol/).
 
 ## ⏳ Performance optimization
 
