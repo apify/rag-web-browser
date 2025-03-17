@@ -3,9 +3,30 @@ import { parse, ParsedUrlQuery } from 'querystring';
 
 import { defaults } from './const.js';
 import { OrganicResult, ContentScraperSettings, TimeMeasure, ContentCrawlerUserData, SearchCrawlerUserData } from './types.js';
+import inputSchema from '../.actor/input_schema.json' with { type: 'json' };
 
 export function parseParameters(url: string): ParsedUrlQuery {
-    return parse(url.slice(1));
+    const params = parse(url.slice(1));
+
+    // Parse non-primitive parameters following input schema
+    type SupportedParams = keyof typeof inputSchema.properties
+    for (const [key, value] of Object.entries(params)) {
+        // If the key is not supported by schema, skip it
+        if (!Object.keys(inputSchema.properties).includes(key)) {
+            log.warning(`Unknown parameter: '${key}', skipping it. Supported parameters: ${Object.keys(defaults).join(', ')}`);
+            continue;
+        }
+        const typedKey = key as SupportedParams;
+        if (['object', 'array'].includes(inputSchema.properties[typedKey].type) && typeof value === 'string') {
+            try {
+                params[key] = JSON.parse(value);
+            } catch (e) {
+                log.warning(`Failed to parse parameter ${key}, it must be valid JSON. Skipping it: ${e}`);
+            }
+        }
+    }
+
+    return params;
 }
 
 /**
