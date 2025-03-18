@@ -37,6 +37,7 @@ export type Input = {
 
 export type StandbyInput = Input & {
     outputFormats: OutputFormats[] | string
+    blockMedia: boolean | string;
 }
 
 export type OrganicResult = {
