@@ -109,6 +109,7 @@ for (const [key, data] of results) {
             }
         }
     }
+    log.info(`Performance for key: ${key}`);
     log.info('Average time for each time measure event:', timeMeasuresMap);
 
     for (const [k, value] of timeMeasuresMap) {

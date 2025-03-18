@@ -46,9 +46,6 @@ async function processInputInternal(
     if (originalInput.outputFormats && typeof originalInput.outputFormats === 'string') {
         originalInput.outputFormats = originalInput.outputFormats.split(',').map((format) => format.trim()) as OutputFormats[];
     }
-    if (originalInput.blockMedia && typeof originalInput.blockMedia === 'string') {
-        originalInput.blockMedia = originalInput.blockMedia === 'true' || originalInput.blockMedia === '1';
-    }
     const input = { ...defaults, ...originalInput } as Input;
     validateAndFillInput(input, standbyInit);
 
@@ -212,7 +209,5 @@ export function validateAndFillInput(input: Input, standbyInit: boolean) {
     // handle case when blockMedia is not defined, coerce blockMedia to boolean
     if (input.blockMedia === undefined || input.blockMedia === null) {
         input.blockMedia = defaults.blockMedia;
-    } else {
-        throw new UserInputError('The `blockMedia` parameter must be a boolean or a string.');
     }
 }
