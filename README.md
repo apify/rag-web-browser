@@ -281,23 +281,31 @@ increase `requestTimeoutSecs` accordingly.
 
 Below is a typical latency breakdown for RAG Web Browser with **maxResults** set to either `1` or `3`, and various memory settings.
 These settings allow for processing all search results in parallel.
-The numbers below are based on the following search terms: "apify", "Donald Trump", "boston".
+The numbers below are based on the following search terms: "apify", "Donald Trump", "AI Agents".
 Results were averaged for the three queries.
 
-| Memory (GB) | Max results | Latency (sec) |
-|-------------|-------------|---------------|
-| 4           | 1           | 22            |
-| 4           | 3           | 31            |
-| 8           | 1           | 16            |
-| 8           | 3           | 17            |
+| Memory (GB) | Scraping Tool      | Max Results | Latency (sec) |
+|-------------|--------------------|-------------|---------------|
+| 8           | raw-http           | 1           | 3.4           |
+| 8           | browser-playwright | 1           | 8.9           |
+| 8           | raw-http           | 3           | 5.4           |
+| 8           | browser-playwright | 3           | 13.6          |
 
-Please note the these results are only indicative and may vary based on the search term, target websites, and network latency.
+| Memory (GB) | Scraping Tool      | Max Results | Latency (sec) |
+|-------------|--------------------|-------------|---------------|
+| 4           | raw-http           | 1           | 4.1           |
+| 4           | raw-http           | 3           | 4.8           |
+| 4           | browser-playwright | 1           | 16.5          |
+| 4           | browser-playwright | 3           | 20.6          |
+
+Please note that these results are only indicative and may vary based on the search term, target websites, and network latency.
 
 ## 💰 Pricing
 
 The RAG Web Browser is free of charge, and you only pay for the Apify platform consumption when it runs.
 The main driver of the price is the Actor compute units (CUs), which are proportional to the amount of Actor run memory
 and run time (1 CU = 1 GB memory x 1 hour).
+Another thing to consider is proxy traffic; residential proxies are more expensive than datacenter proxies.
 
 ## ⓘ Limitations and feedback
 

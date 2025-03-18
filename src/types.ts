@@ -37,6 +37,7 @@ export type Input = {
 
 export type StandbyInput = Input & {
     outputFormats: OutputFormats[] | string
+    blockMedia: boolean | string;
 }
 
 export type OrganicResult = {
@@ -79,6 +80,7 @@ export type SearchCrawlerUserData = {
     contentCrawlerKey: string;
     responseId: string;
     contentScraperSettings: ContentScraperSettings;
+    blockMedia: boolean;
 };
 
 export type ContentCrawlerUserData = {
@@ -88,6 +90,7 @@ export type ContentCrawlerUserData = {
     searchResult?: OrganicResult;
     contentCrawlerKey?: string;
     contentScraperSettings: ContentScraperSettings;
+    blockMedia?: boolean;
 };
 
 export interface ContentScraperSettings {
@@ -113,7 +116,9 @@ export type Output = {
         loadedAt?: Date;
         requestStatus: string;
         uniqueKey: string;
-        debug?: unknown;
+        debug?: {
+            timeMeasures?: TimeMeasure[];
+        };
     };
     searchResult: OrganicResult;
     metadata: {

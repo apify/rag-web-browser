@@ -21,6 +21,7 @@ export const PLAYWRIGHT_REQUEST_TIMEOUT_NORMAL_MODE_SECS = 60;
 
 // Default values parsed from input_schema.json
 export const defaults = {
+    blockMedia: inputSchema.properties.blockMedia.default,
     debugMode: inputSchema.properties.debugMode.default,
     dynamicContentWaitSecs: inputSchema.properties.dynamicContentWaitSecs.default,
     htmlTransformer: inputSchema.properties.htmlTransformer.default,
@@ -37,12 +38,11 @@ export const defaults = {
     query: undefined, // No default value in input_schema.json
     readableTextCharThreshold: 100, // Not in input_schema.json
     removeCookieWarnings: inputSchema.properties.removeCookieWarnings.default,
-    blockMedia: inputSchema.properties.blockMedia.default,
     removeElementsCssSelector: inputSchema.properties.removeElementsCssSelector.default,
     requestTimeoutSecs: inputSchema.properties.requestTimeoutSecs.default,
     requestTimeoutSecsMax: inputSchema.properties.requestTimeoutSecs.maximum,
+    scrapingTool: inputSchema.properties.scrapingTool.default,
     serpMaxRetries: inputSchema.properties.serpMaxRetries.default,
     serpMaxRetriesMax: inputSchema.properties.serpMaxRetries.maximum,
     serpProxyGroup: inputSchema.properties.serpProxyGroup.default,
-    scrapingTool: inputSchema.properties.scrapingTool.default,
 };

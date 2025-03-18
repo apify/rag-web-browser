@@ -46,8 +46,13 @@ async function processInputInternal(
     if (originalInput.outputFormats && typeof originalInput.outputFormats === 'string') {
         originalInput.outputFormats = originalInput.outputFormats.split(',').map((format) => format.trim()) as OutputFormats[];
     }
-    const input = { ...defaults, ...originalInput } as Input;
 
+    // noinspection SuspiciousTypeOfGuard
+    if (typeof originalInput.blockMedia === 'string') {
+        originalInput.blockMedia = originalInput.blockMedia === 'true' || originalInput.blockMedia === '1';
+    }
+
+    const input = { ...defaults, ...originalInput } as Input;
     validateAndFillInput(input, standbyInit);
 
     const {
@@ -111,27 +116,6 @@ function createPlaywrightCrawlerOptions(input: Input, proxy: ProxyConfiguration 
                 maxConcurrency,
                 minConcurrency,
             },
-            preNavigationHooks: input.blockMedia ? [
-                async ({ page }) => {
-                    await page.route('**/*', async (route) => {
-                        const resourceType = route.request().resourceType();
-                        const url = route.request().url();
-
-                        // Block if it's an image/video/css resource type or has an image/video extension
-                        if (
-                            resourceType === 'image'
-                            || resourceType === 'video'
-                            || resourceType === 'media'
-                            || resourceType === 'stylesheet'
-                            || /\.(jpg|jpeg|png|gif|bmp|webp|mp4|webm|ogg|mov|css)$/i.test(url)
-                        ) {
-                            await route.abort();
-                        } else {
-                            await route.continue();
-                        }
-                    });
-                },
-            ] : [],
         },
     };
 }
@@ -206,5 +190,9 @@ export function validateAndFillInput(input: Input, standbyInit: boolean) {
     }
     if (input.scrapingTool !== 'browser-playwright' && input.scrapingTool !== 'raw-http') {
         throw new UserInputError('The `scrapingTool` parameter must be either `browser-playwright` or `raw-http`.');
+    }
+    // handle case when blockMedia is not defined, coerce blockMedia to boolean
+    if (input.blockMedia === undefined || input.blockMedia === null) {
+        input.blockMedia = defaults.blockMedia;
     }
 }

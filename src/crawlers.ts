@@ -75,6 +75,7 @@ export async function createAndStartSearchCrawler(
                     responseId,
                     request.userData.contentScraperSettings!,
                     request.userData.timeMeasures!,
+                    request.userData.blockMedia,
                 );
                 await addContentCrawlRequest(r, responseId, request.userData.contentCrawlerKey!);
             }
@@ -130,6 +131,31 @@ export async function createAndStartContentCrawler(
     return { key, crawler };
 }
 
+/**
+ * PreNavigation hook that blocks resources based on the blockMedia setting
+ * from the request's userData.
+ * Only blocks resources if blockMedia is true.
+ */
+async function blockMediaResourcesHook({ page, request }: PlaywrightCrawlingContext<ContentCrawlerUserData>) {
+    await page.route('**/*', async (route) => {
+        const resourceType = route.request().resourceType();
+        const url = route.request().url();
+
+        // Block if it's an image/video/css resource type or has an image/video extension
+        if (request.userData.blockMedia && (
+            resourceType === 'image'
+            || resourceType === 'video'
+            || resourceType === 'media'
+            || resourceType === 'stylesheet'
+            || /\.(jpg|jpeg|png|gif|bmp|webp|mp4|webm|ogg|mov|css)$/i.test(url)
+        )) {
+            await route.abort();
+        } else {
+            await route.continue();
+        }
+    });
+}
+
 async function createPlaywrightContentCrawler(
     crawlerOptions: PlaywrightCrawlerOptions,
     key: string,
@@ -143,6 +169,11 @@ async function createPlaywrightContentCrawler(
             await requestHandlerPlaywright(context as unknown as PlaywrightCrawlingContext<ContentCrawlerUserData>);
         },
         failedRequestHandler: ({ request }, err) => failedRequestHandler(request, err, ContentCrawlerTypes.PLAYWRIGHT),
+        preNavigationHooks: [
+            async (context) => {
+                await blockMediaResourcesHook(context as unknown as PlaywrightCrawlingContext<ContentCrawlerUserData>);
+            },
+        ],
     });
 }
 
