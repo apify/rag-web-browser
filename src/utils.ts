@@ -13,7 +13,6 @@ export function parseParameters(url: string): ParsedUrlQuery {
     for (const [key, value] of Object.entries(params)) {
         // If the key is not supported by schema, skip it
         if (!Object.keys(inputSchema.properties).includes(key)) {
-            log.warning(`Unknown parameter: '${key}', skipping it. Supported parameters: ${Object.keys(defaults).join(', ')}`);
             continue;
         }
         const typedKey = key as SupportedParams;
