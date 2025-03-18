@@ -43,7 +43,7 @@ const scrapingToolSet = ['raw-http', 'browser-playwright'];
 const mediaBlockedSet = [true, false];
 const maxResultsSet = [1, 3];
 
-const url = `https://${urlUserActor}.apify.actor/search`;
+const url = `https://${urlUserActor}.apify.actor`;
 
 const headers = {
     Accept: 'application/json',
