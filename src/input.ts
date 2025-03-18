@@ -116,27 +116,6 @@ function createPlaywrightCrawlerOptions(input: Input, proxy: ProxyConfiguration 
                 maxConcurrency,
                 minConcurrency,
             },
-            preNavigationHooks: [
-                async ({ page }) => {
-                    await page.route('**/*', async (route) => {
-                        const resourceType = route.request().resourceType();
-                        const url = route.request().url();
-
-                        // Block if it's an image/video/css resource type or has an image/video extension
-                        if (input.blockMedia && (
-                            resourceType === 'image'
-                            || resourceType === 'video'
-                            || resourceType === 'media'
-                            || resourceType === 'stylesheet'
-                            || /\.(jpg|jpeg|png|gif|bmp|webp|mp4|webm|ogg|mov|css)$/i.test(url)
-                        )) {
-                            await route.abort();
-                        } else {
-                            await route.continue();
-                        }
-                    });
-                },
-            ],
         },
     };
 }

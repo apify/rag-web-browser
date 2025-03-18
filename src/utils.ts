@@ -80,6 +80,7 @@ export function createRequest(
     responseId: string,
     contentScraperSettings: ContentScraperSettings,
     timeMeasures: TimeMeasure[] | null = null,
+    blockMedia: boolean = false,
 ): RequestOptions<ContentCrawlerUserData> {
     return {
         url: result.url!,
@@ -90,6 +91,7 @@ export function createRequest(
             searchResult: result.url && result.title ? result : undefined,
             timeMeasures: timeMeasures ? [...timeMeasures] : [],
             contentScraperSettings,
+            blockMedia,
         },
     };
 }

@@ -39,6 +39,7 @@ function prepareRequest(
             responseId,
             contentScraperSettings,
             null,
+            input.blockMedia,
         )
         : createSearchRequest(
             query,

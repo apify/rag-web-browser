@@ -89,6 +89,7 @@ export type ContentCrawlerUserData = {
     searchResult?: OrganicResult;
     contentCrawlerKey?: string;
     contentScraperSettings: ContentScraperSettings;
+    blockMedia?: boolean;
 };
 
 export interface ContentScraperSettings {
