@@ -56,10 +56,18 @@ const resultsTable = [];
 for (const scrapingTool of scrapingToolSet) {
     for (const blockMedia of mediaBlockedSet) {
         for (const maxResults of maxResultsSet) {
-            log.info(`Running ${EVALUATION_QUERIES.length} query/queries with ${scrapingTool}, ${blockMedia ? 'blocked media' : 'unblocked media'}, maxResults=${maxResults}`);
+            log.info(`Running ${EVALUATION_QUERIES.length} query/queries with ${scrapingTool}, mediaBlocked=${blockMedia}, maxResults=${maxResults}`);
+            log.info('Start in standby mode');
+            const r1 = await fetch(url, { method: 'GET', headers });
+            if (!r1.ok) {
+                throw new Error(`Failed to run the actor: ${JSON.stringify(await r1.json())}`);
+            } else {
+                // sleep for 10 seconds to let the actor start
+                await new Promise((resolve) => setTimeout(resolve, 10000));
+            }
             for (const q of EVALUATION_QUERIES) {
                 const queryParams = new URLSearchParams({ query: q, scrapingTool, blockMedia: blockMedia.toString(), debugMode: 'true', maxResults: maxResults.toString() });
-                const urlWithParams = `${url}?${queryParams.toString()}`;
+                const urlWithParams = `${url}/search?${queryParams.toString()}`;
                 log.info(`Running ${urlWithParams}`);
                 const res = await fetch(urlWithParams, { method: 'GET', headers });
                 if (!res.ok) {
@@ -67,25 +75,25 @@ for (const scrapingTool of scrapingToolSet) {
                 }
                 const data: Output[] = await res.json();
                 log.info(`Received number of results: ${data.length}`);
-                const k = `${scrapingTool}__${blockMedia ? 'blocked' : 'unblocked'}__${maxResults}`;
+                const k = `${scrapingTool}__${blockMedia ? 'blocked' : 'allowed'}__${maxResults}`;
                 if (results.has(k)) {
                     results.set(k, [...results.get(k)!, ...data]);
                 } else {
                     results.set(k, data);
                 }
             }
+            log.info(`Get the last run: ${actorId}`);
+            const response = await fetch(`https://api.apify.com/v2/acts/${actorId}/runs/last`, { headers });
+            const resp = await response.json();
+            const { id: runId } = resp.data;
+
+            // it is better to abort run not to mix results and involve autoscaling into the mix
+            log.info(`Abort run ${runId}`);
+            const r = await fetch(`https://api.apify.com/v2/actor-runs/${runId}/abort`, { method: 'POST', headers });
+            log.info(`The last run has been aborted status=${r.status}`);
         }
     }
 }
-
-log.info(`Get the last run: ${actorId}`);
-const response = await fetch(`https://api.apify.com/v2/acts/${actorId}/runs/last`, { headers });
-const resp = await response.json();
-const { id: runId } = resp.data;
-
-log.info(`Abort run ${runId}`);
-const r = await fetch(`https://api.apify.com/v2/actor-runs/${runId}/abort`, { headers });
-log.info(`The last run has been aborted: ${await r.json()}`);
 
 for (const [key, data] of results) {
     const remoteDataset = data;
@@ -118,16 +126,17 @@ for (const [key, data] of results) {
         log.info(`${k}: ${avg.toFixed(0)} ms`);
     }
 
+    const avgLatency = timeMeasuresTimeTaken.reduce((a, b) => a + b, 0) / timeMeasuresTimeTaken.length / 1000;
     log.info('Time taken for each request:', timeMeasuresTimeTaken);
-    log.info('Time taken on average', { average: timeMeasuresTimeTaken.reduce((a, b) => a + b, 0) / timeMeasuresTimeTaken.length });
+    log.info('Time taken on average', { average: avgLatency.toFixed(1) });
 
     // Store results for the table
-    const avgLatency = timeMeasuresTimeTaken.reduce((a, b) => a + b, 0) / timeMeasuresTimeTaken.length / 1000;
-    resultsTable.push(`| ${memory} | ${key.split('__')[0]} | ${key.split('__')[1]} | ${key.split('__')[2]} | ${avgLatency.toFixed(1)} |`);
+    const [scrapingTool, mediaBlocked, maxResults] = key.split('__');
+    resultsTable.push(`| ${memory} | ${scrapingTool} | ${mediaBlocked} | ${maxResults} | ${avgLatency.toFixed(1)} |`);
 }
 
 // Print the results table
 log.info('\nPerformance Results:');
-log.info('| Memory (GB) | Scraping Tool | Media Blocked | Max Results | Latency (sec) |');
+log.info('| Memory (GB) | Scraping Tool | Media | Max Results | Latency (sec) |');
 log.info('|-------------|---------------|---------------|-------------|---------------|');
 resultsTable.forEach((row) => log.info(row));

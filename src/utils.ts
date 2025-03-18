@@ -48,6 +48,7 @@ export function createSearchRequest(
     contentCrawlerKey: string,
     proxyConfiguration: ProxyConfiguration | undefined,
     contentScraperSettings: ContentScraperSettings,
+    blockMedia: boolean,
 ): RequestOptions<SearchCrawlerUserData> {
     // add some overhead for the maxResults to account for the fact that some results are not Organic
     const n = Number(maxResults) + 5;
@@ -67,6 +68,7 @@ export function createSearchRequest(
             contentCrawlerKey,
             contentScraperSettings,
             responseId,
+            blockMedia,
         },
     };
 }

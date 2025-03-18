@@ -48,6 +48,7 @@ function prepareRequest(
             contentCrawlerKey,
             searchCrawlerOptions.proxyConfiguration,
             contentScraperSettings,
+            input.blockMedia,
         );
 
     addTimeMeasureEvent(req.userData!, 'request-received', Date.now());

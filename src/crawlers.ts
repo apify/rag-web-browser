@@ -75,6 +75,7 @@ export async function createAndStartSearchCrawler(
                     responseId,
                     request.userData.contentScraperSettings!,
                     request.userData.timeMeasures!,
+                    request.userData.blockMedia,
                 );
                 await addContentCrawlRequest(r, responseId, request.userData.contentCrawlerKey!);
             }

@@ -80,6 +80,7 @@ export type SearchCrawlerUserData = {
     contentCrawlerKey: string;
     responseId: string;
     contentScraperSettings: ContentScraperSettings;
+    blockMedia: boolean;
 };
 
 export type ContentCrawlerUserData = {
