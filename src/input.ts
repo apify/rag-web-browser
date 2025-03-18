@@ -46,6 +46,11 @@ async function processInputInternal(
     if (originalInput.outputFormats && typeof originalInput.outputFormats === 'string') {
         originalInput.outputFormats = originalInput.outputFormats.split(',').map((format) => format.trim()) as OutputFormats[];
     }
+
+    if (typeof originalInput.blockMedia === 'string') {
+        originalInput.blockMedia = originalInput.blockMedia === 'true' || originalInput.blockMedia === '1';
+    }
+
     const input = { ...defaults, ...originalInput } as Input;
     validateAndFillInput(input, standbyInit);
 
@@ -89,7 +94,7 @@ function createPlaywrightCrawlerOptions(input: Input, proxy: ProxyConfiguration 
     return {
         type: ContentCrawlerTypes.PLAYWRIGHT,
         crawlerOptions: {
-            headless: false,
+            headless: true,
             keepAlive,
             maxRequestRetries,
             proxyConfiguration: proxy,

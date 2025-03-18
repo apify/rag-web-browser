@@ -23,10 +23,7 @@ const crawlers = new Map<string, CheerioCrawler | PlaywrightCrawler>();
 const client = new MemoryStorage({ persistStorage: false });
 
 export function getCrawlerKey(crawlerOptions: CheerioCrawlerOptions | PlaywrightCrawlerOptions) {
-    // remove 'log' field from crawler key
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { log: _log, ...rest } = crawlerOptions;
-    return JSON.stringify(rest);
+    return JSON.stringify(crawlerOptions);
 }
 
 /**
