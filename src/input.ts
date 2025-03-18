@@ -47,6 +47,7 @@ async function processInputInternal(
         originalInput.outputFormats = originalInput.outputFormats.split(',').map((format) => format.trim()) as OutputFormats[];
     }
 
+    // noinspection SuspiciousTypeOfGuard
     if (typeof originalInput.blockMedia === 'string') {
         originalInput.blockMedia = originalInput.blockMedia === 'true' || originalInput.blockMedia === '1';
     }
