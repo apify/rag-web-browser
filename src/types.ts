@@ -113,7 +113,9 @@ export type Output = {
         loadedAt?: Date;
         requestStatus: string;
         uniqueKey: string;
-        debug?: unknown;
+        debug?: {
+            timeMeasures?: TimeMeasure[];
+        };
     };
     searchResult: OrganicResult;
     metadata: {
