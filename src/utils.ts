@@ -3,23 +3,44 @@ import { parse, ParsedUrlQuery } from 'querystring';
 
 import { defaults } from './const.js';
 import { OrganicResult, ContentScraperSettings, TimeMeasure, ContentCrawlerUserData, SearchCrawlerUserData } from './types.js';
+import inputSchema from '../.actor/input_schema.json' with { type: 'json' };
 
 export function parseParameters(url: string): ParsedUrlQuery {
-    return parse(url.slice(1));
-}
+    const params = parse(url.slice(1));
 
-/**
- * Check whether the query parameters are valid (do not support extra parameters)
- */
-export function checkAndRemoveExtraParams(params: ParsedUrlQuery) {
-    const keys = Object.keys(defaults);
-    keys.push('token', '?token'); // token is a special parameter
-    for (const key of Object.keys(params)) {
-        if (!keys.includes(key)) {
+    type SupportedParamKey = keyof typeof defaults;
+
+    const parsedValidatedParams = {} as Record<SupportedParamKey, unknown>;
+    for (const [key, value] of Object.entries(params)) {
+        // If the key is not supported by schema or is not Apify API token, skip it
+        if (key !== 'token' && !Object.keys(defaults).includes(key)) {
             log.warning(`Unknown parameter: ${key}. Supported parameters: ${Object.keys(defaults).join(', ')}`);
-            delete params[key];
+            continue;
+        }
+        const typedKey = key as SupportedParamKey;
+        // Schema keys are subset of SupportedParams so we can safely cast
+        type SchemaKey = keyof typeof inputSchema.properties;
+
+        // Parse non-primitive parameters following input schema because querystring doesn't parse objects
+        if (
+            !!inputSchema.properties[typedKey as SchemaKey]
+            && ['object', 'array'].includes(inputSchema.properties[typedKey as SchemaKey].type)
+            && typeof value === 'string'
+        ) {
+            try {
+                parsedValidatedParams[typedKey] = JSON.parse(value);
+                log.debug(`Parsed parameter ${key} from string: ${value} to object`, parsedValidatedParams[typedKey] as object);
+            } catch (e) {
+                log.warning(`Failed to parse parameter ${key}, it must be valid JSON. Skipping it: ${e}`);
+            }
+        } else {
+            parsedValidatedParams[typedKey] = value;
         }
     }
+
+    // TODO: We should unify the type for parameters to single source,
+    // now we have ParsedUrlQuery, Input and SupportedParams
+    return parsedValidatedParams as ParsedUrlQuery;
 }
 
 export function randomId() {
