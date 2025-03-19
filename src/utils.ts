@@ -1,7 +1,6 @@
 import { RequestOptions, log, ProxyConfiguration } from 'crawlee';
 import { parse, ParsedUrlQuery } from 'querystring';
 
-import { defaults } from './const.js';
 import { OrganicResult, ContentScraperSettings, TimeMeasure, ContentCrawlerUserData, SearchCrawlerUserData } from './types.js';
 import inputSchema from '../.actor/input_schema.json' with { type: 'json' };
 
@@ -9,37 +8,30 @@ export function parseParameters(url: string): ParsedUrlQuery {
     const params = parse(url.slice(1));
 
     // Parse non-primitive parameters following input schema
-    type SupportedParams = keyof typeof inputSchema.properties
+    type SupportedParams = keyof typeof inputSchema.properties;
+
+    const parsedValidatedParams = {} as Record<SupportedParams, unknown>;
     for (const [key, value] of Object.entries(params)) {
-        // If the key is not supported by schema, skip it
-        if (!Object.keys(inputSchema.properties).includes(key)) {
+        // If the key is not supported by schema or is not Apify API token, skip it
+        if (key !== 'token' && !Object.keys(inputSchema.properties).includes(key)) {
+            log.warning(`Unknown parameter: ${key}. Supported parameters: ${Object.keys(inputSchema.properties).join(', ')}`);
             continue;
         }
         const typedKey = key as SupportedParams;
         if (['object', 'array'].includes(inputSchema.properties[typedKey].type) && typeof value === 'string') {
             try {
-                params[key] = JSON.parse(value);
+                parsedValidatedParams[typedKey] = JSON.parse(value);
             } catch (e) {
                 log.warning(`Failed to parse parameter ${key}, it must be valid JSON. Skipping it: ${e}`);
             }
+        } else {
+            parsedValidatedParams[typedKey] = value;
         }
     }
 
-    return params;
-}
-
-/**
- * Check whether the query parameters are valid (do not support extra parameters)
- */
-export function checkAndRemoveExtraParams(params: ParsedUrlQuery) {
-    const keys = Object.keys(defaults);
-    keys.push('token', '?token'); // token is a special parameter
-    for (const key of Object.keys(params)) {
-        if (!keys.includes(key)) {
-            log.warning(`Unknown parameter: ${key}. Supported parameters: ${Object.keys(defaults).join(', ')}`);
-            delete params[key];
-        }
-    }
+    // TODO: We should unify the type for parameters to single source,
+    // now we have ParsedUrlQuery, Input and SupportedParams
+    return parsedValidatedParams as ParsedUrlQuery;
 }
 
 export function randomId() {

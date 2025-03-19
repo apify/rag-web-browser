@@ -9,7 +9,6 @@ import { createResponsePromise } from './responses.js';
 import { Input, Output, ContentScraperSettings, ContentCrawlerOptions } from './types.js';
 import {
     addTimeMeasureEvent,
-    checkAndRemoveExtraParams,
     createRequest,
     createSearchRequest,
     interpretAsUrl,
@@ -100,7 +99,6 @@ export async function handleSearchRequest(request: IncomingMessage, response: Se
     try {
         const params = parseParameters(request.url?.slice(Routes.SEARCH.length) ?? '');
         log.info(`Received query parameters: ${JSON.stringify(params)}`);
-        checkAndRemoveExtraParams(params);
 
         const results = await runSearchProcess(params);
 
