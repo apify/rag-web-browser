@@ -24,14 +24,15 @@ export const deduplicateResults = <T extends { title?: string; url?: string }>(r
  * Extracts search results from the given selectors (source: @apify/google-search).
  */
 const extractResultsFromSelectors = ($: CheerioAPI, selectors: string[]) => {
-    const searchResults = [];
+    const searchResults: OrganicResult[] = [];
     const selector = selectors.join(', ');
     for (const resultEl of $(selector)) {
-        searchResults.push(
-            ...$(resultEl)
-                .map((_i, el) => parseResult($, el as Element))
-                .toArray(),
-        );
+        const results = $(resultEl).map((_i, el) => parseResult($, el as Element)).toArray();
+        for (const result of results) {
+            if (result.title && result.url) {
+                searchResults.push(result);
+            }
+        }
     }
     return searchResults;
 };
@@ -59,7 +60,7 @@ export const scrapeOrganicResults = ($: CheerioAPI) => {
     const resultSelectors2023January = [
         '.hlcw0c', // Top result with site links
         '.g.Ww4FFb', // General search results
-        '.MjjYud .g', // General catch all. Used for one main + one nested from the same site. Added in Jun 2023, not very good selector
+        '.MjjYud', // General search results 2025 March, this includes also images so we need to add a check that results has both title and url
         '.g .tF2Cxc>.yuRUbf', // old search selector 2021 January
         '.g [data-header-feature="0"]', // old search selector 2022 January
         '.g .rc', // very old selector
