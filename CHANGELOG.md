@@ -1,5 +1,15 @@
 This changelog summarizes all changes of the RAG Web Browser
 
+### 1.0.11 (2025-03-21)
+
+🐛 Bug Fixes
+- Selector for organic search results
+
+### 1.0.10 (2025-03-19)
+
+🚀 Features
+- Handle all query parameters in the standby mode (including proxy)
+
 ### 1.0.9 (2025-03-14)
 
 🚀 Features
