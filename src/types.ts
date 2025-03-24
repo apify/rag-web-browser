@@ -34,10 +34,6 @@ export type Input = {
     scrapingTool: 'browser-playwright' | 'raw-http';
 };
 
-export type StandbyInput = Input & {
-    outputFormats: OutputFormats[] | string
-}
-
 export type OrganicResult = {
     description?: string;
     title?: string;

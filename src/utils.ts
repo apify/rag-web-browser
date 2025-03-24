@@ -2,7 +2,14 @@ import { RequestOptions, log, ProxyConfiguration } from 'crawlee';
 import { parse, ParsedUrlQuery } from 'querystring';
 
 import { defaults } from './const.js';
-import { OrganicResult, ContentScraperSettings, TimeMeasure, ContentCrawlerUserData, SearchCrawlerUserData } from './types.js';
+import {
+    OrganicResult,
+    ContentScraperSettings,
+    TimeMeasure,
+    ContentCrawlerUserData,
+    SearchCrawlerUserData,
+    type OutputFormats,
+} from './types.js';
 import inputSchema from '../.actor/input_schema.json' with { type: 'json' };
 
 export function parseParameters(url: string): ParsedUrlQuery {
@@ -17,9 +24,15 @@ export function parseParameters(url: string): ParsedUrlQuery {
             log.warning(`Unknown parameter: ${key}. Supported parameters: ${Object.keys(defaults).join(', ')}`);
             continue;
         }
+
         const typedKey = key as SupportedParamKey;
         // Schema keys are subset of SupportedParams so we can safely cast
         type SchemaKey = keyof typeof inputSchema.properties;
+
+        // Handle output formats as array
+        if (typedKey === 'outputFormats' && typeof value === 'string') {
+            parsedValidatedParams[typedKey] = value.split(',').map((format) => format.trim()) as OutputFormats[];
+        }
 
         // Parse non-primitive parameters following input schema because querystring doesn't parse objects
         if (

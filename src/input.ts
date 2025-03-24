@@ -4,13 +4,14 @@ import { firefox } from 'playwright';
 
 import { ContentCrawlerTypes, defaults } from './const.js';
 import { UserInputError } from './errors.js';
-import type { Input, ContentScraperSettings, OutputFormats, StandbyInput, ContentCrawlerOptions } from './types.js';
+import type { Input, ContentScraperSettings, OutputFormats, ContentCrawlerOptions } from './types.js';
+import inputSchema from '../.actor/input_schema.json' with { type: 'json' };
 
 /**
  * Processes the input and returns an array of crawler settings. This is ideal for startup of STANDBY mode
  * because it makes it simple to start all crawlers at once.
  */
-export async function processStandbyInput(originalInput: Partial<Input> | Partial<StandbyInput>) {
+export async function processStandbyInput(originalInput: Partial<Input>) {
     const { input, searchCrawlerOptions, contentScraperSettings } = await processInputInternal(originalInput, true);
 
     const proxy = await Actor.createProxyConfiguration(input.proxyConfiguration);
@@ -25,7 +26,7 @@ export async function processStandbyInput(originalInput: Partial<Input> | Partia
 /**
  * Processes the input and returns the settings for the crawler.
  */
-export async function processInput(originalInput: Partial<Input> | Partial<StandbyInput>) {
+export async function processInput(originalInput: Partial<Input>) {
     const { input, searchCrawlerOptions, contentScraperSettings } = await processInputInternal(originalInput);
 
     const proxy = await Actor.createProxyConfiguration(input.proxyConfiguration);
@@ -40,15 +41,12 @@ export async function processInput(originalInput: Partial<Input> | Partial<Stand
  * Processes the input and returns the settings for the crawler (adapted from: Website Content Crawler).
  */
 async function processInputInternal(
-    originalInput: Partial<Input> | Partial<StandbyInput>,
+    originalInput: Partial<Input>,
     standbyInit: boolean = false,
 ) {
-    if (originalInput.outputFormats && typeof originalInput.outputFormats === 'string') {
-        originalInput.outputFormats = originalInput.outputFormats.split(',').map((format) => format.trim()) as OutputFormats[];
-    }
-    const input = { ...defaults, ...originalInput } as Input;
+    // const input = { ...defaults, ...originalInput } as Input;
 
-    validateAndFillInput(input, standbyInit);
+    const input = validateAndFillInput(originalInput, standbyInit);
 
     const {
         debugMode,
@@ -139,7 +137,7 @@ function createCheerioCrawlerOptions(input: Input, proxy: ProxyConfiguration | u
  * Do not validate query parameter when standbyInit is true.
  * This is a bit ugly, but it's necessary to avoid throwing an error when the query is not provided in standby mode.
  */
-export function validateAndFillInput(input: Input, standbyInit: boolean) {
+export function validateAndFillInput(input: Partial<Input>, standbyInit: boolean): Input {
     const validateRange = (
         value: number | string | undefined,
         min: number,
@@ -162,8 +160,14 @@ export function validateAndFillInput(input: Input, standbyInit: boolean) {
         }
         return value;
     };
+
+    // Throw an error if the query is not provided and standbyInit is false.
     if (!input.query && !standbyInit) {
         throw new UserInputError('The `query` parameter must be provided and non-empty.');
+    }
+
+    if (!input.keepAlive) {
+        input.keepAlive = true;
     }
 
     input.maxResults = validateRange(input.maxResults, 1, defaults.maxResultsMax, defaults.maxResults, 'maxResults');
@@ -177,13 +181,17 @@ export function validateAndFillInput(input: Input, standbyInit: boolean) {
     } else if (input.outputFormats.some((format) => !['text', 'markdown', 'html'].includes(format))) {
         throw new UserInputError('The `outputFormats` array may only contain `text`, `markdown`, or `html`.');
     }
-    if (input.serpProxyGroup !== 'GOOGLE_SERP' && input.serpProxyGroup !== 'SHADER') {
+    if (!input.serpProxyGroup || input.serpProxyGroup.length === 0) {
+        input.serpProxyGroup = inputSchema.properties.serpProxyGroup.default as 'GOOGLE_SERP' | 'SHADER';
+    } else if (input.serpProxyGroup !== 'GOOGLE_SERP' && input.serpProxyGroup !== 'SHADER') {
         throw new UserInputError('The `serpProxyGroup` parameter must be either `GOOGLE_SERP` or `SHADER`.');
     }
-    if (input.dynamicContentWaitSecs >= input.requestTimeoutSecs) {
+    if (!input.dynamicContentWaitSecs || input.dynamicContentWaitSecs >= input.requestTimeoutSecs) {
         input.dynamicContentWaitSecs = Math.round(input.requestTimeoutSecs / 2);
     }
     if (input.scrapingTool !== 'browser-playwright' && input.scrapingTool !== 'raw-http') {
         throw new UserInputError('The `scrapingTool` parameter must be either `browser-playwright` or `raw-http`.');
     }
+
+    return input as Input;
 }
