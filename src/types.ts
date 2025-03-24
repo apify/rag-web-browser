@@ -4,19 +4,18 @@ import { CheerioCrawlerOptions, PlaywrightCrawlerOptions } from 'crawlee';
 import { ContentCrawlerTypes } from './const';
 
 export type OutputFormats = 'text' | 'markdown' | 'html';
+export type SERPProxyGroup = 'GOOGLE_SERP' | 'SHADER';
+export type ScrapingTool = 'browser-playwright' | 'raw-http';
 
 export type Input = {
     debugMode: boolean;
     requestTimeoutSecs: number;
 
-    // both
-    keepAlive: boolean;
-
     // google search parameters
     countryCode: string;
     languageCode: string;
     maxResults: number;
-    serpProxyGroup: 'GOOGLE_SERP' | 'SHADER';
+    serpProxyGroup: SERPProxyGroup;
     serpMaxRetries: number;
     query: string;
 
@@ -31,7 +30,7 @@ export type Input = {
     readableTextCharThreshold: number;
     removeElementsCssSelector: string;
     removeCookieWarnings: boolean;
-    scrapingTool: 'browser-playwright' | 'raw-http';
+    scrapingTool: ScrapingTool;
 };
 
 export type OrganicResult = {

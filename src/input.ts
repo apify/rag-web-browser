@@ -1,10 +1,18 @@
-import { Actor } from 'apify';
+import { Actor, ProxyConfigurationOptions } from 'apify';
+import { val } from 'cheerio/lib/api/attributes';
 import { BrowserName, CheerioCrawlerOptions, log, ProxyConfiguration } from 'crawlee';
 import { firefox } from 'playwright';
 
 import { ContentCrawlerTypes, defaults } from './const.js';
 import { UserInputError } from './errors.js';
-import type { Input, ContentScraperSettings, OutputFormats, ContentCrawlerOptions } from './types.js';
+import type {
+    Input,
+    ContentScraperSettings,
+    OutputFormats,
+    ContentCrawlerOptions,
+    ScrapingTool,
+    SERPProxyGroup
+} from './types.js';
 import inputSchema from '../.actor/input_schema.json' with { type: 'json' };
 
 /**
@@ -31,8 +39,8 @@ export async function processInput(originalInput: Partial<Input>) {
 
     const proxy = await Actor.createProxyConfiguration(input.proxyConfiguration);
     const contentCrawlerOptions: ContentCrawlerOptions = input.scrapingTool === 'raw-http'
-        ? createCheerioCrawlerOptions(input, proxy)
-        : createPlaywrightCrawlerOptions(input, proxy);
+        ? createCheerioCrawlerOptions(input, proxy, false)
+        : createPlaywrightCrawlerOptions(input, proxy, false);
 
     return { input, searchCrawlerOptions, contentCrawlerOptions, contentScraperSettings };
 }
@@ -51,7 +59,6 @@ async function processInputInternal(
     const {
         debugMode,
         dynamicContentWaitSecs,
-        keepAlive,
         serpMaxRetries,
         serpProxyGroup,
         readableTextCharThreshold,
@@ -62,7 +69,7 @@ async function processInputInternal(
 
     const proxySearch = await Actor.createProxyConfiguration({ groups: [serpProxyGroup] });
     const searchCrawlerOptions: CheerioCrawlerOptions = {
-        keepAlive,
+        keepAlive: standbyInit,
         maxRequestRetries: serpMaxRetries,
         proxyConfiguration: proxySearch,
         autoscaledPoolOptions: { desiredConcurrency: 1 },
@@ -82,8 +89,12 @@ async function processInputInternal(
     return { input, searchCrawlerOptions, contentScraperSettings };
 }
 
-function createPlaywrightCrawlerOptions(input: Input, proxy: ProxyConfiguration | undefined): ContentCrawlerOptions {
-    const { keepAlive, maxRequestRetries, initialConcurrency, maxConcurrency, minConcurrency } = input;
+function createPlaywrightCrawlerOptions(
+    input: Input,
+    proxy: ProxyConfiguration | undefined,
+    keepAlive: boolean = true,
+): ContentCrawlerOptions {
+    const { maxRequestRetries, initialConcurrency, maxConcurrency, minConcurrency } = input;
 
     return {
         type: ContentCrawlerTypes.PLAYWRIGHT,
@@ -113,8 +124,12 @@ function createPlaywrightCrawlerOptions(input: Input, proxy: ProxyConfiguration 
     };
 }
 
-function createCheerioCrawlerOptions(input: Input, proxy: ProxyConfiguration | undefined): ContentCrawlerOptions {
-    const { keepAlive, maxRequestRetries, initialConcurrency, maxConcurrency, minConcurrency } = input;
+function createCheerioCrawlerOptions(
+    input: Input,
+    proxy: ProxyConfiguration | undefined,
+    keepAlive: boolean = true,
+): ContentCrawlerOptions {
+    const { maxRequestRetries, initialConcurrency, maxConcurrency, minConcurrency } = input;
 
     return {
         type: ContentCrawlerTypes.CHEERIO,
@@ -137,7 +152,7 @@ function createCheerioCrawlerOptions(input: Input, proxy: ProxyConfiguration | u
  * Do not validate query parameter when standbyInit is true.
  * This is a bit ugly, but it's necessary to avoid throwing an error when the query is not provided in standby mode.
  */
-export function validateAndFillInput(input: Partial<Input>, standbyInit: boolean): Input {
+function validateAndFillInput(input: Partial<Input>, standbyInit: boolean): Input {
     const validateRange = (
         value: number | string | undefined,
         min: number,
@@ -166,31 +181,120 @@ export function validateAndFillInput(input: Partial<Input>, standbyInit: boolean
         throw new UserInputError('The `query` parameter must be provided and non-empty.');
     }
 
-    if (!input.keepAlive) {
-        input.keepAlive = true;
-    }
+    // Max results
+    input.maxResults = validateRange(
+        input.maxResults,
+        inputSchema.properties.maxResults.minimum,
+        inputSchema.properties.maxResults.maximum,
+        inputSchema.properties.maxResults.default,
+        'maxResults',
+    );
 
-    input.maxResults = validateRange(input.maxResults, 1, defaults.maxResultsMax, defaults.maxResults, 'maxResults');
-    input.requestTimeoutSecs = validateRange(input.requestTimeoutSecs, 1, defaults.requestTimeoutSecsMax, defaults.requestTimeoutSecs, 'requestTimeoutSecs');
-    input.serpMaxRetries = validateRange(input.serpMaxRetries, 0, defaults.serpMaxRetriesMax, defaults.serpMaxRetries, 'serpMaxRetries');
-    input.maxRequestRetries = validateRange(input.maxRequestRetries, 0, defaults.maxRequestRetriesMax, defaults.maxRequestRetries, 'maxRequestRetries');
-
+    // Output formats
     if (!input.outputFormats || input.outputFormats.length === 0) {
         input.outputFormats = defaults.outputFormats as OutputFormats[];
         log.warning(`The \`outputFormats\` parameter must be a non-empty array. Using default value \`${defaults.outputFormats}\`.`);
     } else if (input.outputFormats.some((format) => !['text', 'markdown', 'html'].includes(format))) {
         throw new UserInputError('The `outputFormats` array may only contain `text`, `markdown`, or `html`.');
     }
+
+    // Request timout seconds
+    input.requestTimeoutSecs = validateRange(
+        input.requestTimeoutSecs,
+        inputSchema.properties.requestTimeoutSecs.minimum,
+        inputSchema.properties.requestTimeoutSecs.maximum,
+        inputSchema.properties.requestTimeoutSecs.default,
+        'requestTimeoutSecs',
+    );
+
+    // SERP proxy group
     if (!input.serpProxyGroup || input.serpProxyGroup.length === 0) {
-        input.serpProxyGroup = inputSchema.properties.serpProxyGroup.default as 'GOOGLE_SERP' | 'SHADER';
+        input.serpProxyGroup = inputSchema.properties.serpProxyGroup.default as SERPProxyGroup;
     } else if (input.serpProxyGroup !== 'GOOGLE_SERP' && input.serpProxyGroup !== 'SHADER') {
         throw new UserInputError('The `serpProxyGroup` parameter must be either `GOOGLE_SERP` or `SHADER`.');
     }
+
+    // SERP max retries
+    input.serpMaxRetries = validateRange(
+        input.serpMaxRetries,
+        inputSchema.properties.serpMaxRetries.minimum,
+        inputSchema.properties.serpMaxRetries.maximum,
+        inputSchema.properties.serpMaxRetries.default,
+        'serpMaxRetries',
+    );
+
+    // Proxy configuration
+    if (!input.proxyConfiguration) {
+        input.proxyConfiguration = inputSchema.properties.proxyConfiguration.default as ProxyConfigurationOptions;
+    }
+
+    // Scraping tool
+    if (!input.scrapingTool) {
+        input.scrapingTool = inputSchema.properties.scrapingTool.default as ScrapingTool;
+    } else if (input.scrapingTool !== 'browser-playwright' && input.scrapingTool !== 'raw-http') {
+        throw new UserInputError('The `scrapingTool` parameter must be either `browser-playwright` or `raw-http`.');
+    }
+
+    // Remove elements CSS selector
+    if (!input.removeElementsCssSelector) {
+        input.removeElementsCssSelector = inputSchema.properties.removeElementsCssSelector.default;
+    }
+
+    // TODO: Is this input necessary?
+    // HTML transformer
+    // if (!input.htmlTransformer) {
+    //     input.htmlTransformer = inputSchema.properties.htmlTransformer.default;
+    // }
+
+    // Initial concurrency
+    input.initialConcurrency = validateRange(
+        input.initialConcurrency,
+        inputSchema.properties.initialConcurrency.minimum,
+        inputSchema.properties.initialConcurrency.maximum,
+        inputSchema.properties.initialConcurrency.default,
+        'initialConcurrency',
+    );
+
+    // Min concurrency
+    input.minConcurrency = validateRange(
+        input.minConcurrency,
+        inputSchema.properties.minConcurrency.minimum,
+        inputSchema.properties.minConcurrency.maximum,
+        inputSchema.properties.minConcurrency.default,
+        'minConcurrency',
+    );
+
+    // Max concurrency
+    input.maxConcurrency = validateRange(
+        input.maxConcurrency,
+        inputSchema.properties.maxConcurrency.minimum,
+        inputSchema.properties.maxConcurrency.maximum,
+        inputSchema.properties.maxConcurrency.default,
+        'maxConcurrency',
+    );
+
+    // Max request retries
+    input.maxRequestRetries = validateRange(
+        input.maxRequestRetries,
+        inputSchema.properties.maxRequestRetries.minimum,
+        inputSchema.properties.maxRequestRetries.maximum,
+        inputSchema.properties.maxRequestRetries.default,
+        'maxRequestRetries',
+    );
+
+    // Dynamic content wait seconds
     if (!input.dynamicContentWaitSecs || input.dynamicContentWaitSecs >= input.requestTimeoutSecs) {
         input.dynamicContentWaitSecs = Math.round(input.requestTimeoutSecs / 2);
     }
-    if (input.scrapingTool !== 'browser-playwright' && input.scrapingTool !== 'raw-http') {
-        throw new UserInputError('The `scrapingTool` parameter must be either `browser-playwright` or `raw-http`.');
+
+    // Remove cookie warnings
+    if (input.removeCookieWarnings === undefined) {
+        input.removeCookieWarnings = inputSchema.properties.removeCookieWarnings.default;
+    }
+
+    // Debug mode
+    if (input.debugMode === undefined) {
+        input.debugMode = inputSchema.properties.debugMode.default;
     }
 
     return input as Input;
