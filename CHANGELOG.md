@@ -1,5 +1,10 @@
 This changelog summarizes all changes of the RAG Web Browser
 
+### 1.0.12 (2025-03-24)
+
+🐛 Bug Fixes
+- Updated selector for organic search results and places
+
 ### 1.0.11 (2025-03-21)
 
 🐛 Bug Fixes

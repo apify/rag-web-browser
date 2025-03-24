@@ -64,6 +64,7 @@ export const scrapeOrganicResults = ($: CheerioAPI) => {
         '.g .tF2Cxc>.yuRUbf', // old search selector 2021 January
         '.g [data-header-feature="0"]', // old search selector 2022 January
         '.g .rc', // very old selector
+        '.sATSHe', // another new selector in March 2025
     ];
 
     if (areTheResultsSuggestions($)) {
