@@ -1,59 +1,63 @@
 import { RequestOptions, log, ProxyConfiguration } from 'crawlee';
-import { parse, ParsedUrlQuery } from 'querystring';
+import { parse } from 'querystring';
 
-import { defaults } from './const.js';
 import {
     OrganicResult,
     ContentScraperSettings,
     TimeMeasure,
     ContentCrawlerUserData,
     SearchCrawlerUserData,
-    type OutputFormats,
+    type OutputFormats, Input,
 } from './types.js';
 import inputSchema from '../.actor/input_schema.json' with { type: 'json' };
 
-export function parseParameters(url: string): ParsedUrlQuery {
+/**
+ * Parse the query parameters from the URL
+ */
+export function parseParameters(url: string): Partial<Input> {
     const params = parse(url.slice(1));
 
-    type SupportedParamKey = keyof typeof defaults;
+    type SchemaKey = keyof typeof inputSchema.properties;
 
-    const parsedValidatedParams = {} as Record<SupportedParamKey, unknown>;
+    const parsedInput: Partial<Input> = {};
     for (const [key, value] of Object.entries(params)) {
+        // If the value is undefined skip it
+        if (value === undefined) continue;
+
         // If the key is not supported by schema or is not Apify API token, skip it
-        if (key !== 'token' && !Object.keys(defaults).includes(key)) {
-            log.warning(`Unknown parameter: ${key}. Supported parameters: ${Object.keys(defaults).join(', ')}`);
+        if (key !== 'token' && !Object.keys(inputSchema.properties).includes(key)) {
+            log.warning(`Unknown parameter: ${key}. Supported parameters: ${Object.keys(inputSchema.properties).join(', ')}`);
             continue;
         }
 
-        const typedKey = key as SupportedParamKey;
-        // Schema keys are subset of SupportedParams so we can safely cast
-        type SchemaKey = keyof typeof inputSchema.properties;
+        const typedKey = key as SchemaKey;
+        // const inputKey = key as keyof typeof parsedInput;
 
-        // Handle output formats as array
+        // Parse outputFormats parameter as an array of OutputFormats
         if (typedKey === 'outputFormats' && typeof value === 'string') {
-            parsedValidatedParams[typedKey] = value.split(',').map((format) => format.trim()) as OutputFormats[];
+            parsedInput[typedKey] = value.split(',').map((format) => format.trim()) as OutputFormats[];
         }
 
         // Parse non-primitive parameters following input schema because querystring doesn't parse objects
         if (
-            !!inputSchema.properties[typedKey as SchemaKey]
-            && ['object', 'array'].includes(inputSchema.properties[typedKey as SchemaKey].type)
+            !!inputSchema.properties[typedKey]
+            && ['object', 'array'].includes(inputSchema.properties[typedKey].type)
             && typeof value === 'string'
         ) {
             try {
-                parsedValidatedParams[typedKey] = JSON.parse(value);
-                log.debug(`Parsed parameter ${key} from string: ${value} to object`, parsedValidatedParams[typedKey] as object);
+                parsedInput[typedKey] = JSON.parse(value);
+                log.debug(`Parsed parameter ${key} from string: ${value} to object`, parsedInput[typedKey] as object);
             } catch (e) {
                 log.warning(`Failed to parse parameter ${key}, it must be valid JSON. Skipping it: ${e}`);
             }
         } else {
-            parsedValidatedParams[typedKey] = value;
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
+            parsedInput[typedKey] = value;
         }
     }
 
-    // TODO: We should unify the type for parameters to single source,
-    // now we have ParsedUrlQuery, Input and SupportedParams
-    return parsedValidatedParams as ParsedUrlQuery;
+    return parsedInput;
 }
 
 export function randomId() {

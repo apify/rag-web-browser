@@ -29,6 +29,7 @@ export type Input = {
     proxyConfiguration: ProxyConfigurationOptions;
     readableTextCharThreshold: number;
     removeElementsCssSelector: string;
+    htmlTransformer: string;
     removeCookieWarnings: boolean;
     scrapingTool: ScrapingTool;
 };

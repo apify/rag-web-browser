@@ -1,9 +1,8 @@
 import { Actor, ProxyConfigurationOptions } from 'apify';
-import { val } from 'cheerio/lib/api/attributes';
 import { BrowserName, CheerioCrawlerOptions, log, ProxyConfiguration } from 'crawlee';
 import { firefox } from 'playwright';
 
-import { ContentCrawlerTypes, defaults } from './const.js';
+import { ContentCrawlerTypes } from './const.js';
 import { UserInputError } from './errors.js';
 import type {
     Input,
@@ -11,7 +10,7 @@ import type {
     OutputFormats,
     ContentCrawlerOptions,
     ScrapingTool,
-    SERPProxyGroup
+    SERPProxyGroup,
 } from './types.js';
 import inputSchema from '../.actor/input_schema.json' with { type: 'json' };
 
@@ -162,7 +161,7 @@ function validateAndFillInput(input: Partial<Input>, standbyInit: boolean): Inpu
     ) => {
         // parse the value as a number to check if it's a valid number
         if (value === undefined) {
-            log.warning(`The \`${fieldName}\` parameter must be defined. Using the default value ${defaultValue} instead.`);
+            log.info(`The \`${fieldName}\` parameter is not defined. Using the default value ${defaultValue}.`);
             return defaultValue;
         } if (typeof value === 'string') {
             value = Number(value);
@@ -192,8 +191,8 @@ function validateAndFillInput(input: Partial<Input>, standbyInit: boolean): Inpu
 
     // Output formats
     if (!input.outputFormats || input.outputFormats.length === 0) {
-        input.outputFormats = defaults.outputFormats as OutputFormats[];
-        log.warning(`The \`outputFormats\` parameter must be a non-empty array. Using default value \`${defaults.outputFormats}\`.`);
+        input.outputFormats = inputSchema.properties.outputFormats.default as OutputFormats[];
+        log.info(`The \`outputFormats\` parameter is not defined. Using default value \`${input.outputFormats}\`.`);
     } else if (input.outputFormats.some((format) => !['text', 'markdown', 'html'].includes(format))) {
         throw new UserInputError('The `outputFormats` array may only contain `text`, `markdown`, or `html`.');
     }
@@ -240,11 +239,10 @@ function validateAndFillInput(input: Partial<Input>, standbyInit: boolean): Inpu
         input.removeElementsCssSelector = inputSchema.properties.removeElementsCssSelector.default;
     }
 
-    // TODO: Is this input necessary?
     // HTML transformer
-    // if (!input.htmlTransformer) {
-    //     input.htmlTransformer = inputSchema.properties.htmlTransformer.default;
-    // }
+    if (!input.htmlTransformer) {
+        input.htmlTransformer = inputSchema.properties.htmlTransformer.default;
+    }
 
     // Initial concurrency
     input.initialConcurrency = validateRange(
