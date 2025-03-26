@@ -39,7 +39,8 @@ export function createResponsePromise(responseId: string, timeoutSecs: number): 
 
         // Set a timeout to reject the promise if it takes too long
         data.timeoutId = setTimeout(() => {
-            sendResponseError(responseId, 'Timed out');
+            const defaultDatasetId = process.env.ACTOR_DEFAULT_DATASET_ID;
+            sendResponseError(responseId, `Timed out. Please check the dataset ${defaultDatasetId} for results.`);
         }, timeoutSecs * 1000);
     });
 }
