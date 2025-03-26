@@ -60,7 +60,10 @@ async function processInputInternal(
         dynamicContentWaitSecs,
         serpMaxRetries,
         serpProxyGroup,
+        outputFormats,
         readableTextCharThreshold,
+        removeElementsCssSelector,
+        htmlTransformer,
         removeCookieWarnings,
     } = input;
 
@@ -77,12 +80,12 @@ async function processInputInternal(
     const contentScraperSettings: ContentScraperSettings = {
         debugMode,
         dynamicContentWaitSecs,
-        htmlTransformer: 'none',
+        htmlTransformer,
         maxHtmlCharsToProcess: 1.5e6,
-        outputFormats: input.outputFormats as OutputFormats[],
+        outputFormats,
         readableTextCharThreshold,
         removeCookieWarnings,
-        removeElementsCssSelector: input.removeElementsCssSelector,
+        removeElementsCssSelector,
     };
 
     return { input, searchCrawlerOptions, contentScraperSettings };
@@ -93,7 +96,7 @@ function createPlaywrightCrawlerOptions(
     proxy: ProxyConfiguration | undefined,
     keepAlive: boolean = true,
 ): ContentCrawlerOptions {
-    const { maxRequestRetries, initialConcurrency, maxConcurrency, minConcurrency } = input;
+    const { maxRequestRetries, desiredConcurrency } = input;
 
     return {
         type: ContentCrawlerTypes.PLAYWRIGHT,
@@ -115,9 +118,7 @@ function createPlaywrightCrawlerOptions(
                 retireInactiveBrowserAfterSecs: 60,
             },
             autoscaledPoolOptions: {
-                desiredConcurrency: initialConcurrency === 0 ? undefined : Math.min(initialConcurrency, maxConcurrency),
-                maxConcurrency,
-                minConcurrency,
+                desiredConcurrency,
             },
         },
     };
@@ -128,7 +129,7 @@ function createCheerioCrawlerOptions(
     proxy: ProxyConfiguration | undefined,
     keepAlive: boolean = true,
 ): ContentCrawlerOptions {
-    const { maxRequestRetries, initialConcurrency, maxConcurrency, minConcurrency } = input;
+    const { maxRequestRetries, desiredConcurrency } = input;
 
     return {
         type: ContentCrawlerTypes.CHEERIO,
@@ -138,9 +139,7 @@ function createCheerioCrawlerOptions(
             proxyConfiguration: proxy,
             requestHandlerTimeoutSecs: input.requestTimeoutSecs,
             autoscaledPoolOptions: {
-                desiredConcurrency: initialConcurrency === 0 ? undefined : Math.min(initialConcurrency, maxConcurrency),
-                maxConcurrency,
-                minConcurrency,
+                desiredConcurrency,
             },
         },
     };
@@ -244,31 +243,13 @@ function validateAndFillInput(input: Partial<Input>, standbyInit: boolean): Inpu
         input.htmlTransformer = inputSchema.properties.htmlTransformer.default;
     }
 
-    // Initial concurrency
-    input.initialConcurrency = validateRange(
-        input.initialConcurrency,
-        inputSchema.properties.initialConcurrency.minimum,
-        inputSchema.properties.initialConcurrency.maximum,
-        inputSchema.properties.initialConcurrency.default,
-        'initialConcurrency',
-    );
-
-    // Min concurrency
-    input.minConcurrency = validateRange(
-        input.minConcurrency,
-        inputSchema.properties.minConcurrency.minimum,
-        inputSchema.properties.minConcurrency.maximum,
-        inputSchema.properties.minConcurrency.default,
-        'minConcurrency',
-    );
-
-    // Max concurrency
-    input.maxConcurrency = validateRange(
-        input.maxConcurrency,
-        inputSchema.properties.maxConcurrency.minimum,
-        inputSchema.properties.maxConcurrency.maximum,
-        inputSchema.properties.maxConcurrency.default,
-        'maxConcurrency',
+    // Desired concurrency
+    input.desiredConcurrency = validateRange(
+        input.desiredConcurrency,
+        inputSchema.properties.desiredConcurrency.minimum,
+        inputSchema.properties.desiredConcurrency.maximum,
+        inputSchema.properties.desiredConcurrency.default,
+        'desiredConcurrency',
     );
 
     // Max request retries

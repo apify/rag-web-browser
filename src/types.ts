@@ -22,10 +22,8 @@ export type Input = {
     // content crawler parameters
     dynamicContentWaitSecs: number;
     outputFormats: OutputFormats[];
-    initialConcurrency: number;
-    maxConcurrency: number;
+    desiredConcurrency: number;
     maxRequestRetries: number;
-    minConcurrency: number;
     proxyConfiguration: ProxyConfigurationOptions;
     readableTextCharThreshold: number;
     removeElementsCssSelector: string;
