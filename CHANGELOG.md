@@ -1,6 +1,6 @@
 This changelog summarizes all changes of the RAG Web Browser
 
-### 1.0.14 (2025-03-27)
+### 1.0.15 (2025-03-27)
 
 🐛 Bug Fixes
 - Cancel requests only in standby mode
