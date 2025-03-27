@@ -153,7 +153,6 @@ export async function requestHandlerPlaywright(
 
     if (timedOutResponses.has(responseId)) {
         request.noRetry = true;
-        timedOutResponses.delete(responseId);
         throw new Error('Timed out. Cancelling the request...');
     }
 
@@ -191,7 +190,6 @@ export async function requestHandlerCheerio(
 
     if (timedOutResponses.has(responseId)) {
         request.noRetry = true;
-        timedOutResponses.delete(responseId);
         throw new Error('Timed out. Cancelling the request...');
     }
 

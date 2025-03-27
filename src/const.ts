@@ -17,6 +17,9 @@ export enum ContentCrawlerTypes {
     CHEERIO = 'cheerio',
 }
 
+// Max length of the timed out response array used for cancelling timed out response requests
+export const TIMED_OUT_RESPONSE_ARRAY_SIZE = 200;
+
 export const PLAYWRIGHT_REQUEST_TIMEOUT_NORMAL_MODE_SECS = 60;
 
 // Default values parsed from input_schema.json
