@@ -3,7 +3,6 @@ import { RequestOptions } from 'crawlee';
 
 import { ContentCrawlerStatus } from './const.js';
 import { Output, ContentCrawlerUserData } from './types.js';
-import { timedOutResponses } from './state.js';
 
 type ResponseData = {
     resultsMap: Map<string, Output>;
@@ -12,7 +11,7 @@ type ResponseData = {
     timeoutId?: NodeJS.Timeout;
 };
 
-const responseData = new Map<string, ResponseData>();
+export const responseData = new Map<string, ResponseData>();
 
 /**
  * Helper function to get response object by responseId.
@@ -40,7 +39,6 @@ export function createResponsePromise(responseId: string, timeoutSecs: number): 
 
         // Set a timeout to reject the promise if it takes too long
         data.timeoutId = setTimeout(() => {
-            timedOutResponses.add(responseId);
             sendResponseError(responseId, 'Timed out.');
         }, timeoutSecs * 1000);
     });

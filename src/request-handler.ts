@@ -3,12 +3,11 @@ import { load } from 'cheerio';
 import { CheerioCrawlingContext, htmlToText, log, PlaywrightCrawlingContext, sleep, Request } from 'crawlee';
 
 import { ContentCrawlerStatus, ContentCrawlerTypes } from './const.js';
-import { addResultToResponse, sendResponseIfFinished } from './responses.js';
+import { addResultToResponse, responseData, sendResponseIfFinished } from './responses.js';
 import { Output, ContentCrawlerUserData } from './types.js';
 import { addTimeMeasureEvent, transformTimeMeasuresToRelative } from './utils.js';
 import { processHtml } from './website-content-crawler/html-processing.js';
 import { htmlToMarkdown } from './website-content-crawler/markdown.js';
-import { timedOutResponses } from './state.js';
 
 let ACTOR_TIMEOUT_AT: number | undefined;
 try {
@@ -26,6 +25,22 @@ async function waitForPlaywright({ page }: PlaywrightCrawlingContext, time: numb
     await sleep(hardDelay);
 
     return Promise.race([page.waitForLoadState('networkidle', { timeout: 0 }), sleep(time - hardDelay)]);
+}
+
+/**
+ * Checks if the request should time out based on response timeout.
+ * It verifies if the response data contains the responseId. If not, it sets the request's noRetry flag
+ * to true and throws an error to cancel the request.
+ *
+ * @param {Request} request - The request object to be checked.
+ * @param {string} responseId - The response ID to look for in the response data.
+ * @throws {Error} Throws an error if the request times out.
+ */
+function checkTimeoutAndCancelRequest(request: Request, responseId: string) {
+    if (!responseData.has(responseId)) {
+        request.noRetry = true;
+        throw new Error('Timed out. Cancelling the request...');
+    }
 }
 
 /**
@@ -151,10 +166,7 @@ export async function requestHandlerPlaywright(
     const { request, response, page, closeCookieModals } = context;
     const { contentScraperSettings: settings, responseId } = request.userData;
 
-    if (timedOutResponses.has(responseId)) {
-        request.noRetry = true;
-        throw new Error('Timed out. Cancelling the request...');
-    }
+    checkTimeoutAndCancelRequest(request, responseId);
 
     log.info(`Processing URL: ${request.url}`);
     addTimeMeasureEvent(request.userData, 'playwright-request-start');
@@ -188,10 +200,7 @@ export async function requestHandlerCheerio(
     const { $, request, response } = context;
     const { responseId } = request.userData;
 
-    if (timedOutResponses.has(responseId)) {
-        request.noRetry = true;
-        throw new Error('Timed out. Cancelling the request...');
-    }
+    checkTimeoutAndCancelRequest(request, responseId);
 
     log.info(`Processing URL: ${request.url}`);
     addTimeMeasureEvent(request.userData, 'cheerio-request-start');
