@@ -1,9 +1,14 @@
+import { Actor } from 'apify';
 import { RequestOptions, log, ProxyConfiguration } from 'crawlee';
 import { parse, ParsedUrlQuery } from 'querystring';
 
 import { defaults } from './const.js';
 import { OrganicResult, ContentScraperSettings, TimeMeasure, ContentCrawlerUserData, SearchCrawlerUserData } from './types.js';
 import inputSchema from '../.actor/input_schema.json' with { type: 'json' };
+
+export function isActorStandby(): boolean {
+    return Actor.getEnv().metaOrigin === 'STANDBY';
+}
 
 export function parseParameters(url: string): ParsedUrlQuery {
     const params = parse(url.slice(1));
