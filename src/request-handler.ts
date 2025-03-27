@@ -8,6 +8,7 @@ import { Output, ContentCrawlerUserData } from './types.js';
 import { addTimeMeasureEvent, transformTimeMeasuresToRelative } from './utils.js';
 import { processHtml } from './website-content-crawler/html-processing.js';
 import { htmlToMarkdown } from './website-content-crawler/markdown.js';
+import { timedOutResponses } from './state.js';
 
 let ACTOR_TIMEOUT_AT: number | undefined;
 try {
@@ -148,7 +149,13 @@ export async function requestHandlerPlaywright(
     context: PlaywrightCrawlingContext<ContentCrawlerUserData>,
 ) {
     const { request, response, page, closeCookieModals } = context;
-    const { contentScraperSettings: settings } = request.userData;
+    const { contentScraperSettings: settings, responseId } = request.userData;
+
+    if (timedOutResponses.has(responseId)) {
+        request.noRetry = true;
+        timedOutResponses.delete(responseId);
+        throw new Error('Timed out. Cancelling the request...');
+    }
 
     log.info(`Processing URL: ${request.url}`);
     addTimeMeasureEvent(request.userData, 'playwright-request-start');
@@ -180,6 +187,13 @@ export async function requestHandlerCheerio(
     context: CheerioCrawlingContext<ContentCrawlerUserData>,
 ) {
     const { $, request, response } = context;
+    const { responseId } = request.userData;
+
+    if (timedOutResponses.has(responseId)) {
+        request.noRetry = true;
+        timedOutResponses.delete(responseId);
+        throw new Error('Timed out. Cancelling the request...');
+    }
 
     log.info(`Processing URL: ${request.url}`);
     addTimeMeasureEvent(request.userData, 'cheerio-request-start');
