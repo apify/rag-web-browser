@@ -5,7 +5,7 @@ import { CheerioCrawlingContext, htmlToText, log, PlaywrightCrawlingContext, sle
 import { ContentCrawlerStatus, ContentCrawlerTypes } from './const.js';
 import { addResultToResponse, responseData, sendResponseIfFinished } from './responses.js';
 import { Output, ContentCrawlerUserData } from './types.js';
-import { addTimeMeasureEvent, transformTimeMeasuresToRelative } from './utils.js';
+import { addTimeMeasureEvent, isActorStandby, transformTimeMeasuresToRelative } from './utils.js';
 import { processHtml } from './website-content-crawler/html-processing.js';
 import { htmlToMarkdown } from './website-content-crawler/markdown.js';
 
@@ -166,7 +166,7 @@ export async function requestHandlerPlaywright(
     const { request, response, page, closeCookieModals } = context;
     const { contentScraperSettings: settings, responseId } = request.userData;
 
-    checkTimeoutAndCancelRequest(request, responseId);
+    if (isActorStandby()) checkTimeoutAndCancelRequest(request, responseId);
 
     log.info(`Processing URL: ${request.url}`);
     addTimeMeasureEvent(request.userData, 'playwright-request-start');
@@ -200,7 +200,7 @@ export async function requestHandlerCheerio(
     const { $, request, response } = context;
     const { responseId } = request.userData;
 
-    checkTimeoutAndCancelRequest(request, responseId);
+    if (isActorStandby()) checkTimeoutAndCancelRequest(request, responseId);
 
     log.info(`Processing URL: ${request.url}`);
     addTimeMeasureEvent(request.userData, 'cheerio-request-start');

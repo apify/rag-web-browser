@@ -10,6 +10,7 @@ import { RagWebBrowserServer } from './mcp/server.js';
 import { addTimeoutToAllResponses } from './responses.js';
 import { handleSearchRequest, handleSearchNormalMode } from './search.js';
 import { Input } from './types.js';
+import { isActorStandby } from './utils.js';
 
 await Actor.init();
 
@@ -57,10 +58,9 @@ app.use((req, res) => {
     res.status(404).json({ message: `The is nothing at route ${req.method} ${req.originalUrl}. ${HELP_MESSAGE}` });
 });
 
-const standbyMode = Actor.getEnv().metaOrigin === 'STANDBY';
 const originalInput = await Actor.getInput<Partial<Input>>() ?? {} as Input;
 
-if (standbyMode) {
+if (isActorStandby()) {
     log.info('Actor is running in the STANDBY mode.');
 
     const host = Actor.isAtHome() ? process.env.ACTOR_STANDBY_URL : 'http://localhost';
