@@ -11,7 +11,7 @@ type ResponseData = {
     timeoutId?: NodeJS.Timeout;
 };
 
-const responseData = new Map<string, ResponseData>();
+export const responseData = new Map<string, ResponseData>();
 
 /**
  * Helper function to get response object by responseId.
@@ -39,7 +39,7 @@ export function createResponsePromise(responseId: string, timeoutSecs: number): 
 
         // Set a timeout to reject the promise if it takes too long
         data.timeoutId = setTimeout(() => {
-            sendResponseError(responseId, 'Timed out');
+            sendResponseError(responseId, 'Timed out.');
         }, timeoutSecs * 1000);
     });
 }

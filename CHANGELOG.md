@@ -1,5 +1,10 @@
 This changelog summarizes all changes of the RAG Web Browser
 
+### 1.0.13 (2025-03-27)
+
+🐛 Bug Fixes
+- Cancel crawling requests from timed-out search queries
+
 ### 1.0.12 (2025-03-24)
 
 🐛 Bug Fixes
