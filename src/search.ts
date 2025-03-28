@@ -65,6 +65,10 @@ async function runSearchProcess(params: Partial<Input>): Promise<Output[]> {
         contentScraperSettings,
     } = await processInput(params);
 
+    // Set keepAlive to true to find the correct crawlers
+    searchCrawlerOptions.keepAlive = true;
+    contentCrawlerOptions.crawlerOptions.keepAlive = true;
+
     await createAndStartSearchCrawler(searchCrawlerOptions);
     const { key: contentCrawlerKey } = await createAndStartContentCrawler(contentCrawlerOptions);
 
@@ -137,8 +141,6 @@ export async function handleSearchNormalMode(input: Input,
     contentScraperSettings: ContentScraperSettings,
 ) {
     const startedTime = Date.now();
-    searchCrawlerOptions.keepAlive = false;
-    contentCrawlerOptions.crawlerOptions.keepAlive = false;
     contentCrawlerOptions.crawlerOptions.requestHandlerTimeoutSecs = PLAYWRIGHT_REQUEST_TIMEOUT_NORMAL_MODE_SECS;
 
     const { crawler: searchCrawler } = await createAndStartSearchCrawler(searchCrawlerOptions, false);

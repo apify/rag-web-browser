@@ -97,31 +97,13 @@
             "prefill": "none",
             "editor": "hidden"
         },
-        "initialConcurrency": {
-            "title": "Initial browsing concurrency",
+        "desiredConcurrency": {
+            "title": "Desired browsing concurrency",
             "type": "integer",
-            "description": "The initial number of web browsers running in parallel. The system automatically scales the number based on the CPU and memory usage, in the range specified by `minConcurrency` and `maxConcurrency`. If the initial value is `0`, the Actor picks the number automatically based on the available memory.",
+            "description": "The desired number of web browsers running in parallel. The system automatically scales the number based on the CPU and memory usage. If the initial value is `0`, the Actor picks the number automatically based on the available memory.",
             "minimum": 0,
             "maximum": 50,
             "default": 5,
-            "editor": "hidden"
-        },
-        "minConcurrency": {
-            "title": "Minimum browsing concurrency",
-            "type": "integer",
-            "description": "The minimum number of web browsers running in parallel.",
-            "minimum": 1,
-            "maximum": 50,
-            "default": 3,
-            "editor": "hidden"
-        },
-        "maxConcurrency": {
-            "title": "Maximum browsing concurrency",
-            "type": "integer",
-            "description": "The maximum number of web browsers running in parallel.",
-            "minimum": 1,
-            "maximum": 100,
-            "default": 50,
             "editor": "hidden"
         },
         "maxRequestRetries": {
