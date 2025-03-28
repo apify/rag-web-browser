@@ -1,3 +1,4 @@
+import { Actor } from 'apify';
 import { RequestOptions, log, ProxyConfiguration } from 'crawlee';
 import { parse } from 'querystring';
 
@@ -10,6 +11,10 @@ import {
     type OutputFormats, Input,
 } from './types.js';
 import inputSchema from '../.actor/input_schema.json' with { type: 'json' };
+
+export function isActorStandby(): boolean {
+    return Actor.getEnv().metaOrigin === 'STANDBY';
+}
 
 /**
  * Parse the query parameters from the URL
@@ -31,7 +36,6 @@ export function parseParameters(url: string): Partial<Input> {
         }
 
         const typedKey = key as SchemaKey;
-        // const inputKey = key as keyof typeof parsedInput;
 
         // Parse outputFormats parameter as an array of OutputFormats
         if (typedKey === 'outputFormats' && typeof value === 'string') {
