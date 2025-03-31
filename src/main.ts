@@ -21,7 +21,7 @@ if (isActorStandby()) {
     log.info('Actor is running in the STANDBY mode.');
 
     const host = Actor.isAtHome() ? process.env.ACTOR_STANDBY_URL as string : 'http://localhost';
-    const port = Actor.isAtHome() ? process.env.ACTOR_STANDBY_PORT as string : 3000;
+    const port = Actor.isAtHome() ? Number(process.env.ACTOR_STANDBY_PORT) : 3000;
 
     const {
         input,
