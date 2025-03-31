@@ -1,15 +1,15 @@
 import { MemoryStorage } from '@crawlee/memory-storage';
 import { RequestQueue } from 'apify';
-import { CheerioAPI } from 'cheerio';
+import type { CheerioAPI } from 'cheerio';
 import {
     CheerioCrawler,
-    CheerioCrawlerOptions,
-    CheerioCrawlingContext,
+    type CheerioCrawlerOptions,
+    type CheerioCrawlingContext,
     log,
     PlaywrightCrawler,
-    PlaywrightCrawlerOptions,
-    PlaywrightCrawlingContext,
-    RequestOptions,
+    type PlaywrightCrawlerOptions,
+    type PlaywrightCrawlingContext,
+    type RequestOptions,
 } from 'crawlee';
 
 import { ContentCrawlerTypes } from './const.js';
@@ -32,7 +32,7 @@ export function getCrawlerKey(crawlerOptions: CheerioCrawlerOptions | Playwright
  */
 export async function createAndStartSearchCrawler(
     searchCrawlerOptions: CheerioCrawlerOptions,
-    startCrawler: boolean = true,
+    startCrawler = true,
 ) {
     const key = getCrawlerKey(searchCrawlerOptions);
     if (crawlers.has(key)) {
@@ -88,7 +88,7 @@ export async function createAndStartSearchCrawler(
     });
     if (startCrawler) {
         crawler.run().then(
-            () => log.warning(`Google-search-crawler has finished`),
+            () => log.warning('Google-search-crawler has finished'),
             () => { },
         );
         log.info('Google-search-crawler has started 🫡');
@@ -105,7 +105,7 @@ export async function createAndStartSearchCrawler(
  */
 export async function createAndStartContentCrawler(
     contentCrawlerOptions: ContentCrawlerOptions,
-    startCrawler: boolean = true,
+    startCrawler = true,
 ) {
     const { type: crawlerType, crawlerOptions } = contentCrawlerOptions;
 
@@ -139,9 +139,9 @@ async function createPlaywrightContentCrawler(
         ...crawlerOptions,
         keepAlive: crawlerOptions.keepAlive,
         requestQueue: await RequestQueue.open(key, { storageClient: client }),
-        requestHandler: async (context) => {
+        requestHandler: crawlerOptions.requestHandler ?? (async (context) => {
             await requestHandlerPlaywright(context as unknown as PlaywrightCrawlingContext<ContentCrawlerUserData>);
-        },
+        }),
         failedRequestHandler: ({ request }, err) => failedRequestHandler(request, err, ContentCrawlerTypes.PLAYWRIGHT),
     });
 }
@@ -155,9 +155,10 @@ async function createCheerioContentCrawler(
         ...crawlerOptions,
         keepAlive: crawlerOptions.keepAlive,
         requestQueue: await RequestQueue.open(key, { storageClient: client }),
-        requestHandler: async (context) => {
-            await requestHandlerCheerio(context as unknown as CheerioCrawlingContext<ContentCrawlerUserData>);
-        },
+        requestHandler: crawlerOptions.requestHandler ?? (async (context) => {
+            await requestHandlerCheerio(context as unknown as CheerioCrawlingContext<ContentCrawlerUserData>,
+            );
+        }),
         failedRequestHandler: ({ request }, err) => failedRequestHandler(request, err, ContentCrawlerTypes.CHEERIO),
     });
 }

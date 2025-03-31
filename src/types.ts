@@ -1,9 +1,15 @@
 import type { ProxyConfigurationOptions } from 'apify';
-import { CheerioCrawlerOptions, PlaywrightCrawlerOptions } from 'crawlee';
+import type { CheerioCrawlerOptions, CheerioCrawlingContext, PlaywrightCrawlerOptions, PlaywrightCrawlingContext, Request } from 'crawlee';
 
-import { ContentCrawlerTypes } from './const';
+import type { ContentCrawlerTypes } from './const';
 
 export type OutputFormats = 'text' | 'markdown' | 'html';
+
+export interface ResultCallbackInput {
+    result: Output;
+    context?: PlaywrightCrawlingContext<ContentCrawlerUserData> | CheerioCrawlingContext<ContentCrawlerUserData>;
+    request?: Request<ContentCrawlerUserData>;
+}
 
 export type Input = {
     debugMode: boolean;

@@ -1,5 +1,5 @@
 import { Actor } from 'apify';
-import { BrowserName, CheerioCrawlerOptions, log, ProxyConfiguration } from 'crawlee';
+import { BrowserName, type CheerioCrawlerOptions, log, type ProxyConfiguration } from 'crawlee';
 import { firefox } from 'playwright';
 
 import { ContentCrawlerTypes, defaults } from './const.js';
@@ -41,7 +41,7 @@ export async function processInput(originalInput: Partial<Input> | Partial<Stand
  */
 async function processInputInternal(
     originalInput: Partial<Input> | Partial<StandbyInput>,
-    standbyInit: boolean = false,
+    standbyInit = false,
 ) {
     if (originalInput.outputFormats && typeof originalInput.outputFormats === 'string') {
         originalInput.outputFormats = originalInput.outputFormats.split(',').map((format) => format.trim()) as OutputFormats[];

@@ -12,7 +12,7 @@
         "strict": true
     },
     "include": [
-        "./src/**/*", "./types/**/*"
+        "./src/**/*", "./types/**/*", "./tests/**/*"
     ],
     "exclude": ["node_modules"]
 }

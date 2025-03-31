@@ -1,8 +1,8 @@
 import { log } from 'apify';
-import { RequestOptions } from 'crawlee';
+import type { RequestOptions } from 'crawlee';
 
 import { ContentCrawlerStatus } from './const.js';
-import { Output, ContentCrawlerUserData } from './types.js';
+import type { Output, ContentCrawlerUserData } from './types.js';
 
 type ResponseData = {
     resultsMap: Map<string, Output>;

@@ -1,9 +1,9 @@
 import { Actor } from 'apify';
-import { RequestOptions, log, ProxyConfiguration } from 'crawlee';
-import { parse, ParsedUrlQuery } from 'querystring';
+import { type RequestOptions, log, type ProxyConfiguration } from 'crawlee';
+import { parse, type ParsedUrlQuery } from 'node:querystring';
 
 import { defaults } from './const.js';
-import { OrganicResult, ContentScraperSettings, TimeMeasure, ContentCrawlerUserData, SearchCrawlerUserData } from './types.js';
+import type { OrganicResult, ContentScraperSettings, TimeMeasure, ContentCrawlerUserData, SearchCrawlerUserData } from './types.js';
 import inputSchema from '../.actor/input_schema.json' with { type: 'json' };
 
 export function isActorStandby(): boolean {
