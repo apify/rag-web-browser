@@ -2,7 +2,7 @@ import { MemoryStorage } from '@crawlee/memory-storage';
 import { RequestQueue } from 'apify';
 import { CheerioCrawler, Configuration, log, type CheerioCrawlingContext } from 'crawlee';
 import type { Server } from 'node:http';
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 
 import { startTestServer, stopTestServer } from './helpers/server';
 import { requestHandlerCheerio } from '../src/request-handler';
@@ -35,12 +35,14 @@ describe('Cheerio Crawler Content Tests', () => {
         const crawler = new CheerioCrawler({
             requestQueue,
             requestHandler: async (context: CheerioCrawlingContext<ContentCrawlerUserData>) => {
-                await requestHandlerCheerio(context,
-                    async (input) => {
-                        const text = input.result.text?.trim();
-                        if (text !== 'hello world') return;
-                        successUrls.add(context.request.url);
-                    });
+                const pushDataSpy = vi.spyOn(context, 'pushData').mockResolvedValue(undefined);
+                await requestHandlerCheerio(context);
+
+                expect(pushDataSpy).toHaveBeenCalledTimes(1);
+                expect(pushDataSpy).toHaveBeenCalledWith(expect.objectContaining({
+                    text: expect.stringContaining('hello world')
+                }));
+                successUrls.add(context.request.url);
             },
             failedRequestHandler: async ({ request }, error) => {
                 log.error(`Request ${request.url} failed with error: ${error.message}`);

@@ -139,7 +139,7 @@ async function createPlaywrightContentCrawler(
         ...crawlerOptions,
         keepAlive: crawlerOptions.keepAlive,
         requestQueue: await RequestQueue.open(key, { storageClient: client }),
-        requestHandler: crawlerOptions.requestHandler ?? (async (context) => {
+        requestHandler: (async (context) => {
             await requestHandlerPlaywright(context as unknown as PlaywrightCrawlingContext<ContentCrawlerUserData>);
         }),
         failedRequestHandler: ({ request }, err) => failedRequestHandler(request, err, ContentCrawlerTypes.PLAYWRIGHT),
@@ -155,7 +155,7 @@ async function createCheerioContentCrawler(
         ...crawlerOptions,
         keepAlive: crawlerOptions.keepAlive,
         requestQueue: await RequestQueue.open(key, { storageClient: client }),
-        requestHandler: crawlerOptions.requestHandler ?? (async (context) => {
+        requestHandler: (async (context) => {
             await requestHandlerCheerio(context as unknown as CheerioCrawlingContext<ContentCrawlerUserData>,
             );
         }),

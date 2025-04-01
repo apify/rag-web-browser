@@ -4,7 +4,7 @@ import { type CheerioCrawlingContext, htmlToText, log, type PlaywrightCrawlingCo
 
 import { ContentCrawlerStatus, ContentCrawlerTypes } from './const.js';
 import { addResultToResponse, responseData, sendResponseIfFinished } from './responses.js';
-import type { Output, ContentCrawlerUserData, ResultCallbackInput } from './types.js';
+import type { Output, ContentCrawlerUserData } from './types.js';
 import { addTimeMeasureEvent, isActorStandby, transformTimeMeasuresToRelative } from './utils.js';
 import { processHtml } from './website-content-crawler/html-processing.js';
 import { htmlToMarkdown } from './website-content-crawler/markdown.js';
@@ -107,25 +107,11 @@ async function checkValidResponse(
     return true;
 }
 
-async function pushResultToDataset(
-    input: ResultCallbackInput,
-) {
-    const { result, context, request } = input;
-    if (!context) throw new Error('Context must be passed to the pushResultToDataset function');
-    if (!request) throw new Error('Request must be passed to the pushResultToDataset function');
-
-    log.info(`Adding result to the Apify dataset, url: ${request.url}`);
-    await context.pushData(result);
-}
-
 async function handleContent(
     $: CheerioCrawlingContext['$'],
     crawlerType: ContentCrawlerTypes,
     statusCode: number | undefined,
     context: PlaywrightCrawlingContext<ContentCrawlerUserData> | CheerioCrawlingContext<ContentCrawlerUserData>,
-    resultCallback: (
-        input: ResultCallbackInput,
-    ) => Promise<void> = pushResultToDataset,
 ) {
     const { request } = context;
     const { responseId, contentScraperSettings: settings } = request.userData;
@@ -164,7 +150,8 @@ async function handleContent(
     if (settings.debugMode) {
         result.crawl.debug = { timeMeasures: transformTimeMeasuresToRelative(request.userData.timeMeasures!) };
     }
-    await resultCallback({ result, context, request });
+    log.info(`Adding result to the Apify dataset, url: ${request.url}`);
+    await context.pushData(result);
 
     // Get responseId from the request.userData, which corresponds to the original search request
     if (responseId) {
@@ -175,9 +162,6 @@ async function handleContent(
 
 export async function requestHandlerPlaywright(
     context: PlaywrightCrawlingContext<ContentCrawlerUserData>,
-    resultCallback: (
-        input: ResultCallbackInput,
-    ) => Promise<void> = pushResultToDataset,
 ) {
     const { request, response, page, closeCookieModals } = context;
     const { contentScraperSettings: settings, responseId } = request.userData;
@@ -207,14 +191,11 @@ export async function requestHandlerPlaywright(
 
     const statusCode = response?.status();
 
-    await handleContent($, ContentCrawlerTypes.PLAYWRIGHT, statusCode, context, resultCallback);
+    await handleContent($, ContentCrawlerTypes.PLAYWRIGHT, statusCode, context);
 }
 
 export async function requestHandlerCheerio(
     context: CheerioCrawlingContext<ContentCrawlerUserData>,
-    resultCallback: (
-        input: ResultCallbackInput,
-    ) => Promise<void> = pushResultToDataset,
 ) {
     const { $, request, response } = context;
     const { responseId } = request.userData;
@@ -229,7 +210,7 @@ export async function requestHandlerCheerio(
 
     const statusCode = response?.statusCode;
 
-    await handleContent($, ContentCrawlerTypes.CHEERIO, statusCode, context, resultCallback);
+    await handleContent($, ContentCrawlerTypes.CHEERIO, statusCode, context);
 }
 
 export async function failedRequestHandler(request: Request, err: Error, crawlerType: ContentCrawlerTypes) {

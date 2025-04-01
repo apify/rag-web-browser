@@ -5,12 +5,6 @@ import type { ContentCrawlerTypes } from './const';
 
 export type OutputFormats = 'text' | 'markdown' | 'html';
 
-export interface ResultCallbackInput {
-    result: Output;
-    context?: PlaywrightCrawlingContext<ContentCrawlerUserData> | CheerioCrawlingContext<ContentCrawlerUserData>;
-    request?: Request<ContentCrawlerUserData>;
-}
-
 export type Input = {
     debugMode: boolean;
     requestTimeoutSecs: number;
