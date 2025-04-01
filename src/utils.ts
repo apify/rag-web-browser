@@ -1,16 +1,16 @@
-import { Actor } from 'apify';
-import { RequestOptions, log, ProxyConfiguration } from 'crawlee';
-import { parse } from 'querystring';
+import { parse } from 'node:querystring';
 
-import {
-    OrganicResult,
-    ContentScraperSettings,
-    TimeMeasure,
-    ContentCrawlerUserData,
-    SearchCrawlerUserData,
-    type OutputFormats, Input,
-} from './types.js';
+import { Actor } from 'apify';
+import type { ProxyConfiguration, RequestOptions } from 'crawlee';
+import { log } from 'crawlee';
+
 import inputSchema from '../.actor/input_schema.json' with { type: 'json' };
+import type { ContentCrawlerUserData,
+    ContentScraperSettings,
+    Input,
+    OrganicResult, OutputFormats,
+    SearchCrawlerUserData,
+    TimeMeasure } from './types.js';
 
 export function isActorStandby(): boolean {
     return Actor.getEnv().metaOrigin === 'STANDBY';
@@ -137,6 +137,7 @@ export function createRequest(
 }
 
 export function addTimeMeasureEvent(userData: ContentCrawlerUserData, event: TimeMeasure['event'], time: number | null = null) {
+    /* eslint-disable no-param-reassign */
     let timePrev = 0;
     if (!userData.timeMeasures?.length) {
         userData.timeMeasures = [];
@@ -145,6 +146,7 @@ export function addTimeMeasureEvent(userData: ContentCrawlerUserData, event: Tim
     }
     time = time ?? Date.now();
     userData.timeMeasures.push({ event, timeMs: time, timeDeltaPrevMs: timePrev ? time - timePrev : 0 });
+    /* eslint-enable no-param-reassign */
 }
 
 export function transformTimeMeasuresToRelative(timeMeasures: TimeMeasure[]): TimeMeasure[] {

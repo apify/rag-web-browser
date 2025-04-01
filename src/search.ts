@@ -1,12 +1,13 @@
-import { type CheerioCrawlerOptions, log } from 'crawlee';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
+import { type CheerioCrawlerOptions, log } from 'crawlee';
+
 import { PLAYWRIGHT_REQUEST_TIMEOUT_NORMAL_MODE_SECS, Routes } from './const.js';
-import { addContentCrawlRequest, addSearchRequest, createAndStartSearchCrawler, createAndStartContentCrawler } from './crawlers.js';
+import { addContentCrawlRequest, addSearchRequest, createAndStartContentCrawler, createAndStartSearchCrawler } from './crawlers.js';
 import { UserInputError } from './errors.js';
 import { processInput } from './input.js';
 import { createResponsePromise } from './responses.js';
-import type { Input, Output, ContentScraperSettings, ContentCrawlerOptions } from './types.js';
+import type { ContentCrawlerOptions, ContentScraperSettings, Input, Output } from './types.js';
 import {
     addTimeMeasureEvent,
     createRequest,
@@ -140,6 +141,7 @@ export async function handleSearchNormalMode(input: Input,
     contentCrawlerOptions: ContentCrawlerOptions,
     contentScraperSettings: ContentScraperSettings,
 ) {
+    /* eslint-disable no-param-reassign */
     const startedTime = Date.now();
     contentCrawlerOptions.crawlerOptions.requestHandlerTimeoutSecs = PLAYWRIGHT_REQUEST_TIMEOUT_NORMAL_MODE_SECS;
 
@@ -169,4 +171,5 @@ export async function handleSearchNormalMode(input: Input,
     addTimeMeasureEvent(req.userData!, 'before-playwright-run', startedTime);
     log.info(`Running target page crawler with request: ${JSON.stringify(req)}`);
     await contentCrawler!.run();
+    /* eslint-enable no-param-reassign */
 }

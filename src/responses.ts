@@ -2,7 +2,7 @@ import { log } from 'apify';
 import type { RequestOptions } from 'crawlee';
 
 import { ContentCrawlerStatus } from './const.js';
-import type { Output, ContentCrawlerUserData } from './types.js';
+import type { ContentCrawlerUserData, Output } from './types.js';
 
 type ResponseData = {
     resultsMap: Map<string, Output>;
@@ -27,7 +27,7 @@ const getResponse = (responseId: string): ResponseData | null => {
  * Create a response promise
  * (for content crawler requests there is no need to create a response object).
  */
-export function createResponsePromise(responseId: string, timeoutSecs: number): Promise<Output[]> {
+export async function createResponsePromise(responseId: string, timeoutSecs: number): Promise<Output[]> {
     log.info(`Created responsePromise for response ID: ${responseId}`);
     return new Promise<Output[]>((resolve, reject) => {
         const data: ResponseData = {
@@ -166,7 +166,7 @@ export function sendResponseIfFinished(responseId: string) {
 /**
  * Add timeout to all responses when actor is migrating (source: SuperScraper).
  */
-export const addTimeoutToAllResponses = (timeoutSeconds: number = 60) => {
+export const addTimeoutToAllResponses = (timeoutSeconds = 60) => {
     const migrationErrorMessage = {
         errorMessage: `Actor had to migrate to another server. Please, retry your request.`,
     };

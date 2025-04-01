@@ -27,6 +27,33 @@ export function getCrawlerKey(crawlerOptions: CheerioCrawlerOptions | Playwright
 }
 
 /**
+ * Adds a content crawl request to selected content crawler.
+ * Get existing crawler based on crawlerOptions and scraperSettings, if not present -> create new
+ */
+export const addContentCrawlRequest = async (
+    request: RequestOptions<ContentCrawlerUserData>,
+    responseId: string,
+    contentCrawlerKey: string,
+) => {
+    const crawler = crawlers.get(contentCrawlerKey);
+    const name = crawler instanceof PlaywrightCrawler ? 'playwright' : 'cheerio';
+
+    if (!crawler) {
+        log.error(`Content crawler not found: key ${contentCrawlerKey}`);
+        return;
+    }
+    try {
+        await crawler.requestQueue!.addRequest(request);
+        // create an empty result in search request response
+        // do not use request.uniqueKey as responseId as it is not id of a search request
+        addEmptyResultToResponse(responseId, request);
+        log.info(`Added request to the ${name}-content-crawler: ${request.url}`);
+    } catch (err) {
+        log.error(`Error adding request to ${name}-content-crawler: ${request.url}, error: ${err}`);
+    }
+};
+
+/**
  * Creates and starts a Google search crawler with the provided configuration.
  * A crawler won't be created if it already exists.
  */
@@ -89,6 +116,7 @@ export async function createAndStartSearchCrawler(
     if (startCrawler) {
         crawler.run().then(
             () => log.warning('Google-search-crawler has finished'),
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
             () => { },
         );
         log.info('Google-search-crawler has started 🫡');
@@ -121,6 +149,7 @@ export async function createAndStartContentCrawler(
     if (startCrawler) {
         crawler.run().then(
             () => log.warning(`Crawler ${crawlerType} has finished`),
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
             () => {},
         );
         log.info(`Crawler ${crawlerType} has started 💪🏼`);
@@ -142,7 +171,7 @@ async function createPlaywrightContentCrawler(
         requestHandler: (async (context) => {
             await requestHandlerPlaywright(context as unknown as PlaywrightCrawlingContext<ContentCrawlerUserData>);
         }),
-        failedRequestHandler: ({ request }, err) => failedRequestHandler(request, err, ContentCrawlerTypes.PLAYWRIGHT),
+        failedRequestHandler: async ({ request }, err) => failedRequestHandler(request, err, ContentCrawlerTypes.PLAYWRIGHT),
     });
 }
 
@@ -159,7 +188,7 @@ async function createCheerioContentCrawler(
             await requestHandlerCheerio(context as unknown as CheerioCrawlingContext<ContentCrawlerUserData>,
             );
         }),
-        failedRequestHandler: ({ request }, err) => failedRequestHandler(request, err, ContentCrawlerTypes.CHEERIO),
+        failedRequestHandler: async ({ request }, err) => failedRequestHandler(request, err, ContentCrawlerTypes.CHEERIO),
     });
 }
 
@@ -181,31 +210,4 @@ export const addSearchRequest = async (
     addTimeMeasureEvent(request.userData!, 'before-cheerio-queue-add');
     await crawler.requestQueue!.addRequest(request);
     log.info(`Added request to cheerio-google-search-crawler: ${request.url}`);
-};
-
-/**
- * Adds a content crawl request to selected content crawler.
- * Get existing crawler based on crawlerOptions and scraperSettings, if not present -> create new
- */
-export const addContentCrawlRequest = async (
-    request: RequestOptions<ContentCrawlerUserData>,
-    responseId: string,
-    contentCrawlerKey: string,
-) => {
-    const crawler = crawlers.get(contentCrawlerKey);
-    const name = crawler instanceof PlaywrightCrawler ? 'playwright' : 'cheerio';
-
-    if (!crawler) {
-        log.error(`Content crawler not found: key ${contentCrawlerKey}`);
-        return;
-    }
-    try {
-        await crawler.requestQueue!.addRequest(request);
-        // create an empty result in search request response
-        // do not use request.uniqueKey as responseId as it is not id of a search request
-        addEmptyResultToResponse(responseId, request);
-        log.info(`Added request to the ${name}-content-crawler: ${request.url}`);
-    } catch (err) {
-        log.error(`Error adding request to ${name}-content-crawler: ${request.url}, error: ${err}`);
-    }
 };

@@ -10,7 +10,7 @@ import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprot
 
 import inputSchema from '../../.actor/input_schema.json' with { type: 'json' };
 import { handleModelContextProtocol } from '../search.js';
-import { Input } from '../types.js';
+import type { Input } from '../types.js';
 
 const TOOL_SEARCH = inputSchema.title.toLowerCase().replace(/ /g, '-');
 
