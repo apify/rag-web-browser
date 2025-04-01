@@ -38,18 +38,15 @@ if (isActorStandby()) {
 
     const app = createServer();
 
-    const startCrawlers = async () => {
+    app.listen(port, async () => {
         const promises: Promise<unknown>[] = [];
         promises.push(createAndStartSearchCrawler(searchCrawlerOptions));
         for (const settings of contentCrawlerOptions) {
             promises.push(createAndStartContentCrawler(settings));
         }
-        await Promise.all(promises);
-    };
 
-    app.listen(port, async () => {
+        await Promise.all(promises);
         log.info(`The Actor web server is listening for user requests at ${host}:${port}`);
-        await startCrawlers();
     });
 } else {
     log.info('Actor is running in the NORMAL mode.');
