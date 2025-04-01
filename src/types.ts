@@ -1,7 +1,7 @@
 import type { ProxyConfigurationOptions } from 'apify';
-import { CheerioCrawlerOptions, PlaywrightCrawlerOptions } from 'crawlee';
+import type { CheerioCrawlerOptions, PlaywrightCrawlerOptions } from 'crawlee';
 
-import { ContentCrawlerTypes } from './const';
+import type { ContentCrawlerTypes } from './const';
 
 export type OutputFormats = 'text' | 'markdown' | 'html';
 export type SERPProxyGroup = 'GOOGLE_SERP' | 'SHADER';
@@ -65,6 +65,17 @@ export interface TimeMeasure {
     timeDeltaPrevMs: number;
 }
 
+export interface ContentScraperSettings {
+    debugMode: boolean;
+    dynamicContentWaitSecs: number;
+    htmlTransformer?: string
+    maxHtmlCharsToProcess: number;
+    outputFormats: OutputFormats[];
+    readableTextCharThreshold: number;
+    removeCookieWarnings?: boolean;
+    removeElementsCssSelector?: string;
+}
+
 export type SearchCrawlerUserData = {
     maxResults: number;
     timeMeasures: TimeMeasure[];
@@ -82,17 +93,6 @@ export type ContentCrawlerUserData = {
     contentCrawlerKey?: string;
     contentScraperSettings: ContentScraperSettings;
 };
-
-export interface ContentScraperSettings {
-    debugMode: boolean;
-    dynamicContentWaitSecs: number;
-    htmlTransformer?: string
-    maxHtmlCharsToProcess: number;
-    outputFormats: OutputFormats[];
-    readableTextCharThreshold: number;
-    removeCookieWarnings?: boolean;
-    removeElementsCssSelector?: string;
-}
 
 export type Output = {
     text?: string | null;

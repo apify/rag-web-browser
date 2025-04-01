@@ -1,4 +1,4 @@
-import { Readability, isProbablyReaderable } from '@mozilla/readability';
+import { isProbablyReaderable, Readability } from '@mozilla/readability';
 import { log } from 'crawlee';
 import { JSDOM, VirtualConsole } from 'jsdom';
 

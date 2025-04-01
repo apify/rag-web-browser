@@ -1,18 +1,20 @@
-import { Actor, ProxyConfigurationOptions } from 'apify';
-import { BrowserName, CheerioCrawlerOptions, log, ProxyConfiguration } from 'crawlee';
+import type { ProxyConfigurationOptions } from 'apify';
+import { Actor } from 'apify';
+import type { CheerioCrawlerOptions, ProxyConfiguration } from 'crawlee';
+import { BrowserName, log } from 'crawlee';
 import { firefox } from 'playwright';
 
+import inputSchema from '../.actor/input_schema.json' with { type: 'json' };
 import { ContentCrawlerTypes } from './const.js';
 import { UserInputError } from './errors.js';
 import type {
-    Input,
-    ContentScraperSettings,
-    OutputFormats,
     ContentCrawlerOptions,
+    ContentScraperSettings,
+    Input,
+    OutputFormats,
     ScrapingTool,
     SERPProxyGroup,
 } from './types.js';
-import inputSchema from '../.actor/input_schema.json' with { type: 'json' };
 
 /**
  * Processes the input and returns an array of crawler settings. This is ideal for startup of STANDBY mode
@@ -49,7 +51,7 @@ export async function processInput(originalInput: Partial<Input>) {
  */
 async function processInputInternal(
     originalInput: Partial<Input>,
-    standbyInit: boolean = false,
+    standbyInit = false,
 ) {
     // const input = { ...defaults, ...originalInput } as Input;
 
@@ -94,7 +96,7 @@ async function processInputInternal(
 function createPlaywrightCrawlerOptions(
     input: Input,
     proxy: ProxyConfiguration | undefined,
-    keepAlive: boolean = true,
+    keepAlive = true,
 ): ContentCrawlerOptions {
     const { maxRequestRetries, desiredConcurrency } = input;
 
@@ -127,7 +129,7 @@ function createPlaywrightCrawlerOptions(
 function createCheerioCrawlerOptions(
     input: Input,
     proxy: ProxyConfiguration | undefined,
-    keepAlive: boolean = true,
+    keepAlive = true,
 ): ContentCrawlerOptions {
     const { maxRequestRetries, desiredConcurrency } = input;
 
@@ -151,6 +153,7 @@ function createCheerioCrawlerOptions(
  * This is a bit ugly, but it's necessary to avoid throwing an error when the query is not provided in standby mode.
  */
 function validateAndFillInput(input: Partial<Input>, standbyInit: boolean): Input {
+    /* eslint-disable no-param-reassign */
     const validateRange = (
         value: number | string | undefined,
         min: number,
@@ -277,4 +280,5 @@ function validateAndFillInput(input: Partial<Input>, standbyInit: boolean): Inpu
     }
 
     return input as Input;
+    /* eslint-enable no-param-reassign */
 }
