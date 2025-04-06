@@ -25,11 +25,9 @@ export function createTestServer() {
  */
 export function startTestServer(port = 3030): Server {
     const app = createTestServer();
-    const server = app.listen(port, () => {
+    return app.listen(port, () => {
         console.log(`Test server is running on port ${port}`);
     });
-
-    return server;
 }
 
 /**
