@@ -9,3 +9,7 @@ storage
 
 # Added by Apify CLI
 .venv
+.aider*
+
+# Actor run input
+input.json

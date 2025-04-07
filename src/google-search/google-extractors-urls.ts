@@ -21,6 +21,22 @@ export const deduplicateResults = <T extends { title?: string; url?: string }>(r
 };
 
 /**
+ * Parses a single organic search result (source: @apify/google-search).
+ */
+const parseResult = ($: CheerioAPI, el: Element) => {
+    $(el).find('div.action-menu').remove();
+
+    const descriptionSelector = '.VwiC3b';
+    const searchResult: OrganicResult = {
+        title: $(el).find('h3').first().text() || '',
+        description: ($(el).find(descriptionSelector).text() || '').trim(),
+        url: $(el).find('a').first().attr('href') || '',
+    };
+
+    return searchResult;
+};
+
+/**
  * Extracts search results from the given selectors (source: @apify/google-search).
  */
 const extractResultsFromSelectors = ($: CheerioAPI, selectors: string[]) => {
@@ -38,19 +54,11 @@ const extractResultsFromSelectors = ($: CheerioAPI, selectors: string[]) => {
 };
 
 /**
- * Parses a single organic search result (source: @apify/google-search).
+ * If true, the results are not inherent to the given query, but to a similar suggested query
  */
-const parseResult = ($: CheerioAPI, el: Element) => {
-    $(el).find('div.action-menu').remove();
-
-    const descriptionSelector = '.VwiC3b';
-    const searchResult: OrganicResult = {
-        title: $(el).find('h3').first().text() || '',
-        description: ($(el).find(descriptionSelector).text() || '').trim(),
-        url: $(el).find('a').first().attr('href') || '',
-    };
-
-    return searchResult;
+const areTheResultsSuggestions = ($: CheerioAPI) => {
+    // Check if the message "No results found" is shown
+    return $('div#topstuff > div.fSp71d').children().length > 0;
 };
 
 /**
@@ -73,12 +81,4 @@ export const scrapeOrganicResults = ($: CheerioAPI) => {
 
     const searchResults = extractResultsFromSelectors($, resultSelectors2023January);
     return deduplicateResults(searchResults);
-};
-
-/**
- * If true, the results are not inherent to the given query, but to a similar suggested query
- */
-const areTheResultsSuggestions = ($: CheerioAPI) => {
-    // Check if the message "No results found" is shown
-    return $('div#topstuff > div.fSp71d').children().length > 0;
 };

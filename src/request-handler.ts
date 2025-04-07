@@ -1,10 +1,10 @@
 import { Actor } from 'apify';
 import { load } from 'cheerio';
-import { CheerioCrawlingContext, htmlToText, log, PlaywrightCrawlingContext, sleep, Request } from 'crawlee';
+import { type CheerioCrawlingContext, htmlToText, log, type PlaywrightCrawlingContext, type Request, sleep } from 'crawlee';
 
 import { ContentCrawlerStatus, ContentCrawlerTypes } from './const.js';
 import { addResultToResponse, responseData, sendResponseIfFinished } from './responses.js';
-import { Output, ContentCrawlerUserData } from './types.js';
+import type { ContentCrawlerUserData, Output } from './types.js';
 import { addTimeMeasureEvent, isActorStandby, transformTimeMeasuresToRelative } from './utils.js';
 import { processHtml } from './website-content-crawler/html-processing.js';
 import { htmlToMarkdown } from './website-content-crawler/markdown.js';
@@ -12,7 +12,7 @@ import { htmlToMarkdown } from './website-content-crawler/markdown.js';
 let ACTOR_TIMEOUT_AT: number | undefined;
 try {
     ACTOR_TIMEOUT_AT = process.env.ACTOR_TIMEOUT_AT ? new Date(process.env.ACTOR_TIMEOUT_AT).getTime() : undefined;
-} catch (err) {
+} catch {
     ACTOR_TIMEOUT_AT = undefined;
 }
 
