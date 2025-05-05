@@ -64,7 +64,7 @@ const areTheResultsSuggestions = ($: CheerioAPI) => {
 /**
  * Extracts organic search results from the given Cheerio instance (source: @apify/google-search).
  */
-export const scrapeOrganicResults = ($: CheerioAPI) => {
+export const scrapeOrganicResults = ($: CheerioAPI): OrganicResult[] => {
     const resultSelectors2023January = [
         '.hlcw0c', // Top result with site links
         '.g.Ww4FFb', // General search results
@@ -75,10 +75,16 @@ export const scrapeOrganicResults = ($: CheerioAPI) => {
         '.sATSHe', // another new selector in March 2025
     ];
 
-    if (areTheResultsSuggestions($)) {
-        return [];
-    }
-
     const searchResults = extractResultsFromSelectors($, resultSelectors2023January);
-    return deduplicateResults(searchResults);
+    const deduplicatedResults = deduplicateResults(searchResults);
+    if (areTheResultsSuggestions($)) {
+        return deduplicatedResults.map((result) => ({
+            ...result,
+            resultType: 'SUGGESTED',
+        }));
+    }
+    return deduplicatedResults.map((result) => ({
+        ...result,
+        resultType: 'ORGANIC',
+    }));
 };
