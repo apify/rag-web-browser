@@ -1,7 +1,7 @@
 import type { CheerioAPI } from 'cheerio';
 import type { Element } from 'domhandler';
 
-import type { OrganicResult } from '../types.js';
+import type { OrganicResult, SearchResultType } from '../types.js';
 
 /**
  * Deduplicates search results based on their title and URL (source @apify/google-search).
@@ -77,14 +77,12 @@ export const scrapeOrganicResults = ($: CheerioAPI): OrganicResult[] => {
 
     const searchResults = extractResultsFromSelectors($, resultSelectors2023January);
     const deduplicatedResults = deduplicateResults(searchResults);
+    let resultType: SearchResultType = 'ORGANIC';
     if (areTheResultsSuggestions($)) {
-        return deduplicatedResults.map((result) => ({
-            ...result,
-            resultType: 'SUGGESTED',
-        }));
+        resultType = 'SUGGESTED';
     }
     return deduplicatedResults.map((result) => ({
         ...result,
-        resultType: 'ORGANIC',
+        resultType,
     }));
 };
