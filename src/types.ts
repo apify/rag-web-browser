@@ -32,11 +32,14 @@ export type Input = {
     scrapingTool: ScrapingTool;
 };
 
+export type SearchResultType = 'ORGANIC' | 'SUGGESTED';
+
 export type OrganicResult = {
     description?: string;
     title?: string;
     rank?: number;
     url?: string;
+    resultType?: SearchResultType;
 };
 
 export interface TimeMeasure {

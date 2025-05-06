@@ -16,10 +16,11 @@
                     "title": "Overview",
                     "description": "An view showing just basic properties for simplicity.",
                     "transformation": {
-                        "flatten": ["metadata"],
+                        "flatten": ["metadata", "searchResult"],
                         "fields": [
                             "metadata.url",
                             "metadata.title",
+                            "searchResult.resultType",
                             "markdown"
                         ]
                     },
@@ -32,6 +33,10 @@
                             },
                             "metadata.title": {
                                 "label": "Page title",
+                                "format": "text"
+                            },
+                            "searchResult.resultType": {
+                                "label": "Result type",
                                 "format": "text"
                             },
                             "text": {
@@ -49,6 +54,7 @@
                         "fields": [
                             "searchResult.title",
                             "searchResult.description",
+                            "searchResult.resultType",
                             "searchResult.url"
                         ]
                     },
@@ -61,6 +67,10 @@
                             },
                             "searchResult.title": {
                                 "label": "Title",
+                                "format": "text"
+                            },
+                            "searchResult.resultType": {
+                                "label": "Result type",
                                 "format": "text"
                             },
                             "searchResult.url": {
