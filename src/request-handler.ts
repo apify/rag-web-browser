@@ -139,6 +139,7 @@ async function handleContent(
             description: $('meta[name=description]').first().attr('content') ?? undefined,
             languageCode: $html.first().attr('lang') ?? undefined,
             url: request.url,
+            redirectedUrl: request.loadedUrl,
         },
         query: request.userData.query,
         text: settings.outputFormats.includes('text') ? text : undefined,
