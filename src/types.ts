@@ -115,6 +115,7 @@ export type Output = {
     metadata: {
         title?: string | null;
         url: string;
+        redirectedUrl?: string | null;
         description?: string | null;
         author?: string | null;
         languageCode?: string | null;
