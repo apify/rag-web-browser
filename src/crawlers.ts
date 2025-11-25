@@ -70,7 +70,7 @@ export async function createAndStartSearchCrawler(
     const crawler = new CheerioCrawler({
         ...(searchCrawlerOptions as CheerioCrawlerOptions),
         requestQueue: await RequestQueue.open(key, { storageClient: client }),
-        requestHandler: async ({ request, $: _$ }: CheerioCrawlingContext<SearchCrawlerUserData>) => {
+        requestHandler: async ({ request, $: _$, addRequests }: CheerioCrawlingContext<SearchCrawlerUserData>) => {
             // NOTE: we need to cast this to fix `cheerio` type errors
             addTimeMeasureEvent(request.userData!, 'cheerio-request-handler-start');
             const $ = _$ as CheerioAPI;
@@ -108,7 +108,7 @@ export async function createAndStartSearchCrawler(
                     searchCrawlerOptions.proxyConfiguration,
                     nextOffset,
                 );
-                await crawler.requestQueue!.addRequest(nextRequest);
+                await addRequests([nextRequest]);
             } else {
                 // We have enough results or reached max pages, proceed to content crawling
                 const finalResults = deduplicated.slice(0, request.userData.maxResults);
