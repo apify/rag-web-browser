@@ -88,11 +88,11 @@ export type SearchCrawlerUserData = {
     contentScraperSettings: ContentScraperSettings;
     // Pagination tracking
     /** Results accumulated across SERP pages, passed forward for merging */
-    collectedResults?: OrganicResult[];
+    collectedResults: OrganicResult[];
     /** Current page number (0-indexed) */
-    currentPage?: number;
+    currentPage: number;
     /** Max pages: ceil(maxResults/10) + 1 to handle pages with <10 results */
-    totalPages?: number;
+    totalPages: number;
 };
 
 export type ContentCrawlerUserData = {

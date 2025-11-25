@@ -41,12 +41,14 @@ function prepareRequest(
             null,
         )
         : createSearchRequest(
-            query,
-            responseId,
-            input.maxResults,
-            contentCrawlerKey,
+            {
+                query,
+                responseId,
+                maxResults: input.maxResults,
+                contentCrawlerKey,
+                contentScraperSettings,
+            },
             searchCrawlerOptions.proxyConfiguration,
-            contentScraperSettings,
         );
 
     addTimeMeasureEvent(req.userData!, 'request-received', Date.now());

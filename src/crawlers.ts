@@ -83,21 +83,18 @@ export async function createAndStartSearchCrawler(
             // remove results with URL starting with '/search?q=' (google return empty search results for images)
             results = results.filter((result) => !result.url!.startsWith('/search?q='));
 
-            // Initialize or update collected results
-            const collectedResults = request.userData.collectedResults || [];
-            const currentPage = request.userData.currentPage || 0;
-            // Calculate total pages to scrape: base pages + 1 extra to account for pages with fewer than 10 results
-            const totalPages = request.userData.totalPages || Math.ceil(request.userData.maxResults / 10) + 1;
+            // Destructure userData for easier access (pagination fields are initialized in createSearchRequest)
+            const { collectedResults, currentPage, totalPages, maxResults } = request.userData;
 
             // Merge with previously collected results and deduplicate
             const allResults = [...collectedResults, ...results];
             const deduplicated = deduplicateResults(allResults);
 
-            log.info(`Page ${currentPage + 1}/${totalPages}: Extracted ${results.length} results, Total unique: ${deduplicated.length}/${request.userData.maxResults}`);
+            log.info(`Page ${currentPage + 1}/${totalPages}: Extracted ${results.length} results, Total unique: ${deduplicated.length}/${maxResults}`);
 
             // Decide whether to fetch the next page
             // Continue fetching if: (1) we haven't reached maxResults AND (2) we haven't exceeded totalPages AND (3) Google returned results
-            const shouldFetchNextPage = deduplicated.length < request.userData.maxResults
+            const shouldFetchNextPage = deduplicated.length < maxResults
                 && currentPage + 1 < totalPages
                 && results.length > 0; // Stop if Google returned 0 results (empty page)
 
@@ -108,16 +105,13 @@ export async function createAndStartSearchCrawler(
                 log.info(`Enqueueing next page (${nextPage + 1}/${totalPages}) with offset ${nextOffset}`);
 
                 const nextRequest = createSearchRequest(
-                    request.userData.query,
-                    request.userData.responseId,
-                    request.userData.maxResults,
-                    request.userData.contentCrawlerKey,
+                    {
+                        ...request.userData,
+                        collectedResults: deduplicated,
+                        currentPage: nextPage,
+                    },
                     searchCrawlerOptions.proxyConfiguration,
-                    request.userData.contentScraperSettings,
                     nextOffset,
-                    deduplicated,
-                    nextPage,
-                    totalPages,
                 );
                 await crawler.requestQueue!.addRequest(nextRequest);
             } else {
