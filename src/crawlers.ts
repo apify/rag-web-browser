@@ -123,7 +123,7 @@ export async function createAndStartSearchCrawler(
             } else {
                 // We have enough results or reached max pages, proceed to content crawling
                 const finalResults = deduplicated.slice(0, request.userData.maxResults);
-                log.info(`Pagination complete. Extracted ${finalResults.length} results: \n${finalResults.map((r) => r.url).join('\n')}`);
+                log.info(`Pagination complete. Extracted ${finalResults.length} results.`, { finalResults: finalResults.map((r) => r.url) });
 
                 addTimeMeasureEvent(request.userData!, 'before-playwright-queue-add');
                 const responseId = request.userData.responseId!;
