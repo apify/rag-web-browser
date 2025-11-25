@@ -12,7 +12,7 @@ import {
     type RequestOptions,
 } from 'crawlee';
 
-import { ContentCrawlerTypes } from './const.js';
+import { ContentCrawlerTypes, GOOGLE_STANDARD_RESULTS_PER_PAGE } from './const.js';
 import { deduplicateResults, scrapeOrganicResults } from './google-search/google-extractors-urls.js';
 import { failedRequestHandler, requestHandlerCheerio, requestHandlerPlaywright } from './request-handler.js';
 import { addEmptyResultToResponse, sendResponseError } from './responses.js';
@@ -86,8 +86,8 @@ export async function createAndStartSearchCrawler(
             // Initialize or update collected results
             const collectedResults = request.userData.collectedResults || [];
             const currentPage = request.userData.currentPage || 0;
-            // Calculate total pages to scrape: base pages + 1 extra to account for pages with fewer than 10 results
-            const totalPages = request.userData.totalPages || Math.ceil(request.userData.maxResults / 10) + 1;
+            // Calculate total pages to scrape: base pages + 1 extra to account for pages with fewer than GOOGLE_STANDARD_RESULTS_PER_PAGE results
+            const totalPages = request.userData.totalPages || Math.ceil(request.userData.maxResults / GOOGLE_STANDARD_RESULTS_PER_PAGE) + 1;
 
             // Merge with previously collected results and deduplicate
             const allResults = [...collectedResults, ...results];
@@ -104,7 +104,7 @@ export async function createAndStartSearchCrawler(
             if (shouldFetchNextPage) {
                 // Queue the next page
                 const nextPage = currentPage + 1;
-                const nextOffset = nextPage * 10;
+                const nextOffset = nextPage * GOOGLE_STANDARD_RESULTS_PER_PAGE;
                 log.info(`Queueing next page (${nextPage + 1}/${totalPages}) with offset ${nextOffset}`);
 
                 const nextRequest = createSearchRequest(
