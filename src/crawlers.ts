@@ -1,7 +1,6 @@
 import { MemoryStorage } from '@crawlee/memory-storage';
 import { RequestQueue } from 'apify';
-import {
-    CheerioAPI,
+import type { CheerioAPI,
     CheerioCrawler,
     type CheerioCrawlerOptions,
     type CheerioCrawlingContext,
@@ -9,8 +8,7 @@ import {
     PlaywrightCrawler,
     type PlaywrightCrawlerOptions,
     type PlaywrightCrawlingContext,
-    type RequestOptions,
-} from 'crawlee';
+    type RequestOptions } from 'crawlee';
 
 import { ContentCrawlerTypes, GOOGLE_STANDARD_RESULTS_PER_PAGE } from './const.js';
 import { deduplicateResults, scrapeOrganicResults } from './google-search/google-extractors-urls.js';

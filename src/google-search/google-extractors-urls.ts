@@ -1,7 +1,7 @@
+import type { CheerioAPI } from 'crawlee';
 import type { Element } from 'domhandler';
 
 import type { OrganicResult, SearchResultType } from '../types.js';
-import { CheerioAPI } from 'crawlee';
 
 /**
  * Validates if a URL is a valid absolute URL (starts with http/https or is a valid relative URL).

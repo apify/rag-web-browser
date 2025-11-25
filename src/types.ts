@@ -1,7 +1,7 @@
 import type { ProxyConfigurationOptions } from 'apify';
 import type { CheerioCrawlerOptions, PlaywrightCrawlerOptions } from 'crawlee';
 
-import type { ContentCrawlerTypes } from './const';
+import type { ContentCrawlerTypes } from './const.js';
 
 export type OutputFormats = 'text' | 'markdown' | 'html';
 export type SERPProxyGroup = 'GOOGLE_SERP' | 'SHADER';
