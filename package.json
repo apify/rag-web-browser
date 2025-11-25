@@ -10,7 +10,7 @@
 		"@crawlee/memory-storage": "^3.11.1",
 		"@modelcontextprotocol/sdk": "^1.0.4",
 		"@mozilla/readability": "^0.5.0",
-		"apify": "^3.2.6",
+		"apify": "^3.5.2",
 		"cheerio": "^1.0.0-rc.12",
 		"crawlee": "^3.12.0",
 		"express": "^4.21.2",

@@ -122,7 +122,7 @@ async function handleContent(
     addTimeMeasureEvent(request.userData, `${crawlerType}-process-html`);
 
     const isTooLarge = processedHtml.length > settings.maxHtmlCharsToProcess;
-    const text = isTooLarge ? load(processedHtml).text() : htmlToText(load(processedHtml));
+    const text = isTooLarge ? load(processedHtml).text() : htmlToText(load(processedHtml).html());
 
     const result: Output = {
         crawl: {

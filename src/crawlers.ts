@@ -1,7 +1,7 @@
 import { MemoryStorage } from '@crawlee/memory-storage';
 import { RequestQueue } from 'apify';
-import type { CheerioAPI } from 'cheerio';
 import {
+    CheerioAPI,
     CheerioCrawler,
     type CheerioCrawlerOptions,
     type CheerioCrawlingContext,
