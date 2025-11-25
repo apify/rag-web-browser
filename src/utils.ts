@@ -87,34 +87,38 @@ export function randomId() {
  * We add +1 to the calculated totalPages to account for pages that return fewer than 10 results.
  */
 export function createSearchRequest(
-    query: string,
-    responseId: string,
-    maxResults: number,
-    contentCrawlerKey: string,
+    userData: Partial<SearchCrawlerUserData> & {
+        query: string;
+        responseId: string;
+        maxResults: number;
+        contentCrawlerKey: string;
+        contentScraperSettings: ContentScraperSettings;
+    },
     proxyConfiguration: ProxyConfiguration | undefined,
-    contentScraperSettings: ContentScraperSettings,
     startOffset = 0,
-    collectedResults: OrganicResult[] = [],
-    currentPage = 0,
-    totalPages = Math.ceil(maxResults / 10) + 1,
 ): RequestOptions<SearchCrawlerUserData> {
+    // Initialize or update pagination fields
+    const collectedResults = userData.collectedResults || [];
+    const currentPage = userData.currentPage ?? 0;
+    const totalPages = userData.totalPages ?? Math.ceil(userData.maxResults / 10) + 1;
+
     // @ts-expect-error is there a better way to get group information?
     // (e.g. to  create extended CheerioCrawlOptions and pass it there?)
     const groups = proxyConfiguration?.groups || [];
     const protocol = groups.includes('GOOGLE_SERP') ? 'http' : 'https';
     const urlSearch = startOffset > 0
-        ? `${protocol}://www.google.com/search?q=${query}&start=${startOffset}`
-        : `${protocol}://www.google.com/search?q=${query}`;
+        ? `${protocol}://www.google.com/search?q=${userData.query}&start=${startOffset}`
+        : `${protocol}://www.google.com/search?q=${userData.query}`;
     return {
         url: urlSearch,
         uniqueKey: randomId(),
         userData: {
-            maxResults,
-            timeMeasures: [],
-            query,
-            contentCrawlerKey,
-            contentScraperSettings,
-            responseId,
+            maxResults: userData.maxResults,
+            timeMeasures: userData.timeMeasures || [],
+            query: userData.query,
+            contentCrawlerKey: userData.contentCrawlerKey,
+            contentScraperSettings: userData.contentScraperSettings,
+            responseId: userData.responseId,
             collectedResults,
             currentPage,
             totalPages,

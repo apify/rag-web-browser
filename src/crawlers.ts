@@ -68,7 +68,7 @@ export async function createAndStartSearchCrawler(
     const crawler = new CheerioCrawler({
         ...(searchCrawlerOptions as CheerioCrawlerOptions),
         requestQueue: await RequestQueue.open(key, { storageClient: client }),
-        requestHandler: async ({ request, $: _$ }: CheerioCrawlingContext<SearchCrawlerUserData>) => {
+        requestHandler: async ({ request, $: _$, addRequests }: CheerioCrawlingContext<SearchCrawlerUserData>) => {
             // NOTE: we need to cast this to fix `cheerio` type errors
             addTimeMeasureEvent(request.userData!, 'cheerio-request-handler-start');
             const $ = _$ as CheerioAPI;
@@ -76,28 +76,20 @@ export async function createAndStartSearchCrawler(
             log.info(`Search-crawler requestHandler: Processing URL: ${request.url}`);
             const organicResults = scrapeOrganicResults($);
 
-            // filter organic results to get only results with URL
-            let results = organicResults.filter((result) => result.url !== undefined);
-            // remove results with URL starting with '/search?q=' (google return empty search results for images)
-            results = results.filter((result) => !result.url!.startsWith('/search?q='));
-
-            // Initialize or update collected results
-            const collectedResults = request.userData.collectedResults || [];
-            const currentPage = request.userData.currentPage || 0;
-            // Calculate total pages to scrape: base pages + 1 extra to account for pages with fewer than GOOGLE_STANDARD_RESULTS_PER_PAGE results
-            const totalPages = request.userData.totalPages || Math.ceil(request.userData.maxResults / GOOGLE_STANDARD_RESULTS_PER_PAGE) + 1;
+            // Destructure userData for easier access (pagination fields are initialized in createSearchRequest)
+            const { collectedResults, currentPage, totalPages, maxResults } = request.userData;
 
             // Merge with previously collected results and deduplicate
-            const allResults = [...collectedResults, ...results];
+            const allResults = [...collectedResults, ...organicResults];
             const deduplicated = deduplicateResults(allResults);
 
-            log.info(`Page ${currentPage + 1}/${totalPages}: Extracted ${results.length} results, Total unique: ${deduplicated.length}/${request.userData.maxResults}`);
+            log.info(`Page ${currentPage + 1}/${totalPages}: Extracted ${organicResults.length} results, Total unique: ${deduplicated.length}/${maxResults}`);
 
             // Decide whether to fetch the next page
             // Continue fetching if: (1) we haven't reached maxResults AND (2) we haven't exceeded totalPages AND (3) Google returned results
-            const shouldFetchNextPage = deduplicated.length < request.userData.maxResults
+            const shouldFetchNextPage = deduplicated.length < maxResults
                 && currentPage + 1 < totalPages
-                && results.length > 0; // Stop if Google returned 0 results (empty page)
+                && organicResults.length > 0; // Stop if Google returned 0 results (empty page)
 
             if (shouldFetchNextPage) {
                 // Queue the next page
@@ -106,22 +98,19 @@ export async function createAndStartSearchCrawler(
                 log.info(`Queueing next page (${nextPage + 1}/${totalPages}) with offset ${nextOffset}`);
 
                 const nextRequest = createSearchRequest(
-                    request.userData.query,
-                    request.userData.responseId,
-                    request.userData.maxResults,
-                    request.userData.contentCrawlerKey,
+                    {
+                        ...request.userData,
+                        collectedResults: deduplicated,
+                        currentPage: nextPage,
+                    },
                     searchCrawlerOptions.proxyConfiguration,
-                    request.userData.contentScraperSettings,
                     nextOffset,
-                    deduplicated,
-                    nextPage,
-                    totalPages,
                 );
-                await crawler.requestQueue!.addRequest(nextRequest);
+                await addRequests([nextRequest]);
             } else {
                 // We have enough results or reached max pages, proceed to content crawling
                 const finalResults = deduplicated.slice(0, request.userData.maxResults);
-                log.info(`Pagination complete. Extracted ${finalResults.length} results: \n${finalResults.map((r) => r.url).join('\n')}`);
+                log.info(`Pagination complete. Extracted ${finalResults.length} results.`, { finalResults: finalResults.map((r) => r.url) });
 
                 addTimeMeasureEvent(request.userData!, 'before-playwright-queue-add');
                 const responseId = request.userData.responseId!;
