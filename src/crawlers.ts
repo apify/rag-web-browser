@@ -78,25 +78,20 @@ export async function createAndStartSearchCrawler(
             log.info(`Search-crawler requestHandler: Processing URL: ${request.url}`);
             const organicResults = scrapeOrganicResults($);
 
-            // filter organic results to get only results with URL
-            let results = organicResults.filter((result) => result.url !== undefined);
-            // remove results with URL starting with '/search?q=' (google return empty search results for images)
-            results = results.filter((result) => !result.url!.startsWith('/search?q='));
-
             // Destructure userData for easier access (pagination fields are initialized in createSearchRequest)
             const { collectedResults, currentPage, totalPages, maxResults } = request.userData;
 
             // Merge with previously collected results and deduplicate
-            const allResults = [...collectedResults, ...results];
+            const allResults = [...collectedResults, ...organicResults];
             const deduplicated = deduplicateResults(allResults);
 
-            log.info(`Page ${currentPage + 1}/${totalPages}: Extracted ${results.length} results, Total unique: ${deduplicated.length}/${maxResults}`);
+            log.info(`Page ${currentPage + 1}/${totalPages}: Extracted ${organicResults.length} results, Total unique: ${deduplicated.length}/${maxResults}`);
 
             // Decide whether to fetch the next page
             // Continue fetching if: (1) we haven't reached maxResults AND (2) we haven't exceeded totalPages AND (3) Google returned results
             const shouldFetchNextPage = deduplicated.length < maxResults
                 && currentPage + 1 < totalPages
-                && results.length > 0; // Stop if Google returned 0 results (empty page)
+                && organicResults.length > 0; // Stop if Google returned 0 results (empty page)
 
             if (shouldFetchNextPage) {
                 // Queue the next page
