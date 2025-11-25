@@ -13,11 +13,11 @@ import {
 } from 'crawlee';
 
 import { ContentCrawlerTypes } from './const.js';
-import { scrapeOrganicResults } from './google-search/google-extractors-urls.js';
+import { deduplicateResults, scrapeOrganicResults } from './google-search/google-extractors-urls.js';
 import { failedRequestHandler, requestHandlerCheerio, requestHandlerPlaywright } from './request-handler.js';
 import { addEmptyResultToResponse, sendResponseError } from './responses.js';
 import type { ContentCrawlerOptions, ContentCrawlerUserData, SearchCrawlerUserData } from './types.js';
-import { addTimeMeasureEvent, createRequest } from './utils.js';
+import { addTimeMeasureEvent, createRequest, createSearchRequest } from './utils.js';
 
 const crawlers = new Map<string, CheerioCrawler | PlaywrightCrawler>();
 const client = new MemoryStorage({ persistStorage: false });
@@ -83,27 +83,62 @@ export async function createAndStartSearchCrawler(
             // remove results with URL starting with '/search?q=' (google return empty search results for images)
             results = results.filter((result) => !result.url!.startsWith('/search?q='));
 
-            if (results.length === 0) {
-                throw new Error(`No results found for search request: ${request.url}`);
-            }
+            // Initialize or update collected results
+            const collectedResults = request.userData.collectedResults || [];
+            const currentPage = request.userData.currentPage || 0;
+            // Calculate total pages to scrape: base pages + 1 extra to account for pages with fewer than 10 results
+            const totalPages = request.userData.totalPages || Math.ceil(request.userData.maxResults / 10) + 1;
 
-            // limit the number of search results to the maxResults
-            results = results.slice(0, request.userData?.maxResults ?? results.length);
-            log.info(`Extracted ${results.length} results: \n${results.map((r) => r.url).join('\n')}`);
+            // Merge with previously collected results and deduplicate
+            const allResults = [...collectedResults, ...results];
+            const deduplicated = deduplicateResults(allResults);
 
-            addTimeMeasureEvent(request.userData!, 'before-playwright-queue-add');
-            const responseId = request.userData.responseId!;
-            let rank = 1;
-            for (const result of results) {
-                result.rank = rank++;
-                const r = createRequest(
+            log.info(`Page ${currentPage + 1}/${totalPages}: Extracted ${results.length} results, Total unique: ${deduplicated.length}/${request.userData.maxResults}`);
+
+            // Decide whether to fetch the next page
+            // Continue fetching if: (1) we haven't reached maxResults AND (2) we haven't exceeded totalPages AND (3) Google returned results
+            const shouldFetchNextPage = deduplicated.length < request.userData.maxResults
+                && currentPage + 1 < totalPages
+                && results.length > 0; // Stop if Google returned 0 results (empty page)
+
+            if (shouldFetchNextPage) {
+                // Queue the next page
+                const nextPage = currentPage + 1;
+                const nextOffset = nextPage * 10;
+                log.info(`Queueing next page (${nextPage + 1}/${totalPages}) with offset ${nextOffset}`);
+
+                const nextRequest = createSearchRequest(
                     request.userData.query,
-                    result,
-                    responseId,
-                    request.userData.contentScraperSettings!,
-                    request.userData.timeMeasures!,
+                    request.userData.responseId,
+                    request.userData.maxResults,
+                    request.userData.contentCrawlerKey,
+                    searchCrawlerOptions.proxyConfiguration,
+                    request.userData.contentScraperSettings,
+                    nextOffset,
+                    deduplicated,
+                    nextPage,
+                    totalPages,
                 );
-                await addContentCrawlRequest(r, responseId, request.userData.contentCrawlerKey!);
+                await crawler.requestQueue!.addRequest(nextRequest);
+            } else {
+                // We have enough results or reached max pages, proceed to content crawling
+                const finalResults = deduplicated.slice(0, request.userData.maxResults);
+                log.info(`Pagination complete. Extracted ${finalResults.length} results: \n${finalResults.map((r) => r.url).join('\n')}`);
+
+                addTimeMeasureEvent(request.userData!, 'before-playwright-queue-add');
+                const responseId = request.userData.responseId!;
+                let rank = 1;
+                for (const result of finalResults) {
+                    result.rank = rank++;
+                    const r = createRequest(
+                        request.userData.query,
+                        result,
+                        responseId,
+                        request.userData.contentScraperSettings!,
+                        request.userData.timeMeasures!,
+                    );
+                    await addContentCrawlRequest(r, responseId, request.userData.contentCrawlerKey!);
+                }
             }
         },
         failedRequestHandler: async ({ request }, err) => {

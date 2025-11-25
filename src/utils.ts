@@ -75,13 +75,16 @@ export function randomId() {
 
 /**
  * Create a search request with the provided query and maxResults.
- * Add some overhead for the maxResults to account for the fact that some results are not Organic.
- *
  * The maxResults parameter is passed to the UserData object, when the request is handled it is used to limit
- * the number of search results without the created overhead.
+ * the number of search results retrieved through pagination.
  *
  * Also add the contentCrawlerKey to the UserData object to be able to identify which content crawler should
- * handle the crawling .
+ * handle the crawling.
+ *
+ * Supports pagination via startOffset parameter for fetching additional pages.
+ * Note: Google ignores the ?num parameter and returns at most 10 results per page.
+ * We use the ?start parameter for pagination to retrieve results across multiple pages.
+ * We add +1 to the calculated totalPages to account for pages that return fewer than 10 results.
  */
 export function createSearchRequest(
     query: string,
@@ -90,15 +93,18 @@ export function createSearchRequest(
     contentCrawlerKey: string,
     proxyConfiguration: ProxyConfiguration | undefined,
     contentScraperSettings: ContentScraperSettings,
+    startOffset = 0,
+    collectedResults: OrganicResult[] = [],
+    currentPage = 0,
+    totalPages = Math.ceil(maxResults / 10) + 1,
 ): RequestOptions<SearchCrawlerUserData> {
-    // add some overhead for the maxResults to account for the fact that some results are not Organic
-    const n = Number(maxResults) + 5;
-
     // @ts-expect-error is there a better way to get group information?
     // (e.g. to  create extended CheerioCrawlOptions and pass it there?)
     const groups = proxyConfiguration?.groups || [];
     const protocol = groups.includes('GOOGLE_SERP') ? 'http' : 'https';
-    const urlSearch = `${protocol}://www.google.com/search?q=${query}&num=${n}`;
+    const urlSearch = startOffset > 0
+        ? `${protocol}://www.google.com/search?q=${query}&start=${startOffset}`
+        : `${protocol}://www.google.com/search?q=${query}`;
     return {
         url: urlSearch,
         uniqueKey: randomId(),
@@ -109,6 +115,9 @@ export function createSearchRequest(
             contentCrawlerKey,
             contentScraperSettings,
             responseId,
+            collectedResults,
+            currentPage,
+            totalPages,
         },
     };
 }

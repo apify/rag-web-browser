@@ -86,6 +86,13 @@ export type SearchCrawlerUserData = {
     contentCrawlerKey: string;
     responseId: string;
     contentScraperSettings: ContentScraperSettings;
+    // Pagination tracking
+    /** Results accumulated across SERP pages, passed forward for merging */
+    collectedResults?: OrganicResult[];
+    /** Current page number (0-indexed) */
+    currentPage?: number;
+    /** Max pages: ceil(maxResults/10) + 1 to handle pages with <10 results */
+    totalPages?: number;
 };
 
 export type ContentCrawlerUserData = {

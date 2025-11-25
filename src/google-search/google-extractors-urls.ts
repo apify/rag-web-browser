@@ -4,6 +4,35 @@ import type { Element } from 'domhandler';
 import type { OrganicResult, SearchResultType } from '../types.js';
 
 /**
+ * Validates if a URL is a valid absolute URL (starts with http/https or is a valid relative URL).
+ * Filters out Google's internal search URLs and other invalid URLs.
+ *
+ * Why this validation is needed:
+ * - Google SERP results sometimes contain internal links like "/search?q=..." which are not valid URLs to crawl
+ * - Some results may have malformed or incomplete URLs extracted from the HTML
+ * - Without validation, invalid URLs cause errors when trying to crawl them and fail the content crawl request
+ * - This ensures only legitimate external URLs are queued for content extraction
+ */
+function isValidUrl(url: string): boolean {
+    if (!url || typeof url !== 'string') {
+        return false;
+    }
+
+    // Reject Google's internal search URLs (relative URLs starting with /search)
+    if (url.startsWith('/search')) {
+        return false;
+    }
+
+    // Check if it's a valid HTTP/HTTPS URL
+    try {
+        const urlObj = new URL(url, 'http://example.com'); // Use base URL for relative URL handling
+        return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
+    } catch {
+        return false;
+    }
+}
+
+/**
  * Deduplicates search results based on their title and URL (source @apify/google-search).
  */
 export const deduplicateResults = <T extends { title?: string; url?: string }>(results: T[]): T[] => {
@@ -45,7 +74,10 @@ const extractResultsFromSelectors = ($: CheerioAPI, selectors: string[]) => {
     for (const resultEl of $(selector)) {
         const results = $(resultEl).map((_i, el) => parseResult($, el as Element)).toArray();
         for (const result of results) {
-            if (result.title && result.url) {
+            // Only include results with both title and a valid URL
+            // URL validation filters out Google's internal search links and malformed URLs
+            // that would cause errors during content crawling
+            if (result.title && result.url && isValidUrl(result.url)) {
                 searchResults.push(result);
             }
         }
