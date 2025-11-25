@@ -105,7 +105,7 @@ export async function createAndStartSearchCrawler(
                 // Queue the next page
                 const nextPage = currentPage + 1;
                 const nextOffset = nextPage * 10;
-                log.info(`Queueing next page (${nextPage + 1}/${totalPages}) with offset ${nextOffset}`);
+                log.info(`Enqueueing next page (${nextPage + 1}/${totalPages}) with offset ${nextOffset}`);
 
                 const nextRequest = createSearchRequest(
                     request.userData.query,
