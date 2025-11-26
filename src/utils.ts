@@ -7,6 +7,7 @@ import { log } from 'crawlee';
 import inputSchema from '../.actor/input_schema.json' with { type: 'json' };
 import type { ContentCrawlerUserData,
     ContentScraperSettings,
+    CreateSearchRequestUserData,
     Input,
     OrganicResult, OutputFormats,
     SearchCrawlerUserData,
@@ -87,13 +88,7 @@ export function randomId() {
  * We add +1 to the calculated totalPages to account for pages that return fewer than 10 results.
  */
 export function createSearchRequest(
-    userData: Partial<SearchCrawlerUserData> & {
-        query: string;
-        responseId: string;
-        maxResults: number;
-        contentCrawlerKey: string;
-        contentScraperSettings: ContentScraperSettings;
-    },
+    userData: CreateSearchRequestUserData,
     proxyConfiguration: ProxyConfiguration | undefined,
     startOffset = 0,
 ): RequestOptions<SearchCrawlerUserData> {

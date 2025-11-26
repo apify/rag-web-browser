@@ -3,6 +3,13 @@ import type { CheerioCrawlerOptions, PlaywrightCrawlerOptions } from 'crawlee';
 
 import type { ContentCrawlerTypes } from './const.js';
 
+/**
+ * Utility type to make specific properties of T optional.
+ * @template T - The type to make properties optional
+ * @template K - The keys of T to make optional
+ */
+type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
 export type OutputFormats = 'text' | 'markdown' | 'html';
 export type SERPProxyGroup = 'GOOGLE_SERP' | 'SHADER';
 export type ScrapingTool = 'browser-playwright' | 'raw-http';
@@ -94,6 +101,12 @@ export type SearchCrawlerUserData = {
     /** Max pages: ceil(maxResults/10) + 1 to handle pages with <10 results */
     totalPages: number;
 };
+
+/**
+ * Type for createSearchRequest function parameters.
+ * Makes pagination fields optional while keeping required fields mandatory.
+ */
+export type CreateSearchRequestUserData = Optional<SearchCrawlerUserData, 'timeMeasures' | 'collectedResults' | 'currentPage' | 'totalPages'>;
 
 export type ContentCrawlerUserData = {
     query: string;
