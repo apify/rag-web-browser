@@ -102,8 +102,8 @@ export function createSearchRequest(
     const groups = proxyConfiguration?.groups || [];
     const protocol = groups.includes('GOOGLE_SERP') ? 'http' : 'https';
     const urlSearch = startOffset > 0
-        ? `${protocol}://www.google.com/search?q=${userData.query}&start=${startOffset}`
-        : `${protocol}://www.google.com/search?q=${userData.query}`;
+        ? `${protocol}://www.google.com/search?q=${encodeURI(userData.query)}&start=${startOffset}`
+        : `${protocol}://www.google.com/search?q=${encodeURI(userData.query)}`;
     return {
         url: urlSearch,
         uniqueKey: randomId(),
