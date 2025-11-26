@@ -1,4 +1,4 @@
-import type { CheerioAPI } from 'cheerio';
+import type { CheerioAPI } from 'crawlee';
 import { log } from 'crawlee';
 
 import type { ContentScraperSettings } from '../types.js';

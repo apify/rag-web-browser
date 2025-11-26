@@ -1,7 +1,9 @@
+import { readFile } from 'node:fs/promises';
+
 import { MemoryStorage } from '@crawlee/memory-storage';
+import { PlaywrightBlocker } from '@ghostery/adblocker-playwright';
 import { RequestQueue } from 'apify';
-import type { CheerioAPI } from 'cheerio';
-import {
+import { type CheerioAPI,
     CheerioCrawler,
     type CheerioCrawlerOptions,
     type CheerioCrawlingContext,
@@ -9,10 +11,9 @@ import {
     PlaywrightCrawler,
     type PlaywrightCrawlerOptions,
     type PlaywrightCrawlingContext,
-    type RequestOptions,
-} from 'crawlee';
+    type RequestOptions } from 'crawlee';
 
-import { ContentCrawlerTypes } from './const.js';
+import { ContentCrawlerTypes, GOOGLE_STANDARD_RESULTS_PER_PAGE } from './const.js';
 import { deduplicateResults, scrapeOrganicResults } from './google-search/google-extractors-urls.js';
 import { failedRequestHandler, requestHandlerCheerio, requestHandlerPlaywright } from './request-handler.js';
 import { addEmptyResultToResponse, sendResponseError } from './responses.js';
@@ -21,6 +22,23 @@ import { addTimeMeasureEvent, createRequest, createSearchRequest } from './utils
 
 const crawlers = new Map<string, CheerioCrawler | PlaywrightCrawler>();
 const client = new MemoryStorage({ persistStorage: false });
+
+let ghosteryBlocker: PlaywrightBlocker | undefined;
+
+async function getGhosteryBlocker(): Promise<PlaywrightBlocker | undefined> {
+    if (ghosteryBlocker) {
+        return ghosteryBlocker;
+    }
+
+    try {
+        ghosteryBlocker = PlaywrightBlocker.deserialize(await readFile('./blockers/fanboy-cookiemonster.bin'));
+        log.info('Ghostery blocker loaded successfully');
+        return ghosteryBlocker;
+    } catch (err) {
+        log.warning(`Failed to load Ghostery blocker: ${err instanceof Error ? err.message : String(err)}`);
+        return undefined;
+    }
+}
 
 export function getCrawlerKey(crawlerOptions: CheerioCrawlerOptions | PlaywrightCrawlerOptions) {
     return JSON.stringify(crawlerOptions);
@@ -190,12 +208,13 @@ async function createPlaywrightContentCrawler(
     key: string,
 ): Promise<PlaywrightCrawler> {
     log.info(`Creating new playwright crawler with key ${key}`);
+    const blocker = await getGhosteryBlocker();
     return new PlaywrightCrawler({
         ...crawlerOptions,
         keepAlive: crawlerOptions.keepAlive,
         requestQueue: await RequestQueue.open(key, { storageClient: client }),
         requestHandler: (async (context) => {
-            await requestHandlerPlaywright(context as unknown as PlaywrightCrawlingContext<ContentCrawlerUserData>);
+            await requestHandlerPlaywright(context as unknown as PlaywrightCrawlingContext<ContentCrawlerUserData>, blocker);
         }),
         failedRequestHandler: async ({ request }, err) => failedRequestHandler(request, err, ContentCrawlerTypes.PLAYWRIGHT),
     });

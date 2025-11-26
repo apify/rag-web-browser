@@ -1,7 +1,14 @@
 import type { ProxyConfigurationOptions } from 'apify';
 import type { CheerioCrawlerOptions, PlaywrightCrawlerOptions } from 'crawlee';
 
-import type { ContentCrawlerTypes } from './const';
+import type { ContentCrawlerTypes } from './const.js';
+
+/**
+ * Utility type to make specific properties of T optional.
+ * @template T - The type to make properties optional
+ * @template K - The keys of T to make optional
+ */
+type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
 /**
  * Utility type to make specific properties of T optional.

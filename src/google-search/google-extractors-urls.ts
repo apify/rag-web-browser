@@ -1,4 +1,4 @@
-import type { CheerioAPI } from 'cheerio';
+import type { CheerioAPI } from 'crawlee';
 import type { Element } from 'domhandler';
 
 import type { OrganicResult, SearchResultType } from '../types.js';
