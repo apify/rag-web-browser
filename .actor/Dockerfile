@@ -22,11 +22,13 @@ COPY --chown=myuser . ./
 RUN npm run build
 
 # Create final image
-FROM apify/actor-node-playwright-firefox:22-1.56.0
+FROM apify/actor-node-playwright-firefox:22-1.54.1
 
 # Copy just package.json and package-lock.json
 # to speed up the build using Docker layer cache.
 COPY --chown=myuser package*.json ./
+COPY --chown=myuser policies.json ./
+COPY --chown=myuser patches ./patches
 
 # Install NPM packages, skip optional and development dependencies to
 # keep the image small. Avoid logging too much and print the dependency
@@ -48,6 +50,14 @@ COPY --from=builder --chown=myuser /home/myuser/dist ./dist
 # Since we do this after NPM install, quick build will be really fast
 # for most source file changes.
 COPY --chown=myuser . ./
+
+# Edit the TZ environment variable to set the timezone in the container.
+# Most of the proxy traffic is from the US, so we set the timezone to New York.
+# which can help with the bot-detection mechanisms of some websites.
+ENV TZ=America/New_York
+
+# Configure Firefox policies
+ENV PLAYWRIGHT_FIREFOX_POLICIES_JSON="/home/myuser/policies.json"
 
 # Disable experimental feature warning from Node.js
 ENV NODE_NO_WARNINGS=1

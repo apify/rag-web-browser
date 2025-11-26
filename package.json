@@ -16,6 +16,7 @@
 		"express": "^4.21.2",
 		"joplin-turndown-plugin-gfm": "^1.0.12",
 		"jsdom": "^24.1.1",
+		"patch-package": "^8.0.0",
 		"playwright": "^1.47.0",
 		"turndown": "^7.2.0"
 	},
@@ -44,7 +45,8 @@
 		"build": "tsc",
 		"lint": "eslint ./src --ext .ts",
 		"lint:fix": "eslint ./src --ext .ts --fix",
-		"test": "vitest run"
+		"test": "vitest run",
+		"postinstall": "patch-package"
 	},
 	"author": "Apify",
 	"license": "ISC"

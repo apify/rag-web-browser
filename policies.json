@@ -1,0 +1,9 @@
+{
+	"policies": {
+		"SecurityDevices": {
+			"Add": {
+				"system-cert-store": "/usr/lib/x86_64-linux-gnu/pkcs11/p11-kit-trust.so"
+			}
+		}
+	}
+}
