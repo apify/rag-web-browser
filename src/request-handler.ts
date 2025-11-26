@@ -1,3 +1,4 @@
+import type { PlaywrightBlocker } from '@ghostery/adblocker-playwright';
 import { Actor } from 'apify';
 import { load } from 'cheerio';
 import { type CheerioCrawlingContext, htmlToText, log, type PlaywrightCrawlingContext, type Request, sleep } from 'crawlee';
@@ -163,6 +164,7 @@ async function handleContent(
 
 export async function requestHandlerPlaywright(
     context: PlaywrightCrawlingContext<ContentCrawlerUserData>,
+    blocker?: PlaywrightBlocker,
 ) {
     const { request, response, page, closeCookieModals } = context;
     const { contentScraperSettings: settings, responseId } = request.userData;
@@ -177,7 +179,24 @@ export async function requestHandlerPlaywright(
     }
 
     if (page && settings.removeCookieWarnings) {
-        await closeCookieModals();
+        // First try Ghostery blocker
+        if (blocker) {
+            try {
+                await blocker.enableBlockingInPage(page);
+                log.debug('Ghostery blocker enabled');
+            } catch (err) {
+                log.debug(`Ghostery blocker failed: ${err instanceof Error ? err.message : String(err)}`);
+            }
+        }
+
+        // Then fall back to closeCookieModals as additional cleanup
+        try {
+            await closeCookieModals();
+            log.debug('closeCookieModals executed as fallback');
+        } catch (err) {
+            log.debug(`closeCookieModals failed: ${err instanceof Error ? err.message : String(err)}`);
+        }
+
         addTimeMeasureEvent(request.userData, 'playwright-remove-cookie');
     }
 

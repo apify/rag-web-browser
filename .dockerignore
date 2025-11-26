@@ -16,3 +16,7 @@ node_modules
 data
 src/storage
 dist
+
+# Ghostery blockers (will be rebuilt in Docker)
+blockers
+

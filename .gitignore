@@ -14,3 +14,6 @@ storage
 # Actor run input
 input.json
 INPUT.json
+
+# Ghostery blockers (generated during build)
+blockers/**

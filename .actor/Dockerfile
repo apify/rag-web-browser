@@ -21,6 +21,9 @@ COPY --chown=myuser . ./
 # Don't audit to speed up the installation.
 RUN npm run build
 
+# Build Ghostery blockers for content filtering
+RUN npm run build:playwright-blockers
+
 # Create final image
 FROM apify/actor-node-playwright-firefox:22-1.54.1
 
@@ -45,6 +48,9 @@ RUN npm --quiet set progress=false \
 
 # Copy built JS files from builder image
 COPY --from=builder --chown=myuser /home/myuser/dist ./dist
+
+# Copy Ghostery blockers from builder image
+COPY --from=builder --chown=myuser /home/myuser/blockers ./blockers
 
 # Next, copy the remaining files and directories with the source code.
 # Since we do this after NPM install, quick build will be really fast
