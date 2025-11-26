@@ -1,7 +1,9 @@
+import { readFile } from 'node:fs/promises';
+
 import { MemoryStorage } from '@crawlee/memory-storage';
+import { PlaywrightBlocker } from '@ghostery/adblocker-playwright';
 import { RequestQueue } from 'apify';
-import type { CheerioAPI } from 'cheerio';
-import {
+import { type CheerioAPI,
     CheerioCrawler,
     type CheerioCrawlerOptions,
     type CheerioCrawlingContext,
@@ -9,18 +11,34 @@ import {
     PlaywrightCrawler,
     type PlaywrightCrawlerOptions,
     type PlaywrightCrawlingContext,
-    type RequestOptions,
-} from 'crawlee';
+    type RequestOptions } from 'crawlee';
 
-import { ContentCrawlerTypes } from './const.js';
-import { scrapeOrganicResults } from './google-search/google-extractors-urls.js';
+import { ContentCrawlerTypes, GOOGLE_STANDARD_RESULTS_PER_PAGE } from './const.js';
+import { deduplicateResults, scrapeOrganicResults } from './google-search/google-extractors-urls.js';
 import { failedRequestHandler, requestHandlerCheerio, requestHandlerPlaywright } from './request-handler.js';
 import { addEmptyResultToResponse, sendResponseError } from './responses.js';
 import type { ContentCrawlerOptions, ContentCrawlerUserData, SearchCrawlerUserData } from './types.js';
-import { addTimeMeasureEvent, createRequest } from './utils.js';
+import { addTimeMeasureEvent, createRequest, createSearchRequest } from './utils.js';
 
 const crawlers = new Map<string, CheerioCrawler | PlaywrightCrawler>();
 const client = new MemoryStorage({ persistStorage: false });
+
+let ghosteryBlocker: PlaywrightBlocker | undefined;
+
+async function getGhosteryBlocker(): Promise<PlaywrightBlocker | undefined> {
+    if (ghosteryBlocker) {
+        return ghosteryBlocker;
+    }
+
+    try {
+        ghosteryBlocker = PlaywrightBlocker.deserialize(await readFile('./blockers/fanboy-cookiemonster.bin'));
+        log.info('Ghostery blocker loaded successfully');
+        return ghosteryBlocker;
+    } catch (err) {
+        log.warning(`Failed to load Ghostery blocker: ${err instanceof Error ? err.message : String(err)}`);
+        return undefined;
+    }
+}
 
 export function getCrawlerKey(crawlerOptions: CheerioCrawlerOptions | PlaywrightCrawlerOptions) {
     return JSON.stringify(crawlerOptions);
@@ -70,7 +88,7 @@ export async function createAndStartSearchCrawler(
     const crawler = new CheerioCrawler({
         ...(searchCrawlerOptions as CheerioCrawlerOptions),
         requestQueue: await RequestQueue.open(key, { storageClient: client }),
-        requestHandler: async ({ request, $: _$ }: CheerioCrawlingContext<SearchCrawlerUserData>) => {
+        requestHandler: async ({ request, $: _$, addRequests }: CheerioCrawlingContext<SearchCrawlerUserData>) => {
             // NOTE: we need to cast this to fix `cheerio` type errors
             addTimeMeasureEvent(request.userData!, 'cheerio-request-handler-start');
             const $ = _$ as CheerioAPI;
@@ -78,32 +96,58 @@ export async function createAndStartSearchCrawler(
             log.info(`Search-crawler requestHandler: Processing URL: ${request.url}`);
             const organicResults = scrapeOrganicResults($);
 
-            // filter organic results to get only results with URL
-            let results = organicResults.filter((result) => result.url !== undefined);
-            // remove results with URL starting with '/search?q=' (google return empty search results for images)
-            results = results.filter((result) => !result.url!.startsWith('/search?q='));
+            // Destructure userData for easier access (pagination fields are initialized in createSearchRequest)
+            const { collectedResults, currentPage, totalPages, maxResults } = request.userData;
 
-            if (results.length === 0) {
-                throw new Error(`No results found for search request: ${request.url}`);
-            }
+            // Merge with previously collected results and deduplicate
+            const allResults = [...collectedResults, ...organicResults];
+            const deduplicated = deduplicateResults(allResults);
 
-            // limit the number of search results to the maxResults
-            results = results.slice(0, request.userData?.maxResults ?? results.length);
-            log.info(`Extracted ${results.length} results: \n${results.map((r) => r.url).join('\n')}`);
+            log.info(`Page ${currentPage + 1}/${totalPages}: Extracted ${organicResults.length} results, Total unique: ${deduplicated.length}/${maxResults}`);
 
-            addTimeMeasureEvent(request.userData!, 'before-playwright-queue-add');
-            const responseId = request.userData.responseId!;
-            let rank = 1;
-            for (const result of results) {
-                result.rank = rank++;
-                const r = createRequest(
-                    request.userData.query,
-                    result,
-                    responseId,
-                    request.userData.contentScraperSettings!,
-                    request.userData.timeMeasures!,
+            // Decide whether to fetch the next page
+            // Continue fetching if: (1) we haven't reached maxResults AND (2) we haven't exceeded totalPages AND (3) Google returned results
+            const shouldFetchNextPage = deduplicated.length < maxResults
+                && currentPage + 1 < totalPages
+                && organicResults.length > 0; // Stop if Google returned 0 results (empty page)
+
+            if (shouldFetchNextPage) {
+                // Queue the next page
+                const nextPage = currentPage + 1;
+                const nextOffset = nextPage * GOOGLE_STANDARD_RESULTS_PER_PAGE;
+                // We convert index to human readable number for logging (1-indexed)
+                const nextPageHumanReadableNumber = nextPage + 1;
+                log.info(`Enqueueing next page (${nextPageHumanReadableNumber}/${totalPages}) with offset ${nextOffset}`);
+
+                const nextRequest = createSearchRequest(
+                    {
+                        ...request.userData,
+                        collectedResults: deduplicated,
+                        currentPage: nextPage,
+                    },
+                    searchCrawlerOptions.proxyConfiguration,
+                    nextOffset,
                 );
-                await addContentCrawlRequest(r, responseId, request.userData.contentCrawlerKey!);
+                await addRequests([nextRequest]);
+            } else {
+                // We have enough results or reached max pages, proceed to content crawling
+                const finalResults = deduplicated.slice(0, request.userData.maxResults);
+                log.info(`Pagination complete. Extracted ${finalResults.length} results.`, { finalResults: finalResults.map((r) => r.url) });
+
+                addTimeMeasureEvent(request.userData!, 'before-playwright-queue-add');
+                const responseId = request.userData.responseId!;
+                let rank = 1;
+                for (const result of finalResults) {
+                    result.rank = rank++;
+                    const r = createRequest(
+                        request.userData.query,
+                        result,
+                        responseId,
+                        request.userData.contentScraperSettings!,
+                        request.userData.timeMeasures!,
+                    );
+                    await addContentCrawlRequest(r, responseId, request.userData.contentCrawlerKey!);
+                }
             }
         },
         failedRequestHandler: async ({ request }, err) => {
@@ -164,12 +208,13 @@ async function createPlaywrightContentCrawler(
     key: string,
 ): Promise<PlaywrightCrawler> {
     log.info(`Creating new playwright crawler with key ${key}`);
+    const blocker = await getGhosteryBlocker();
     return new PlaywrightCrawler({
         ...crawlerOptions,
         keepAlive: crawlerOptions.keepAlive,
         requestQueue: await RequestQueue.open(key, { storageClient: client }),
         requestHandler: (async (context) => {
-            await requestHandlerPlaywright(context as unknown as PlaywrightCrawlingContext<ContentCrawlerUserData>);
+            await requestHandlerPlaywright(context as unknown as PlaywrightCrawlingContext<ContentCrawlerUserData>, blocker);
         }),
         failedRequestHandler: async ({ request }, err) => failedRequestHandler(request, err, ContentCrawlerTypes.PLAYWRIGHT),
     });
