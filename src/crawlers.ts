@@ -97,7 +97,9 @@ export async function createAndStartSearchCrawler(
                 // Queue the next page
                 const nextPage = currentPage + 1;
                 const nextOffset = nextPage * 10;
-                log.info(`Enqueueing next page (${nextPage + 1}/${totalPages}) with offset ${nextOffset}`);
+                // We convert index to human readable number for logging (1-indexed)
+                const nextPageHumanReadableNumber = nextPage + 1;
+                log.info(`Enqueueing next page (${nextPageHumanReadableNumber}/${totalPages}) with offset ${nextOffset}`);
 
                 const nextRequest = createSearchRequest(
                     {
