@@ -114,7 +114,7 @@ export async function createAndStartSearchCrawler(
             if (shouldFetchNextPage) {
                 // Queue the next page
                 const nextPage = currentPage + 1;
-                const nextOffset = nextPage * 10;
+                const nextOffset = nextPage * GOOGLE_STANDARD_RESULTS_PER_PAGE;
                 // We convert index to human readable number for logging (1-indexed)
                 const nextPageHumanReadableNumber = nextPage + 1;
                 log.info(`Enqueueing next page (${nextPageHumanReadableNumber}/${totalPages}) with offset ${nextOffset}`);
