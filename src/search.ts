@@ -174,4 +174,7 @@ export async function handleSearchNormalMode(input: Input,
     log.info(`Running target page crawler with request: ${JSON.stringify(req)}`);
     await contentCrawler!.run();
     /* eslint-enable no-param-reassign */
+
+    const { requestsFinished, requestsFailed } = contentCrawler!.stats.state;
+    return { requestsFinished, requestsFailed };
 }
